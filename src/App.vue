@@ -1,6 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf" class="layout">
-  
     <q-page-container>
       <q-page class="page">
         <q-page-container class="page-container">
@@ -9,7 +8,7 @@
               v-for="pokemon in pokemons"
               :key="pokemon.id"
               :pokemon="pokemon"
-              :class="['pokemon-card-item', { 'acquired': pokemon.acquired }]"
+              :class="['pokemon-card-item', { acquired: pokemon.acquired }]"
             />
           </div>
         </q-page-container>
@@ -17,7 +16,9 @@
     </q-page-container>
     <q-footer elevated class="footer">
       <q-toolbar class="footer-toolbar">
-        <q-toolbar-title class="footer-title">Bixomon Collection © 2024</q-toolbar-title>
+        <q-toolbar-title class="footer-title"
+          >Bixomon Collection © 2024</q-toolbar-title
+        >
       </q-toolbar>
     </q-footer>
   </q-layout>
@@ -41,83 +42,97 @@ export default {
           acao: "Se você encostar nele, ele irá gritar QUERO PIKA.",
           image: "/img/ovossauro.png",
           acquired: false,
-          password: "QueroPika"
+          password: "1234",
         },
         {
           id: 2,
           name: "Bulbasaur",
           description: "Um Pokémon semente com um bulbo de planta nas costas.",
           acao: "Ele cresce absorvendo os raios do sol.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
           acquired: false,
-          password: "JeanGay"
+          password: "1234",
         },
         {
           id: 3,
           name: "Charmander",
           description: "Um Pokémon de fogo com uma chama na ponta da cauda.",
           acao: "Se a chama se apagar, ele pode morrer.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
           acquired: false,
-          password: "123"
+          password: "1234",
         },
         {
           id: 4,
           name: "Squirtle",
           description: "Um Pokémon de água que atira água nos inimigos.",
           acao: "Ele se esconde em sua concha para se proteger.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
           acquired: false,
-          password: "1235"
+          password: "1234",
         },
         {
           id: 5,
           name: "Jigglypuff",
           description: "Um Pokémon balão que canta canções de ninar.",
           acao: "Seu canto faz todos dormirem.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/039.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/039.png",
           acquired: false,
+          password: "1234",
         },
         {
           id: 6,
           name: "Meowth",
           description: "Um Pokémon gato que adora moedas.",
           acao: "Ele coleciona objetos brilhantes.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/052.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/052.png",
           acquired: false,
-          password: "jeangay"
+          password: "1234",
         },
         {
           id: 7,
           name: "Psyduck",
           description: "Um Pokémon pato que sofre de dores de cabeça.",
           acao: "Quando ele tem dor de cabeça, libera poderes psíquicos.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/054.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/054.png",
           acquired: false,
+          password: "1234",
         },
         {
           id: 8,
           name: "Machop",
           description: "Um Pokémon superpoderoso que adora treinar.",
           acao: "Ele pode levantar 100 vezes o seu próprio peso.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/066.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/066.png",
           acquired: false,
+          password: "1234",
         },
         {
           id: 9,
           name: "Geodude",
           description: "Um Pokémon rocha que sobe caminhos montanhosos.",
           acao: "Pode ser nocauteado com um único chute.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/074.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/074.png",
           acquired: false,
+          password: "1234",
         },
         {
           id: 10,
           name: "Eevee",
           description: "Um Pokémon com uma composição genética instável.",
           acao: "Ele evolui para diferentes formas baseadas no ambiente.",
-          image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/133.png",
+          image:
+            "https://assets.pokemon.com/assets/cms2/img/pokedex/full/133.png",
           acquired: false,
+          password: "1234",
         },
       ],
     };
@@ -169,11 +184,11 @@ export default {
   width: 100%;
   height: 100%;
   transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
-  filter: grayscale(100%); 
+  filter: grayscale(100%);
 }
 
 .pokemon-card-item.acquired {
-  filter: grayscale(0%); 
+  filter: grayscale(0%);
 }
 
 .pokemon-card-item:hover {

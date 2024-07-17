@@ -1,27 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf" class="layout">
-    <q-header elevated class="header">
-      <q-toolbar>
-        <q-btn
-          flat
-          round
-          dense
-          icon="menu"
-          @click="toggleLeftDrawer"
-          class="header-btn"
-        />
-        <q-toolbar-title class="header-title">Bixomon Collection</q-toolbar-title>
-        <q-btn flat round dense icon="home" to="/" class="header-btn" />
-        <q-btn
-          flat
-          round
-          dense
-          label="Collection"
-          to="/collection"
-          class="header-btn"
-        />
-      </q-toolbar>
-    </q-header>
+  
     <q-page-container>
       <q-page class="page">
         <q-page-container class="page-container">
@@ -62,6 +41,7 @@ export default {
           acao: "Se você encostar nele, ele irá gritar QUERO PIKA.",
           image: "/img/ovossauro.png",
           acquired: false,
+          password: "QueroPika"
         },
         {
           id: 2,
@@ -70,6 +50,7 @@ export default {
           acao: "Ele cresce absorvendo os raios do sol.",
           image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
           acquired: false,
+          password: "JeanGay"
         },
         {
           id: 3,
@@ -212,5 +193,18 @@ export default {
 .footer-title {
   color: #3b4cca;
   font-family: "Press Start 2P", cursive;
+}
+
+/* Adiciona responsividade */
+@media (max-width: 1200px) {
+  .pokemon-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .pokemon-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

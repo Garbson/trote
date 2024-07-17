@@ -16,12 +16,22 @@
           class="password-input"
           :append="passwordVisible ? 'visibility_off' : 'visibility'"
           @append="togglePasswordVisibility"
-        />
+          dense
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="passwordVisible ? 'visibility_off' : 'visibility'"
+              @click.stop="togglePasswordVisibility"
+              class="cursor-pointer"
+            />
+          </template>
+        </q-input>
         <q-btn
           class="acquire-btn"
           @click="acquirePokemon"
           :label="acquired ? 'Adquirido' : 'Adquirir'"
           color="black" 
+          text-color="white" 
           :disable="acquired"
         />
         <div v-if="passwordError" class="error-message">Senha incorreta. Tente novamente.</div>
@@ -54,9 +64,9 @@ function acquirePokemon() {
   if (password.value === props.pokemon.password) {
     acquired.value = true;
     Cookies.set(`pokemon_${props.pokemon.id}`, 'acquired', { expires: 365 }); // Salva no cookie por 1 ano
-    passwordError.value = false; 
+    passwordError.value = false; // Limpa a mensagem de erro
   } else {
-    passwordError.value = true; 
+    passwordError.value = true; // Exibe mensagem de erro se a senha estiver incorreta
   }
 }
 
@@ -80,11 +90,13 @@ onMounted(() => {
   box-shadow: 0 6px 12px rgba(73, 71, 71, 0.3);
   background-color: #f5da3cde;
   border-radius: 0;
-  transition: filter 0.3s; 
+  transition: filter 0.3s; /* Adiciona uma transição suave para o filtro */
+  filter: grayscale(100%); /* Aplica filtro cinza por padrão */
+  margin-bottom: 20px;
 }
 
 .pokemon-card.acquired {
-  filter: grayscale(0%); 
+  filter: grayscale(0%); /* Remove filtro cinza se adquirido */
 }
 
 .card-header {
@@ -107,16 +119,16 @@ onMounted(() => {
 }
 
 .text-h6 {
-  color: #2D2D2D; 
+  color: #2D2D2D; /* Cor preta */
   font-weight: bold;
 }
 
 .text-subtitle2 {
-  color: #2D2D2D; 
+  color: #2D2D2D; /* Cor preta */
 }
 
 strong {
-  color: #FF0000; 
+  color: #FF0000; /* Cor vermelha */
 }
 
 .titulo, .a {
@@ -129,6 +141,13 @@ strong {
 
 .acquire-btn {
   margin-top: 10px;
-  color: white; 
+}
+
+.password-input {
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: red;
 }
 </style>

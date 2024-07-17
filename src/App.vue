@@ -61,7 +61,7 @@ export default {
           description: "Um rato elétrico que solta raios pela cauda.",
           acao: "Se você encostar nele, ele irá gritar QUERO PIKA.",
           image: "/img/ovossauro.png",
-          acquired: false, // Altere para true se adquirido
+          acquired: false,
         },
         {
           id: 2,
@@ -78,6 +78,7 @@ export default {
           acao: "Se a chama se apagar, ele pode morrer.",
           image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
           acquired: false,
+          password: "123"
         },
         {
           id: 4,
@@ -86,6 +87,7 @@ export default {
           acao: "Ele se esconde em sua concha para se proteger.",
           image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
           acquired: false,
+          password: "1235"
         },
         {
           id: 5,
@@ -102,6 +104,7 @@ export default {
           acao: "Ele coleciona objetos brilhantes.",
           image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/052.png",
           acquired: false,
+          password: "jeangay"
         },
         {
           id: 7,
@@ -185,17 +188,16 @@ export default {
   width: 100%;
   height: 100%;
   transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
-  filter: grayscale(100%); /* Adiciona o filtro cinza às cartas */
+  filter: grayscale(100%); 
 }
 
 .pokemon-card-item.acquired {
-  filter: grayscale(0%); /* Remove o filtro cinza se adquirido */
+  filter: grayscale(0%); 
 }
 
 .pokemon-card-item:hover {
-  transform: scale(1.05);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  filter: grayscale(0%); /* Remove o filtro cinza ao passar o mouse */
+  filter: grayscale(0%);
 }
 
 .footer {

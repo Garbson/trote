@@ -7,13 +7,25 @@
     <q-card-section class="card-footer">
       <div class="a text-subtitle2"><strong>Descrição:</strong> {{ pokemon.description }}</div>
       <div class="a text-subtitle2"><strong>Interação:</strong> {{ pokemon.acao }}</div>
-      <q-btn
-        class="acquire-btn"
-        @click="acquirePokemon"
-        :label="acquired ? 'Adquirido' : 'Adquirir'"
-        :color="acquired ? 'green' : 'primary'"
-        :disable="acquired"
-      />
+
+      <div v-if="!acquired">
+        <q-input
+          v-model="password"
+          :type="passwordVisible ? 'text' : 'password'"
+          label="Digite a senha para adquirir"
+          class="password-input"
+          :append="passwordVisible ? 'visibility_off' : 'visibility'"
+          @append="togglePasswordVisibility"
+        />
+        <q-btn
+          class="acquire-btn"
+          @click="acquirePokemon"
+          :label="acquired ? 'Adquirido' : 'Adquirir'"
+          color="black" 
+          :disable="acquired"
+        />
+        <div v-if="passwordError" class="error-message">Senha incorreta. Tente novamente.</div>
+      </div>
     </q-card-section>
   </q-card>
 </template>
@@ -33,11 +45,24 @@ const props = defineProps({
 
 // Define o estado reativo para saber se o Pokémon foi adquirido
 const acquired = ref(false);
+const password = ref('');
+const passwordVisible = ref(false);
+const passwordError = ref(false);
 
 // Função para adquirir um Pokémon e salvar o estado em um cookie
 function acquirePokemon() {
-  acquired.value = true;
-  Cookies.set(`pokemon_${props.pokemon.id}`, 'acquired', { expires: 365 }); // Salva no cookie por 1 ano
+  if (password.value === props.pokemon.password) {
+    acquired.value = true;
+    Cookies.set(`pokemon_${props.pokemon.id}`, 'acquired', { expires: 365 }); // Salva no cookie por 1 ano
+    passwordError.value = false; 
+  } else {
+    passwordError.value = true; 
+  }
+}
+
+// Alterna a visibilidade da senha
+function togglePasswordVisibility() {
+  passwordVisible.value = !passwordVisible.value;
 }
 
 // Verifica se o Pokémon já foi adquirido quando o componente é montado
@@ -55,12 +80,11 @@ onMounted(() => {
   box-shadow: 0 6px 12px rgba(73, 71, 71, 0.3);
   background-color: #f5da3cde;
   border-radius: 0;
-  transition: filter 0.3s; /* Adiciona uma transição suave para o filtro */
-  filter: grayscale(100%); /* Aplica filtro cinza por padrão */
+  transition: filter 0.3s; 
 }
 
 .pokemon-card.acquired {
-  filter: grayscale(0%); /* Remove filtro cinza se adquirido */
+  filter: grayscale(0%); 
 }
 
 .card-header {
@@ -83,16 +107,16 @@ onMounted(() => {
 }
 
 .text-h6 {
-  color: #2D2D2D; /* Cor preta */
+  color: #2D2D2D; 
   font-weight: bold;
 }
 
 .text-subtitle2 {
-  color: #2D2D2D; /* Cor preta */
+  color: #2D2D2D; 
 }
 
 strong {
-  color: #FF0000; /* Cor vermelha */
+  color: #FF0000; 
 }
 
 .titulo, .a {
@@ -105,5 +129,6 @@ strong {
 
 .acquire-btn {
   margin-top: 10px;
+  color: white; 
 }
 </style>

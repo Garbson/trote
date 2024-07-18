@@ -8,7 +8,7 @@
               v-for="pokemon in pokemons"
               :key="pokemon.id"
               :pokemon="pokemon"
-              :class="['pokemon-card-item', { acquired: pokemon.acquired }]"
+              :class="['pokemon-card-item', { acquired: pokemon.acquired, rotate: pokemon.rotate }]"
             />
           </div>
         </q-page-container>
@@ -16,16 +16,43 @@
     </q-page-container>
     <q-footer elevated class="footer">
       <q-toolbar class="footer-toolbar">
-        <q-toolbar-title class="footer-title"
-          >Bixomon Collection © 2024</q-toolbar-title
-        >
+        <q-toolbar-title class="footer-title">
+          Bixomon Collection © 2024
+        </q-toolbar-title>
+        <q-btn
+          label="Adicionar Código"
+          color="black"
+          text-color="white"
+          @click="openCodeDialog"
+        />
       </q-toolbar>
     </q-footer>
+
+    <q-dialog v-model="codeDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Digite o código</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input v-model="inputCode" label="Código" />
+          <q-btn
+            label="Confirmar"
+            color="primary"
+            @click="applyCode"
+            class="q-mt-md"
+          />
+          <div v-if="codeError" class="error-message">Código incorreto. Tente novamente.</div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script>
 import PokemonCard from "./components/PokemonCard.vue";
+import { ref } from 'vue';
+import Cookies from 'js-cookie';
 
 export default {
   components: {
@@ -34,6 +61,9 @@ export default {
   data() {
     return {
       leftDrawerOpen: false,
+      codeDialog: false,
+      inputCode: '',
+      codeError: false,
       pokemons: [
         {
           id: 1,
@@ -42,7 +72,8 @@ export default {
           acao: "Se você encostar nele, ele irá gritar QUERO PIKA.",
           image: "/img/ovossauro.png",
           acquired: false,
-          password: "1234",
+          code: "1234",
+          rotate: false,
         },
         {
           id: 2,
@@ -52,7 +83,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
           acquired: false,
-          password: "1234",
+          code: "5678",
+          rotate: false,
         },
         {
           id: 3,
@@ -62,7 +94,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
           acquired: false,
-          password: "1234",
+          code: "91011",
+          rotate: false,
         },
         {
           id: 4,
@@ -72,7 +105,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
           acquired: false,
-          password: "1234",
+          code: "121314",
+          rotate: false,
         },
         {
           id: 5,
@@ -82,7 +116,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/039.png",
           acquired: false,
-          password: "1234",
+          code: "151617",
+          rotate: false,
         },
         {
           id: 6,
@@ -92,7 +127,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/052.png",
           acquired: false,
-          password: "1234",
+          code: "181920",
+          rotate: false,
         },
         {
           id: 7,
@@ -102,7 +138,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/054.png",
           acquired: false,
-          password: "1234",
+          code: "212223",
+          rotate: false,
         },
         {
           id: 8,
@@ -112,7 +149,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/066.png",
           acquired: false,
-          password: "1234",
+          code: "242526",
+          rotate: false,
         },
         {
           id: 9,
@@ -122,7 +160,8 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/074.png",
           acquired: false,
-          password: "1234",
+          code: "272829",
+          rotate: false,
         },
         {
           id: 10,
@@ -132,14 +171,48 @@ export default {
           image:
             "https://assets.pokemon.com/assets/cms2/img/pokedex/full/133.png",
           acquired: false,
-          password: "1234",
+          code: "303132",
+          rotate: false,
         },
       ],
     };
   },
+  created() {
+    this.loadAcquiredPokemons();
+  },
   methods: {
     toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen;
+    },
+    openCodeDialog() {
+      this.codeDialog = true;
+    },
+    applyCode() {
+      const foundPokemon = this.pokemons.find(pokemon => pokemon.code === this.inputCode);
+      if (foundPokemon) {
+        foundPokemon.acquired = true;
+        foundPokemon.rotate = true;
+        this.saveAcquiredPokemons();
+        this.codeError = false;
+        this.codeDialog = false;
+        setTimeout(() => {
+          foundPokemon.rotate = false;
+        }, 1000);
+      } else {
+        this.codeError = true;
+      }
+    },
+    saveAcquiredPokemons() {
+      const acquiredPokemons = this.pokemons.filter(pokemon => pokemon.acquired).map(pokemon => pokemon.id);
+      Cookies.set('acquiredPokemons', JSON.stringify(acquiredPokemons), { expires: 365 });
+    },
+    loadAcquiredPokemons() {
+      const acquiredPokemons = JSON.parse(Cookies.get('acquiredPokemons') || '[]');
+      this.pokemons.forEach(pokemon => {
+        if (acquiredPokemons.includes(pokemon.id)) {
+          pokemon.acquired = true;
+        }
+      });
     },
   },
 };
@@ -191,6 +264,10 @@ export default {
   filter: grayscale(0%);
 }
 
+.pokemon-card-item.rotate {
+  animation: rotate-card 2s ease-in-out;
+}
+
 .pokemon-card-item:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   filter: grayscale(0%);
@@ -210,6 +287,33 @@ export default {
   font-family: "Press Start 2P", cursive;
 }
 
+.error-message {
+  color: red;
+}
+
+@keyframes rotate-card {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  25% {
+    transform: rotateY(180deg) scale(1.2);
+  }
+  50% {
+    transform: rotateY(360deg) scale(1);
+  }
+  75% {
+    transform: rotateY(540deg) scale(1.2);
+  }
+  100% {
+    transform: rotateY(720deg) scale(1);
+  }
+}
+
+.pokemon-card-item.rotate {
+  animation: rotate-card 4s ease-in-out;
+}
+
+
 /* Adiciona responsividade */
 @media (max-width: 1200px) {
   .pokemon-grid {
@@ -222,4 +326,5 @@ export default {
     grid-template-columns: 1fr;
   }
 }
+
 </style>

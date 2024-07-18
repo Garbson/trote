@@ -7,35 +7,6 @@
     <q-card-section class="card-footer">
       <div class="a text-subtitle2"><strong>Descrição:</strong> {{ pokemon.description }}</div>
       <div class="a text-subtitle2"><strong>Interação:</strong> {{ pokemon.acao }}</div>
-
-      <div v-if="!acquired">
-        <q-input
-          v-model="password"
-          :type="passwordVisible ? 'text' : 'password'"
-          label="Digite a senha para adquirir"
-          class="password-input"
-          :append="passwordVisible ? 'visibility_off' : 'visibility'"
-          @append="togglePasswordVisibility"
-          dense
-        >
-          <template v-slot:append>
-            <q-icon
-              :name="passwordVisible ? 'visibility_off' : 'visibility'"
-              @click.stop="togglePasswordVisibility"
-              class="cursor-pointer"
-            />
-          </template>
-        </q-input>
-        <q-btn
-          class="acquire-btn"
-          @click="acquirePokemon"
-          :label="acquired ? 'Adquirido' : 'Adquirir'"
-          color="black" 
-          text-color="white" 
-          :disable="acquired"
-        />
-        <div v-if="passwordError" class="error-message">Senha incorreta. Tente novamente.</div>
-      </div>
     </q-card-section>
   </q-card>
 </template>
@@ -55,24 +26,18 @@ const props = defineProps({
 
 // Define o estado reativo para saber se o Pokémon foi adquirido
 const acquired = ref(false);
-const password = ref('');
-const passwordVisible = ref(false);
-const passwordError = ref(false);
+const code = ref('');
+const codeError = ref(false);
 
 // Função para adquirir um Pokémon e salvar o estado em um cookie
 function acquirePokemon() {
-  if (password.value === props.pokemon.password) {
+  if (code.value === props.pokemon.code) {
     acquired.value = true;
     Cookies.set(`pokemon_${props.pokemon.id}`, 'acquired', { expires: 365 }); // Salva no cookie por 1 ano
-    passwordError.value = false; // Limpa a mensagem de erro
+    codeError.value = false; // Limpa a mensagem de erro
   } else {
-    passwordError.value = true; // Exibe mensagem de erro se a senha estiver incorreta
+    codeError.value = true; // Exibe mensagem de erro se o código estiver incorreto
   }
-}
-
-// Alterna a visibilidade da senha
-function togglePasswordVisibility() {
-  passwordVisible.value = !passwordVisible.value;
 }
 
 // Verifica se o Pokémon já foi adquirido quando o componente é montado
@@ -143,7 +108,7 @@ strong {
   margin-top: 10px;
 }
 
-.password-input {
+.code-input {
   margin-bottom: 10px;
 }
 

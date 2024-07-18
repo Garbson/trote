@@ -7,8 +7,9 @@
             <PokemonCard
               v-for="pokemon in pokemons"
               :key="pokemon.id"
+              :id="'pokemon-' + pokemon.id"
               :pokemon="pokemon"
-              :class="['pokemon-card-item', { acquired: pokemon.acquired, rotate: pokemon.rotate }]"
+              :class="['pokemon-card-item', { acquired: pokemon.acquired, rotate: pokemon.rotate, 'active-rotate': activePokemon === pokemon.id }]"
             />
           </div>
         </q-page-container>
@@ -27,6 +28,8 @@
         />
       </q-toolbar>
     </q-footer>
+
+    <div v-if="activePokemon" class="overlay"></div>
 
     <q-dialog v-model="codeDialog">
       <q-card>
@@ -49,6 +52,8 @@
   </q-layout>
 </template>
 
+
+
 <script>
 import PokemonCard from "./components/PokemonCard.vue";
 import { ref } from 'vue';
@@ -64,6 +69,7 @@ export default {
       codeDialog: false,
       inputCode: '',
       codeError: false,
+      activePokemon: null,
       pokemons: [
         {
           id: 1,
@@ -192,15 +198,26 @@ export default {
       if (foundPokemon) {
         foundPokemon.acquired = true;
         foundPokemon.rotate = true;
+        this.activePokemon = foundPokemon.id;
         this.saveAcquiredPokemons();
         this.codeError = false;
         this.codeDialog = false;
+        this.scrollToPokemon(foundPokemon.id);
         setTimeout(() => {
           foundPokemon.rotate = false;
-        }, 1000);
+          this.activePokemon = null;
+        }, 4000); // Duração da animação (4 segundos)
       } else {
         this.codeError = true;
       }
+    },
+    scrollToPokemon(pokemonId) {
+      this.$nextTick(() => {
+        const element = document.getElementById('pokemon-' + pokemonId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
     },
     saveAcquiredPokemons() {
       const acquiredPokemons = this.pokemons.filter(pokemon => pokemon.acquired).map(pokemon => pokemon.id);
@@ -216,6 +233,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>
@@ -313,6 +331,21 @@ export default {
   animation: rotate-card 4s ease-in-out;
 }
 
+.pokemon-card-item.active-rotate {
+  z-index: 1000;
+  transform: scale(1.5);
+}
+
+/* Estilos para a sobreposição */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
 
 /* Adiciona responsividade */
 @media (max-width: 1200px) {
@@ -326,5 +359,6 @@ export default {
     grid-template-columns: 1fr;
   }
 }
+
 
 </style>

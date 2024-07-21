@@ -55,18 +55,39 @@ onMounted(() => {
   box-shadow: 0 6px 12px rgba(73, 71, 71, 0.3);
   background-color: #f5da3cde;
   border-radius: 0;
-  transition: filter 0.3s; /* Adiciona uma transição suave para o filtro */
-  filter: grayscale(100%); /* Aplica filtro cinza por padrão */
+  transition: all 0.3s; /* Adiciona uma transição suave para todas as propriedades */
   margin-bottom: 20px;
+  position: relative;
+}
+
+.pokemon-card:not(.acquired) {
+  background-color: black; /* Fundo preto */
+  color: white; /* Texto branco */
 }
 
 .pokemon-card.acquired {
   filter: grayscale(0%); /* Remove filtro cinza se adquirido */
 }
 
-.card-header {
-  padding: 8px;
-  text-align: center;
+.pokemon-card:not(.acquired)::before {
+  content: "?";
+  font-size: 5em;
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.7;
+}
+
+.card-header, .card-footer {
+  visibility: visible;
+}
+
+.pokemon-card:not(.acquired) .card-header,
+.pokemon-card:not(.acquired) .card-footer,
+.pokemon-card:not(.acquired) .pokemon-image {
+  visibility: hidden; /* Oculta o conteúdo da carta não adquirida */
 }
 
 .pokemon-image {

@@ -5,7 +5,6 @@
     </q-card-section>
     <q-img :src="pokemon.image" class="pokemon-image" />
     <q-card-section class="card-footer">
-      <div class="a text-subtitle2"><strong>Descrição:</strong> {{ pokemon.description }}</div>
       <div class="a text-subtitle2"><strong>Interação:</strong> {{ pokemon.acao }}</div>
     </q-card-section>
   </q-card>

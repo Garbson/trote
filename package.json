@@ -12,7 +12,8 @@
     "@quasar/extras": "^1.16.12",
     "js-cookie": "^3.0.5",
     "quasar": "^2.16.6",
-    "vue": "^3.4.29"
+    "vue": "^3.4.29",
+    "vue-router": "^4.0.13"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.7.0",

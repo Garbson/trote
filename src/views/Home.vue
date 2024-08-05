@@ -228,8 +228,7 @@ export default {
           name: "Lickitung",
           description: "",
           acao: "Toque nele e veja a mágica acontecer.",
-          image:
-            "/img/lucting.jpg",
+          image: "/img/lucting.jpg",
           acquired: false,
           code: "1934",
           rotate: false,
@@ -269,8 +268,7 @@ export default {
           name: "Slowbro",
           description: "",
           acao: "Toque nele e veja a mágica acontecer.",
-          image:
-            "/img/slowbrow.jpg",
+          image: "/img/slowbrow.jpg",
           acquired: false,
           code: "2359",
           rotate: false,
@@ -375,7 +373,7 @@ export default {
     },
   },
   created() {
-    this.loadUserPokemons();
+    this.loadPokemons(); 
   },
   mounted() {
     this.typeMessage();
@@ -407,7 +405,7 @@ export default {
         foundPokemon.acquired = true;
         foundPokemon.rotate = true;
         this.activePokemon = foundPokemon.id;
-        this.saveUserPokemons();
+        this.savePokemons();
         this.codeError = false;
         this.codeDialog = false;
         this.scrollToPokemon(foundPokemon.id);
@@ -427,31 +425,21 @@ export default {
         }
       });
     },
-    saveUserPokemons() {
-      const username = Cookies.get("user");
-      if (username) {
-        const acquiredPokemons = this.pokemons
-          .filter((pokemon) => pokemon.acquired)
-          .map((pokemon) => pokemon.id);
-        Cookies.set(
-          `userPokemons_${username}`,
-          JSON.stringify(acquiredPokemons),
-          { expires: 365 }
-        );
-      }
+    savePokemons() {
+      const acquiredPokemons = this.pokemons
+        .filter((pokemon) => pokemon.acquired)
+        .map((pokemon) => pokemon.id);
+      Cookies.set("acquiredPokemons", JSON.stringify(acquiredPokemons), {
+        expires: 365,
+      });
     },
-    loadUserPokemons() {
-      const username = Cookies.get("user");
-      if (username) {
-        const acquiredPokemons = JSON.parse(
-          Cookies.get(`userPokemons_${username}`) || "[]"
-        );
-        this.pokemons.forEach((pokemon) => {
-          if (acquiredPokemons.includes(pokemon.id)) {
-            pokemon.acquired = true;
-          }
-        });
-      }
+    loadPokemons() {
+      const acquiredPokemons = JSON.parse(
+        Cookies.get("acquiredPokemons") || "[]"
+      );
+      this.pokemons.forEach((pokemon) => {
+        pokemon.acquired = acquiredPokemons.includes(pokemon.id);
+      });
     },
   },
 };

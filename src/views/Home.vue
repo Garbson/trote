@@ -220,7 +220,7 @@ export default {
           acao: "Toque nele e veja a mágica acontecer.",
           image: "/img/mew.jpg",
           acquired: false,
-          code: "4211",
+          code: "1129",
           rotate: false,
         },
         {

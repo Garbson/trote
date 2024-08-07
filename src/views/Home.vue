@@ -333,17 +333,17 @@ export default {
           code: "1969",
           rotate: false,
         },
-        // {
-        //   id: 26,
-        //   name: "Jolteon",
-        //   description: "",
-        //   acao: "Toque nele e veja a mágica acontecer.",
-        //   image:
-        //     "https://assets.pokemon.com/assets/cms2/img/pokedex/full/000.png",
-        //   acquired: false,
-        //   code: "2000",
-        //   rotate: false,
-        // },
+        {
+          id: 26,
+          name: "clefairy",
+          description: "",
+          acao: "Toque nele e veja a mágica acontecer.",
+          image:
+            "/img/cleafairy.jpg",
+          acquired: false,
+          code: "4224",
+          rotate: false,
+        },
         {
           id: 27,
           name: "Vulpix",

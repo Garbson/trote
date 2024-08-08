@@ -364,6 +364,16 @@ export default {
           code: "6996",
           rotate: false,
         },
+        {
+          id: 29,
+          name: "Jolteon",
+          description: "",
+          acao: "Toque nele e veja a mágica acontecer.",
+          image: "/img/jolteon.jpg",
+          acquired: false,
+          code: "2000",
+          rotate: false,
+        },
       ],
     };
   },

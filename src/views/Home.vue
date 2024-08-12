@@ -215,7 +215,7 @@ export default {
         },
         {
           id: 14,
-          name: "Mew",
+          name: "Meawth",
           description: "",
           acao: "Toque nele e veja a mágica acontecer.",
           image: "/img/mew.jpg",
@@ -245,12 +245,12 @@ export default {
         },
         {
           id: 17,
-          name: "Meowth",
+          name: "Mew",
           description: "",
           acao: "Toque nele e veja a mágica acontecer.",
           image: "/img/metw.jpg",
           acquired: false,
-          code: "2411",
+          code: "4211",
           rotate: false,
         },
         {

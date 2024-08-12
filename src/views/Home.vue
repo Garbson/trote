@@ -341,7 +341,7 @@ export default {
           image:
             "/img/cleafairy.jpg",
           acquired: false,
-          code: "4224",
+          code: "2348",
           rotate: false,
         },
         {

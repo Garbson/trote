@@ -1,0 +1,418 @@
+/* src/assets/clash-royale-theme.css */
+
+/* Paleta de cores Clash Royale */
+:root {
+  /* Cores principais */
+  --cr-blue-primary: #4a90e2;
+  --cr-blue-dark: #1e3c72;
+  --cr-blue-light: #6bb6ff;
+
+  /* Cores de raridade */
+  --cr-common: #a8a8a8;
+  --cr-rare: #4a90e2;
+  --cr-epic: #9c27b0;
+  --cr-legendary: #ff9500;
+
+  /* Cores de UI */
+  --cr-gold: #ffd700;
+  --cr-purple: #7b2cbf;
+  --cr-orange: #ff6b35;
+  --cr-green: #06d6a0;
+  --cr-red: #ef233c;
+
+  /* Backgrounds */
+  --cr-bg-primary: linear-gradient(
+    135deg,
+    #1e3c72 0%,
+    #2a5298 50%,
+    #4a90e2 100%
+  );
+  --cr-bg-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --cr-bg-card: rgba(255, 255, 255, 0.95);
+  --cr-bg-dark: rgba(30, 60, 114, 0.9);
+
+  /* Sombras */
+  --cr-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --cr-shadow-button: 0 4px 15px rgba(74, 144, 226, 0.4);
+  --cr-shadow-glow: 0 0 20px rgba(255, 215, 0, 0.5);
+
+  /* Bordas */
+  --cr-border-radius: 16px;
+  --cr-border-card: 3px solid var(--cr-gold);
+}
+
+/* Fontes Clash Royale Style */
+@import url("https://fonts.googleapis.com/css2?family=Supercell+Magic:wght@400@600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+/* Reset e base styles */
+* {
+  box-sizing: border-box;
+}
+
+.clash-title {
+  font-family: "Supercell Magic", "Press Start 2P", cursive;
+  font-weight: 600;
+  text-shadow: 2px 2px 0px var(--cr-orange), 4px 4px 0px var(--cr-red),
+    6px 6px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 2px;
+}
+
+.clash-subtitle {
+  font-family: "Supercell Magic", sans-serif;
+  font-weight: 400;
+}
+
+/* Cores de raridade para badges */
+.rarity-common {
+  background: linear-gradient(135deg, #a8a8a8, #7f7f7f);
+  color: white;
+}
+
+.rarity-rare {
+  background: linear-gradient(135deg, #4a90e2, #1e3c72);
+  color: white;
+}
+
+.rarity-epic {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  color: white;
+}
+
+.rarity-legendary {
+  background: linear-gradient(135deg, #ff9500, #ff6b00);
+  color: white;
+  animation: legendary-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes legendary-glow {
+  from {
+    box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(255, 149, 0, 0.8);
+  }
+}
+
+/* Botões estilo Clash Royale */
+.clash-btn {
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.clash-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.clash-btn:hover::before {
+  left: 100%;
+}
+
+.clash-btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--cr-blue-primary),
+    var(--cr-blue-dark)
+  );
+  box-shadow: var(--cr-shadow-button);
+}
+
+.clash-btn-secondary {
+  background: linear-gradient(135deg, var(--cr-purple), var(--cr-orange));
+}
+
+.clash-btn-legendary {
+  background: linear-gradient(135deg, var(--cr-legendary), #ff6b00);
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.4);
+}
+
+.clash-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.6);
+}
+
+/* Cards estilo Clash Royale */
+.clash-card {
+  background: var(--cr-bg-card);
+  border: var(--cr-border-card);
+  border-radius: var(--cr-border-radius);
+  box-shadow: var(--cr-shadow-card);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.clash-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--cr-blue-primary),
+    var(--cr-purple),
+    var(--cr-orange)
+  );
+  z-index: 1;
+}
+
+/* Inputs estilo Clash Royale */
+.clash-input {
+  border-radius: 12px;
+  border: 2px solid var(--cr-blue-light);
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+}
+
+.clash-input:focus {
+  border-color: var(--cr-gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Backgrounds animados */
+.clash-bg-primary {
+  background: var(--cr-bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.clash-bg-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 215, 0, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(156, 39, 176, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(255, 107, 53, 0.05) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  animation: float-bg 10s ease-in-out infinite;
+}
+
+@keyframes float-bg {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+/* Efeitos de partículas */
+.clash-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.clash-particles::before,
+.clash-particles::after {
+  content: "✨";
+  position: absolute;
+  color: var(--cr-gold);
+  font-size: 20px;
+  animation: float-particles 8s ease-in-out infinite;
+}
+
+.clash-particles::before {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.clash-particles::after {
+  top: 60%;
+  right: 15%;
+  animation-delay: 4s;
+}
+
+@keyframes float-particles {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Barras de progresso estilo Clash Royale */
+.clash-progress {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.clash-progress-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--cr-blue-primary),
+    var(--cr-blue-light)
+  );
+  border-radius: 20px;
+  position: relative;
+  transition: width 0.8s ease;
+}
+
+.clash-progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Badges e emblemas */
+.clash-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Efeitos hover para cards */
+.clash-card-hover {
+  transition: all 0.3s ease;
+}
+
+.clash-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Animações especiais */
+.clash-float {
+  animation: clash-float 3s ease-in-out infinite;
+}
+
+@keyframes clash-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.clash-bounce {
+  animation: clash-bounce 2s ease-in-out infinite;
+}
+
+@keyframes clash-bounce {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.clash-pulse {
+  animation: clash-pulse 2s ease-in-out infinite;
+}
+
+@keyframes clash-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .clash-title {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+
+  .clash-card {
+    margin: 0 10px;
+  }
+}
+
+/* Quasar overrides para tema Clash Royale */
+.q-btn.clash-btn {
+  border-radius: 12px !important;
+}
+
+.q-card.clash-card {
+  border-radius: 16px !important;
+}
+
+.q-input.clash-input .q-field__control {
+  border-radius: 12px !important;
+}

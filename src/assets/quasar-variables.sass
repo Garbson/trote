@@ -1,10 +1,86 @@
-$primary   : #003613
-$secondary : #01240D
-$accent    : #9C27B0
+// src/assets/quasar-variables.sass - Tema Clash Royale
 
-$dark      : #1D1D1D
+// Cores principais do Clash Royale
+$primary   : #4a90e2  // Azul principal
+$secondary : #7b2cbf  // Roxo
+$accent    : #ff6b35  // Laranja
 
-$positive  : #21BA45
-$negative  : #C10015
-$info      : #31CCEC
-$warning   : #F2C037
+$dark      : #1e3c72  // Azul escuro
+
+$positive  : #06d6a0  // Verde
+$negative  : #ef233c  // Vermelho
+$info      : #6bb6ff  // Azul claro
+$warning   : #ffd700  // Dourado
+
+// Cores de raridade
+$common    : #a8a8a8  // Cinza
+$rare      : #4a90e2  // Azul
+$epic      : #9c27b0  // Roxo
+$legendary : #ff9500  // Laranja dourado
+
+// Cores customizadas Clash Royale
+$cr-gold   : #ffd700
+$cr-blue   : #4a90e2
+$cr-purple : #7b2cbf
+$cr-orange : #ff6b35
+$cr-green  : #06d6a0
+
+// Tipografia
+$typography-font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif
+
+// Componentes customizados
+$button-border-radius: 12px
+$card-border-radius: 16px
+$input-border-radius: 12px
+
+// Sombras
+$shadow-1: 0 2px 4px rgba(0, 0, 0, 0.1)
+$shadow-2: 0 4px 8px rgba(0, 0, 0, 0.1)
+$shadow-3: 0 8px 16px rgba(0, 0, 0, 0.15)
+$shadow-4: 0 12px 24px rgba(0, 0, 0, 0.2)
+
+// Backgrounds gradients
+$bg-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4a90e2 100%)
+$bg-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+$bg-accent: linear-gradient(135deg, #ff6b35 0%, #f093fb 100%)
+
+// Overrides para componentes Quasar
+.q-btn
+  border-radius: $button-border-radius !important
+  font-weight: 600
+  text-transform: uppercase
+  letter-spacing: 0.5px
+
+.q-card
+  border-radius: $card-border-radius !important
+  backdrop-filter: blur(10px)
+
+.q-input .q-field__control
+  border-radius: $input-border-radius !important
+
+.q-dialog .q-card
+  border: 3px solid $cr-gold
+
+// Cores para badges de raridade
+.badge-comum
+  background: linear-gradient(135deg, $common, darken($common, 15%)) !important
+  color: white !important
+
+.badge-raro  
+  background: linear-gradient(135deg, $rare, darken($rare, 15%)) !important
+  color: white !important
+
+.badge-epico
+  background: linear-gradient(135deg, $epic, darken($epic, 15%)) !important
+  color: white !important
+
+.badge-lendario
+  background: linear-gradient(135deg, $legendary, darken($legendary, 15%)) !important
+  color: white !important
+  animation: legendary-glow 2s ease-in-out infinite alternate
+
+@keyframes legendary-glow
+  from
+    box-shadow: 0 0 10px rgba(255, 149, 0, 0.5)
+  to  
+    box-shadow: 0 0 20px rgba(255, 149, 0, 0.8)

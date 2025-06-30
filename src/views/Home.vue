@@ -1,606 +1,610 @@
 <template>
-  <q-layout view="hHh lpR fFf" class="layout">
+  <q-layout view="hHh lpR fFf" class="clash-layout">
     <q-page-container>
       <q-page class="page">
         <q-page-container class="page-container">
-          <div class="welcome-message">
-            <p v-html="typedMessage"></p>
+          <!-- Partículas decorativas -->
+          <div class="clash-particles"></div>
+
+          <!-- Mensagem de boas-vindas -->
+          <div class="welcome-message clash-card">
+            <div class="welcome-header">
+              <q-icon
+                name="auto_awesome"
+                size="40px"
+                color="amber"
+                class="clash-pulse"
+              />
+              <h2 class="clash-title">Bem-vindo à Arena BIXO ROYALE!</h2>
+            </div>
+            <p v-html="typedMessage" class="welcome-text"></p>
+
+            <!-- Estatísticas do usuário -->
+            <div v-if="authStore.isAuthenticated" class="stats-container">
+              <div class="stat-item clash-badge rarity-rare">
+                <q-icon name="stars" size="md" />
+                <span>{{ authStore.user?.pontos_totais || 0 }} pontos</span>
+              </div>
+              <div class="stat-item clash-badge rarity-epic">
+                <q-icon name="trending_up" size="md" />
+                <span>Nível {{ authStore.user?.nivel || 1 }}</span>
+              </div>
+              <div class="stat-item clash-badge rarity-legendary">
+                <q-icon name="collections" size="md" />
+                <span
+                  >{{ cartasStore.estatisticas.total_cartas }}/{{
+                    cartasStore.estatisticas.total_disponiveis
+                  }}</span
+                >
+              </div>
+              <div class="stat-item clash-badge rarity-common">
+                <q-icon name="percent" size="md" />
+                <span>{{ cartasStore.estatisticas.percentual_completo }}%</span>
+              </div>
+            </div>
           </div>
-          <div class="pokemon-grid">
+
+          <!-- Barra de progresso da coleção -->
+          <div v-if="authStore.isAuthenticated" class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label clash-subtitle"
+                >Progresso da Coleção</span
+              >
+              <span class="progress-percentage"
+                >{{ cartasStore.estatisticas.percentual_completo }}%</span
+              >
+            </div>
+            <div class="clash-progress">
+              <div
+                class="clash-progress-bar"
+                :style="{
+                  width: cartasStore.estatisticas.percentual_completo + '%',
+                }"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Grid de cartas -->
+          <div class="cards-grid">
             <PokemonCard
-              v-for="pokemon in sortedPokemons"
-              :key="pokemon.id"
-              :id="'pokemon-' + pokemon.id"
-              :pokemon="pokemon"
+              v-for="carta in cartasOrdenadas"
+              :key="carta.id"
+              :id="'carta-' + carta.id"
+              :pokemon="mapearCartaParaPokemon(carta)"
               :class="[
-                'pokemon-card-item',
+                'card-item clash-card-hover',
                 {
-                  acquired: pokemon.acquired,
-                  rotate: pokemon.rotate,
-                  'active-rotate': activePokemon === pokemon.id,
+                  acquired: cartasStore.verificarCartaObtida(carta.id),
+                  rotate: carta.rotate,
+                  'active-rotate': activeCarta === carta.id,
                 },
               ]"
             />
           </div>
+
+          <div v-if="cartasStore.loading" class="loading-container">
+            <q-spinner-dots size="50px" color="amber" />
+            <p class="clash-subtitle">Carregando cartas da arena...</p>
+          </div>
         </q-page-container>
       </q-page>
     </q-page-container>
-    <q-footer elevated class="footer">
+
+    <q-footer elevated class="clash-footer">
       <q-toolbar class="footer-toolbar">
-        <q-toolbar-title class="footer-title">
-          Bixomon Collection © 2024
-        </q-toolbar-title>
-        <q-btn
-          label="Adicionar Código"
-          color="black"
-          text-color="white"
-          @click="openCodeDialog"
-        />
+        <div class="footer-logo">
+          <q-icon name="shield" size="md" color="amber" />
+          <span class="footer-title clash-title">BIXO ROYALE</span>
+        </div>
+
+        <div class="footer-actions">
+          <q-btn
+            v-if="!authStore.isAuthenticated"
+            label="Entrar na Arena"
+            color="primary"
+            class="clash-btn clash-btn-primary"
+            @click="$router.push('/login')"
+          />
+          <div v-else class="action-buttons">
+            <q-btn
+              label="Adicionar Código"
+              color="legendary"
+              class="clash-btn clash-btn-legendary"
+              @click="openCodeDialog"
+              :loading="cartasStore.loadingObter"
+            >
+              <q-icon name="add" left />
+            </q-btn>
+            <q-btn
+              label="Ranking"
+              color="secondary"
+              class="clash-btn clash-btn-secondary"
+              @click="$router.push('/ranking')"
+            >
+              <q-icon name="emoji_events" left />
+            </q-btn>
+            <q-btn
+              flat
+              round
+              icon="logout"
+              color="white"
+              @click="logout"
+              class="logout-btn"
+              size="md"
+            />
+          </div>
+        </div>
       </q-toolbar>
     </q-footer>
 
-    <div v-if="activePokemon" class="overlay"></div>
+    <!-- Overlay para animação -->
+    <div v-if="activeCarta" class="overlay"></div>
 
+    <!-- Dialog para adicionar código -->
     <q-dialog v-model="codeDialog">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Digite o código</div>
+      <q-card class="code-dialog clash-card">
+        <q-card-section class="dialog-header">
+          <div class="text-h6 clash-subtitle">🔮 Digite o Código Mágico</div>
         </q-card-section>
 
         <q-card-section>
-          <q-input v-model="inputCode" label="Código" />
+          <q-input
+            v-model="inputCode"
+            label="Código da Carta"
+            outlined
+            color="primary"
+            class="clash-input"
+            @keyup.enter="aplicarCodigo"
+          >
+            <template v-slot:prepend>
+              <q-icon name="key" color="amber" />
+            </template>
+          </q-input>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="grey" v-close-popup />
           <q-btn
             label="Confirmar"
             color="primary"
-            @click="applyCode"
-            class="q-mt-md"
+            class="clash-btn clash-btn-primary"
+            @click="aplicarCodigo"
+            :loading="cartasStore.loadingObter"
           />
-          <div v-if="codeError" class="error-message">
-            Código incorreto. Tente novamente.
-          </div>
-        </q-card-section>
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </q-layout>
 </template>
 
-<script>
+<script setup>
 import PokemonCard from "@/components/PokemonCard.vue";
-import { ref, onMounted } from "vue";
-import Cookies from "js-cookie";
+import { useAuthStore } from "@/stores/auth";
+import { useCartasStore } from "@/stores/cartas";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
-  components: {
-    PokemonCard,
-  },
-  data() {
-    return {
-      leftDrawerOpen: false,
-      codeDialog: false,
-      inputCode: "",
-      codeError: false,
-      activePokemon: null,
-      typedMessage: "",
-      message: `Seja bem-vindo! Nesse site, você pode montar a coleção de pokemons. Cada pokemon tem um código na sua placa. Coloque esse código em "Adicionar código" e obtenha o pokemon, podendo então ver a interatividade do pokemon. No total, são 28 pokemons. Boa sorte tentando capturar os 28! Este site faz parte do trote dos Alunos de Sistemas de Informação.`,
-      pokemons: [
-        {
-          id: 1,
-          name: "Jinkx",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/jinks.jpg",
-          acquired: false,
-          code: "3333",
-          rotate: false,
-        },
-        {
-          id: 2,
-          name: "Gastly",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/geskley.jpg",
-          acquired: false,
-          code: "6969",
-          rotate: false,
-        },
-        {
-          id: 3,
-          name: "Pikachu",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/pikachu.jpg",
-          acquired: false,
-          code: "1234",
-          rotate: false,
-        },
-        {
-          id: 4,
-          name: "Charmander",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/gay.jpg",
-          acquired: false,
-          code: "2100",
-          rotate: false,
-        },
-        {
-          id: 5,
-          name: "Squirtle",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/skartan.jpg",
-          acquired: false,
-          code: "3435",
-          rotate: false,
-        },
-        {
-          id: 6,
-          name: "Psyduck",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/psyduck.jpg",
-          acquired: false,
-          code: "5183",
-          rotate: false,
-        },
-        {
-          id: 7,
-          name: "Magikarp",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/magi_carp.jpg",
-          acquired: false,
-          code: "3211",
-          rotate: false,
-        },
-        {
-          id: 8,
-          name: "Tauros",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/tauros.jpg",
-          acquired: false,
-          code: "6666",
-          rotate: false,
-        },
-        {
-          id: 9,
-          name: "Digglet",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/digglet.jpg",
-          acquired: false,
-          code: "0000",
-          rotate: false,
-        },
-        {
-          id: 10,
-          name: "Alakazam",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/Alacazam.jpg",
-          acquired: false,
-          code: "1089",
-          rotate: false,
-        },
-        {
-          id: 11,
-          name: "Caterpie",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/carterpie.jpg",
-          acquired: false,
-          code: "3485",
-          rotate: false,
-        },
-        {
-          id: 12,
-          name: "Snorlax",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/snorlax.jpg",
-          acquired: false,
-          code: "0800",
-          rotate: false,
-        },
-        {
-          id: 13,
-          name: "Bulbasaur",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/wesley.jpg",
-          acquired: false,
-          code: "8308",
-          rotate: false,
-        },
-        {
-          id: 14,
-          name: "Meawth",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/mew.jpg",
-          acquired: false,
-          code: "1129",
-          rotate: false,
-        },
-        {
-          id: 15,
-          name: "Lickitung",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/lucting.jpg",
-          acquired: false,
-          code: "1934",
-          rotate: false,
-        },
-        {
-          id: 16,
-          name: "Koffing",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/cofen.jpg",
-          acquired: false,
-          code: "7373",
-          rotate: false,
-        },
-        {
-          id: 17,
-          name: "Mew",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/metw.jpg",
-          acquired: false,
-          code: "4211",
-          rotate: false,
-        },
-        {
-          id: 18,
-          name: "Vaporeon",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/valporoun.jpg",
-          acquired: false,
-          code: "1815",
-          rotate: false,
-        },
-        {
-          id: 19,
-          name: "Slowbro",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/slowbrow.jpg",
-          acquired: false,
-          code: "2359",
-          rotate: false,
-        },
-        {
-          id: 20,
-          name: "Togepi",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/togepi.jpg",
-          acquired: false,
-          code: "2424",
-          rotate: false,
-        },
-        {
-          id: 21,
-          name: "Flareon",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/flareon.jpg",
-          acquired: false,
-          code: "1722",
-          rotate: false,
-        },
-        {
-          id: 22,
-          name: "Jigglypuff",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/jigllypof.jpg",
-          acquired: false,
-          code: "1474",
-          rotate: false,
-        },
-        {
-          id: 23,
-          name: "Rattata",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/ratata.jpg",
-          acquired: false,
-          code: "0001",
-          rotate: false,
-        },
-        {
-          id: 24,
-          name: "Ekans",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/ekans.jpg",
-          acquired: false,
-          code: "0311",
-          rotate: false,
-        },
-        {
-          id: 25,
-          name: "Mr. Mime",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/mr_mine.jpg",
-          acquired: false,
-          code: "1969",
-          rotate: false,
-        },
-        {
-          id: 26,
-          name: "clefairy",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image:
-            "/img/cleafairy.jpg",
-          acquired: false,
-          code: "2348",
-          rotate: false,
-        },
-        {
-          id: 27,
-          name: "Vulpix",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/vulpix.jpg",
-          acquired: false,
-          code: "3141",
-          rotate: false,
-        },
-        {
-          id: 28,
-          name: "Sandshrew",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/sandrow.jpg",
-          acquired: false,
-          code: "6996",
-          rotate: false,
-        },
-        {
-          id: 29,
-          name: "Jolteon",
-          description: "",
-          acao: "Toque nele e veja a mágica acontecer.",
-          image: "/img/jolteon.jpg",
-          acquired: false,
-          code: "2000",
-          rotate: false,
-        },
-      ],
-    };
-  },
-  computed: {
-    sortedPokemons() {
-      return this.pokemons.slice().sort((a, b) => b.acquired - a.acquired);
-    },
-  },
-  created() {
-    this.loadPokemons(); 
-  },
-  mounted() {
-    this.typeMessage();
-  },
-  methods: {
-    typeMessage() {
-      let i = 0;
-      const speed = 50; // Speed in milliseconds
-      const type = () => {
-        if (i < this.message.length) {
-          this.typedMessage += this.message.charAt(i);
-          i++;
-          setTimeout(type, speed);
-        }
-      };
-      type();
-    },
-    toggleLeftDrawer() {
-      this.leftDrawerOpen = !this.leftDrawerOpen;
-    },
-    openCodeDialog() {
-      this.codeDialog = true;
-    },
-    applyCode() {
-      const foundPokemon = this.pokemons.find(
-        (pokemon) => pokemon.code === this.inputCode
-      );
-      if (foundPokemon) {
-        foundPokemon.acquired = true;
-        foundPokemon.rotate = true;
-        this.activePokemon = foundPokemon.id;
-        this.savePokemons();
-        this.codeError = false;
-        this.codeDialog = false;
-        this.scrollToPokemon(foundPokemon.id);
-        setTimeout(() => {
-          foundPokemon.rotate = false;
-          this.activePokemon = null;
-        }, 4000); // Duration of the animation (4 seconds)
-      } else {
-        this.codeError = true;
-      }
-    },
-    scrollToPokemon(pokemonId) {
-      this.$nextTick(() => {
-        const element = document.getElementById("pokemon-" + pokemonId);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      });
-    },
-    savePokemons() {
-      const acquiredPokemons = this.pokemons
-        .filter((pokemon) => pokemon.acquired)
-        .map((pokemon) => pokemon.id);
-      Cookies.set("acquiredPokemons", JSON.stringify(acquiredPokemons), {
-        expires: 365,
-      });
-    },
-    loadPokemons() {
-      const acquiredPokemons = JSON.parse(
-        Cookies.get("acquiredPokemons") || "[]"
-      );
-      this.pokemons.forEach((pokemon) => {
-        pokemon.acquired = acquiredPokemons.includes(pokemon.id);
-      });
-    },
-  },
+// Stores e router
+const authStore = useAuthStore();
+const cartasStore = useCartasStore();
+const router = useRouter();
+
+// Estado local
+const codeDialog = ref(false);
+const inputCode = ref("");
+const activeCarta = ref(null);
+const typedMessage = ref("");
+
+// Mensagem de boas-vindas
+const message = `⚔️ Seja bem-vindo à Arena BIXO ROYALE! Aqui você pode colecionar cartas épicas dos calouros mais lendários. Cada carta tem um código único que desbloqueará poderes especiais! Use "Adicionar código" para obter novas cartas e subir no ranking. Prepare-se para a batalha! 🏆`;
+
+// Computed
+const cartasOrdenadas = computed(() => {
+  const cartas = cartasStore.cartasDisponiveis;
+  return cartas.slice().sort((a, b) => {
+    const aObtida = cartasStore.verificarCartaObtida(a.id);
+    const bObtida = cartasStore.verificarCartaObtida(b.id);
+    // Ordenar por: obtidas primeiro, depois por raridade
+    if (aObtida !== bObtida) return bObtida - aObtida;
+    const raridades = { comum: 1, raro: 2, epico: 3, lendario: 4 };
+    return (raridades[b.raridade] || 0) - (raridades[a.raridade] || 0);
+  });
+});
+
+// Methods
+const typeMessage = () => {
+  let i = 0;
+  const speed = 30;
+  const type = () => {
+    if (i < message.length) {
+      typedMessage.value += message.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  };
+  type();
 };
+
+const mapearCartaParaPokemon = (carta) => {
+  return {
+    id: carta.id,
+    name: carta.nome,
+    acao: `${carta.curso} - ${carta.ano_ingresso}`,
+    image: carta.foto_url || "/img/default-avatar.jpg",
+    acquired: cartasStore.verificarCartaObtida(carta.id),
+    code: carta.codigo_unico,
+    raridade: carta.raridade,
+    pontos: carta.pontos_valor,
+  };
+};
+
+const openCodeDialog = () => {
+  codeDialog.value = true;
+  inputCode.value = "";
+};
+
+const aplicarCodigo = async () => {
+  if (!inputCode.value.trim()) return;
+
+  const resultado = await cartasStore.obterCartaPorCodigo(
+    inputCode.value.trim()
+  );
+
+  if (resultado.success) {
+    codeDialog.value = false;
+    inputCode.value = "";
+
+    // Animação da carta
+    activeCarta.value = resultado.carta.id;
+    scrollToCarta(resultado.carta.id);
+
+    setTimeout(() => {
+      activeCarta.value = null;
+    }, 4000);
+  }
+};
+
+const scrollToCarta = (cartaId) => {
+  setTimeout(() => {
+    const element = document.getElementById("carta-" + cartaId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, 100);
+};
+
+const logout = async () => {
+  await authStore.signOut();
+  router.push("/login");
+};
+
+// Lifecycle
+onMounted(async () => {
+  typeMessage();
+
+  // Carregar dados
+  await cartasStore.fetchCartas();
+
+  if (authStore.isAuthenticated) {
+    await cartasStore.fetchCartasUsuario();
+  }
+});
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import "@/assets/clash-royale-theme.css";
 
-.layout {
-  background: rgb(30, 214, 217);
-  background: linear-gradient(
-    0deg,
-    rgba(30, 214, 217, 1) 10%,
-    rgba(245, 238, 117, 1) 90%
-  );
+.clash-layout {
+  background: var(--cr-bg-primary);
   min-height: 100vh;
-}
-
-.header {
-  background-color: #ffcb05;
-  border-bottom: 4px solid #d3a400;
-}
-
-.header-btn {
-  color: #4d4d4d;
-}
-
-.header-title {
-  color: #3b4cca;
-  font-family: "Press Start 2P", cursive;
+  position: relative;
 }
 
 .page-container {
   padding: 20px;
+  position: relative;
 }
 
-.pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.welcome-message {
+  margin-bottom: 30px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .pokemon-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pokemon-card-item {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
-  filter: grayscale(100%);
-  background: #ffcb05; /* Matching card background */
-  border: 2px solid #d3a400;
-  border-radius: 10px;
-  padding: 10px;
-  font-family: "Press Start 2P", cursive;
-}
-
-.pokemon-card-item.acquired {
-  filter: grayscale(0%);
-}
-
-.pokemon-card-item.rotate {
-  animation: rotate-card 2s ease-in-out;
-}
-
-.pokemon-card-item:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  filter: grayscale(0%);
-}
-
-.footer {
-  background-color: #ffcb05;
-  border-top: 4px solid #d3a400;
-}
-
-.footer-toolbar {
+.welcome-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
   justify-content: center;
 }
 
-.footer-title {
-  color: #3b4cca;
-  font-family: "Press Start 2P", cursive;
+.welcome-header h2 {
+  margin: 0;
+  color: var(--cr-gold);
+  font-size: 1.8rem;
 }
 
-.error-message {
-  color: red;
-}
-
-@keyframes rotate-card {
-  0% {
-    transform: rotateY(0deg) scale(1);
-  }
-  25% {
-    transform: rotateY(180deg) scale(1.2);
-  }
-  50% {
-    transform: rotateY(360deg) scale(1);
-  }
-  75% {
-    transform: rotateY(540deg) scale(1.2);
-  }
-  100% {
-    transform: rotateY(720deg) scale(1);
-  }
-}
-
-.pokemon-card-item.rotate {
-  animation: rotate-card 4s ease-in-out;
-}
-
-.pokemon-card-item.active-rotate {
-  z-index: 1000;
-  transform: scale(1.5);
-}
-
-/* Styles for the welcome message */
-.welcome-message {
-  background: rgba(0, 0, 0, 0.7);
-  color: #ffcb05;
-  font-family: "Press Start 2P", cursive;
-  padding: 20px;
-  border-radius: 10px;
+.welcome-text {
+  color: var(--cr-blue-dark);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: center;
   margin-bottom: 20px;
-  animation: fadeIn 2s;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 25px;
 }
 
-/* Overlay styles */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  justify-content: center;
+}
+
+.progress-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.progress-percentage {
+  color: var(--cr-gold);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.clash-progress {
+  height: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.card-item {
+  transition: all 0.3s ease;
+}
+
+.card-item.active-rotate {
+  z-index: 1000;
+  transform: scale(1.1);
+  animation: clash-bounce 4s ease-in-out;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px;
+  color: white;
+}
+
+.clash-footer {
+  background: linear-gradient(135deg, var(--cr-blue-dark), var(--cr-purple));
+  border-top: 3px solid var(--cr-gold);
+}
+
+.footer-toolbar {
+  padding: 12px 20px;
+  min-height: 70px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-title {
+  color: var(--cr-gold);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(30, 60, 114, 0.8);
+  backdrop-filter: blur(5px);
   z-index: 999;
 }
 
-.error-message {
-  color: red;
-  margin-top: 10px;
+.code-dialog {
+  min-width: 350px;
+  background: var(--cr-bg-card);
+  border: var(--cr-border-card);
+}
+
+.dialog-header {
+  background: var(--cr-bg-secondary);
+  color: white;
+  text-align: center;
+  margin: 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .welcome-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .welcome-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .footer-toolbar {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons .clash-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 15px;
+  }
+
+  .welcome-message {
+    padding: 20px;
+  }
+
+  .progress-section {
+    padding: 15px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animações personalizadas */
+@keyframes card-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-item {
+  animation: card-reveal 0.6s ease-out;
+}
+
+.card-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.card-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.card-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.card-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.card-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.card-item:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+/* Efeitos especiais para cartas obtidas */
+.card-item.acquired {
+  position: relative;
+}
+
+.card-item.acquired::after {
+  content: "✨";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 24px;
+  animation: sparkle 2s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* Themes para diferentes raridades */
+.card-item[data-rarity="lendario"] {
+  box-shadow: 0 0 30px rgba(255, 149, 0, 0.3);
+}
+
+.card-item[data-rarity="epico"] {
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+}
+
+.card-item[data-rarity="raro"] {
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
 }
 </style>

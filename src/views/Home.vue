@@ -6,21 +6,61 @@
           <!-- Partículas decorativas -->
           <div class="clash-particles"></div>
 
-          <!-- Mensagem de boas-vindas -->
-          <div class="welcome-message clash-card">
+          <!-- Mensagem de boas-vindas APENAS para visitantes -->
+          <div
+            v-if="!authStore.isAuthenticated"
+            class="welcome-message clash-card"
+          >
             <div class="welcome-header">
               <q-icon
                 name="auto_awesome"
-                size="40px"
+                size="60px"
                 color="amber"
                 class="clash-pulse"
               />
-              <h2 class="clash-title">Bem-vindo à Arena BIXO ROYALE!</h2>
+              <h2 class="epic-title">Bem-vindo à Arena BIXO ROYALE!</h2>
+              <div class="subtitle-container">
+                <p class="epic-subtitle">
+                  🎯 Coleção Épica de Calouros Lendários 🏆
+                </p>
+              </div>
             </div>
-            <p v-html="typedMessage" class="welcome-text"></p>
 
-            <!-- Estatísticas do usuário -->
-            <div v-if="authStore.isAuthenticated" class="stats-container">
+            <div class="epic-message-container">
+              <div class="typed-message" v-html="typedMessage"></div>
+
+              <div class="battle-cry">
+                <div class="cry-line">⚔️ EXPLORE O CAMPUS ⚔️</div>
+                <div class="cry-line">🔥 COLETE OS CÓDIGOS 🔥</div>
+                <div class="cry-line">👑 TORNE-SE LENDÁRIO 👑</div>
+              </div>
+            </div>
+
+            <!-- Marketing do Instagram -->
+            <div class="creator-section">
+              <div class="creator-header">
+                <q-icon name="palette" color="pink" size="md" />
+                <span class="creator-title">Criado por</span>
+              </div>
+              <q-btn flat no-caps class="instagram-btn" @click="openInstagram">
+                <q-icon name="photo_camera" size="sm" />
+                <span>@dev_garbson</span>
+                <q-icon name="open_in_new" size="xs" />
+              </q-btn>
+            </div>
+          </div>
+
+          <!-- Dashboard APENAS para usuários logados -->
+          <div v-if="authStore.isAuthenticated" class="user-dashboard">
+            <div class="dashboard-header">
+              <h3 class="dashboard-title">🏆 Sua Arena</h3>
+              <p class="welcome-back">
+                Bem-vindo de volta,
+                {{ authStore.user?.nome || "Colecionador" }}!
+              </p>
+            </div>
+
+            <div class="stats-container">
               <div class="stat-item clash-badge rarity-rare">
                 <q-icon name="stars" size="md" />
                 <span>{{ authStore.user?.pontos_totais || 0 }} pontos</span>
@@ -107,6 +147,16 @@
           />
           <div v-else class="action-buttons">
             <q-btn
+              v-if="authStore.isAuthenticated && isAdmin"
+              flat
+              round
+              icon="admin_panel_settings"
+              label="painel admin"
+              @click="$router.push('/admin')"
+              class="admin-access-btn"
+              size="md"
+            />
+            <q-btn
               label="Adicionar Código"
               color="legendary"
               class="clash-btn clash-btn-legendary"
@@ -183,6 +233,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useCartasStore } from "@/stores/cartas";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { checkAdminAccess } from "../admin";
 
 // Stores e router
 const authStore = useAuthStore();
@@ -195,8 +246,26 @@ const inputCode = ref("");
 const activeCarta = ref(null);
 const typedMessage = ref("");
 
-// Mensagem de boas-vindas
-const message = `⚔️ Seja bem-vindo à Arena BIXO ROYALE! Aqui você pode colecionar cartas épicas dos calouros mais lendários. Cada carta tem um código único que desbloqueará poderes especiais! Use "Adicionar código" para obter novas cartas e subir no ranking. Prepare-se para a batalha! 🏆`;
+// Mensagem de boas-vindas para visitantes
+const message = `
+🎯 <strong>COMO FUNCIONA A ARENA:</strong><br>
+• Cada carta representa um calouro único com poderes especiais<br>
+• Encontre os calouros no campus e veja a <span style="color: #ffd700;">placa no peito</span> deles<br>
+• Digite o código da placa em "Adicionar Código" para obter a carta<br>
+• Acumule pontos e suba no ranking da arena<br><br>
+
+🏆 <strong>MISSÕES ÉPICAS:</strong><br>
+• Colete todas as cartas raras e lendárias<br>
+• Explore o campus em busca dos calouros com placas<br>
+• Desbloqueie cartas especiais com códigos únicos<br>
+• Compete com outros jogadores no ranking<br><br>
+
+⚡ <strong>DICAS DE BATALHA:</strong><br>
+• Cartas lendárias valem mais pontos<br>
+• Os códigos estão nas <span style="color: #ff6b35;">placas que os calouros usam no peito</span><br>
+• Cada calouro tem um código único - não perca nenhum!<br>
+• Mantenha-se ativo para encontrar todos os calouros
+`;
 
 // Computed
 const cartasOrdenadas = computed(() => {
@@ -209,6 +278,11 @@ const cartasOrdenadas = computed(() => {
     const raridades = { comum: 1, raro: 2, epico: 3, lendario: 4 };
     return (raridades[b.raridade] || 0) - (raridades[a.raridade] || 0);
   });
+});
+
+const isAdmin = computed(() => {
+  if (!authStore.isAuthenticated || !authStore.user) return false;
+  return checkAdminAccess(authStore.user);
 });
 
 // Methods
@@ -278,9 +352,16 @@ const logout = async () => {
   router.push("/login");
 };
 
+const openInstagram = () => {
+  window.open("https://www.instagram.com/dev_garbson/", "_blank");
+};
+
 // Lifecycle
 onMounted(async () => {
-  typeMessage();
+  // Só executa a animação de digitação para visitantes
+  if (!authStore.isAuthenticated) {
+    typeMessage();
+  }
 
   // Carregar dados
   await cartasStore.fetchCartas();
@@ -307,31 +388,212 @@ onMounted(async () => {
 
 .welcome-message {
   margin-bottom: 30px;
-  padding: 30px;
+  padding: 40px;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(30, 60, 114, 0.8)
+  );
+  border: 4px solid var(--cr-gold);
+  animation: epic-border-glow 3s ease-in-out infinite;
+}
+
+@keyframes epic-border-glow {
+  0%,
+  100% {
+    border-color: var(--cr-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    border-color: #fff;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
 }
 
 .welcome-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
-.welcome-header h2 {
-  margin: 0;
+.epic-title {
+  font-family: "Press Start 2P", cursive;
+  font-size: 2.2rem;
   color: var(--cr-gold);
-  font-size: 1.8rem;
+  text-shadow: 2px 2px 0px #ff6b35, 4px 4px 0px #d63031,
+    6px 6px 10px rgba(0, 0, 0, 0.8);
+  margin: 0;
+  letter-spacing: 2px;
+  animation: epic-title-pulse 2s ease-in-out infinite;
+  line-height: 1.2;
 }
 
-.welcome-text {
-  color: var(--cr-blue-dark);
+@keyframes epic-title-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.subtitle-container {
+  background: linear-gradient(45deg, #ff6b35, #f093fb);
+  padding: 15px 25px;
+  border-radius: 20px;
+  border: 2px solid var(--cr-gold);
+  animation: subtitle-float 3s ease-in-out infinite;
+}
+
+.epic-subtitle {
+  font-family: "Press Start 2P", cursive;
   font-size: 1rem;
-  line-height: 1.6;
+  color: white;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+}
+
+@keyframes subtitle-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.epic-message-container {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 25px;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  margin-bottom: 25px;
+}
+
+.typed-message {
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  text-align: left;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.battle-cry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid var(--cr-gold);
+}
+
+.cry-line {
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.9rem;
+  color: var(--cr-gold);
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  animation: cry-glow 2s ease-in-out infinite;
+  letter-spacing: 1px;
+}
+
+.cry-line:nth-child(1) {
+  animation-delay: 0s;
+}
+.cry-line:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.cry-line:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes cry-glow {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.creator-section {
+  background: linear-gradient(
+    135deg,
+    rgba(138, 43, 226, 0.8),
+    rgba(255, 20, 147, 0.8)
+  );
+  padding: 20px;
+  border-radius: 15px;
+  border: 2px solid #ff1493;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.creator-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.creator-title {
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.instagram-btn {
+  background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+  color: white;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: bold;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.instagram-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(131, 58, 180, 0.4);
+}
+
+.user-dashboard {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  border: 2px solid var(--cr-gold);
+}
+
+.dashboard-header {
   text-align: center;
   margin-bottom: 20px;
+}
+
+.dashboard-title {
+  color: var(--cr-gold);
+  font-size: 1.5rem;
+  margin: 0 0 5px 0;
+}
+
+.welcome-back {
+  color: white;
+  margin: 0;
+  font-size: 1.1rem;
 }
 
 .stats-container {
@@ -418,6 +680,9 @@ onMounted(async () => {
 .footer-toolbar {
   padding: 12px 20px;
   min-height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .footer-logo {
@@ -495,8 +760,12 @@ onMounted(async () => {
     text-align: center;
   }
 
-  .welcome-header h2 {
-    font-size: 1.4rem;
+  .epic-title {
+    font-size: 1.6rem;
+  }
+
+  .epic-subtitle {
+    font-size: 0.8rem;
   }
 
   .footer-toolbar {

@@ -1,5 +1,5 @@
 import { createPinia } from "pinia";
-import { Quasar } from "quasar";
+import { Notify, Quasar } from "quasar";
 import "quasar/src/css/index.sass";
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -8,10 +8,13 @@ import router from './router';
 import "@quasar/extras/material-icons/material-icons.css";
 import "quasar/src/css/index.sass";
 
+// Importar tema CSS global
+import "./assets/clash-royale-theme.css";
+
 // Configuração do Quasar
 const quasarConfig = {
   plugins: {
-    Notify: {}
+    Notify
   }
 }
 

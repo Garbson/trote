@@ -6,7 +6,7 @@
         <div class="game-logo">
           <q-icon name="auto_awesome" size="60px" color="amber" />
           <h1 class="game-title">BIXO ROYALE</h1>
-          <p class="game-subtitle">Coleção de Calouros</p>
+          <p class="game-subtitle">Coleção de Calouros Lendários</p>
         </div>
 
         <!-- Card de Login -->
@@ -82,15 +82,6 @@
             </div>
           </q-card-section>
         </q-card>
-
-        <!-- Botão para jogar como visitante -->
-        <q-btn
-          flat
-          label="Explorar como Visitante"
-          color="white"
-          class="guest-btn"
-          @click="continuarComoVisitante"
-        />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -129,8 +120,8 @@ const goToCadastro = () => {
   router.push("/cadastro");
 };
 
-const continuarComoVisitante = () => {
-  router.push("/");
+const openInstagram = () => {
+  window.open("https://www.instagram.com/dev_garbson/", "_blank");
 };
 
 // Lifecycle
@@ -313,18 +304,97 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-.guest-btn {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 25px;
-  padding: 12px 24px;
-  transition: all 0.3s ease;
+.creator-marketing {
+  background: linear-gradient(
+    135deg,
+    rgba(138, 43, 226, 0.9),
+    rgba(255, 20, 147, 0.9)
+  );
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 3px solid #ff1493;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(255, 20, 147, 0.3);
+  animation: glow 3s ease-in-out infinite;
+  max-width: 400px;
+  width: 100%;
 }
 
-.guest-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 15px 35px rgba(255, 20, 147, 0.3);
+  }
+  50% {
+    box-shadow: 0 15px 35px rgba(255, 20, 147, 0.6);
+  }
+}
+
+.marketing-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.marketing-title {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.instagram-marketing-btn {
+  background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+  color: white;
+  border-radius: 25px;
+  padding: 15px 20px;
+  font-weight: bold;
+  gap: 12px;
+  transition: all 0.3s ease;
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 15px;
+}
+
+.instagram-marketing-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(131, 58, 180, 0.5);
+}
+
+.dev-avatar {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: 2px solid white;
+}
+
+.dev-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.dev-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+}
+
+.dev-role {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.marketing-text {
+  color: white;
+  font-size: 0.95rem;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
 }
 
 @keyframes float {
@@ -351,6 +421,23 @@ onMounted(async () => {
     flex-direction: column;
     gap: 12px;
     text-align: center;
+  }
+
+  .creator-marketing {
+    margin: 0 10px;
+  }
+
+  .instagram-marketing-btn {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .dev-name {
+    font-size: 1rem;
+  }
+
+  .dev-role {
+    font-size: 0.8rem;
   }
 }
 </style>

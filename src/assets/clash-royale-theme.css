@@ -1,5 +1,9 @@
 /* src/assets/clash-royale-theme.css */
 
+/* Imports devem vir primeiro */
+@import url("https://fonts.googleapis.com/css2?family=Supercell+Magic:wght@400@600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
 /* Paleta de cores Clash Royale */
 :root {
   /* Cores principais */
@@ -40,10 +44,6 @@
   --cr-border-radius: 16px;
   --cr-border-card: 3px solid var(--cr-gold);
 }
-
-/* Fontes Clash Royale Style */
-@import url("https://fonts.googleapis.com/css2?family=Supercell+Magic:wght@400@600&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 /* Reset e base styles */
 * {

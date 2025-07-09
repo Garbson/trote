@@ -189,16 +189,6 @@
                   clearable
                   class="filter-select"
                 />
-
-                <q-select
-                  v-model="filtro.curso"
-                  :options="cursoOptions"
-                  placeholder="Filtrar por curso"
-                  outlined
-                  dense
-                  clearable
-                  class="filter-select"
-                />
               </div>
             </q-card-section>
           </q-card>
@@ -225,7 +215,7 @@
                 <q-td :props="props">
                   <q-badge
                     :color="getRaridadeColor(props.value)"
-                    :label="props.value"
+                    :label="formatarRaridade(props.value)"
                     class="raridade-badge"
                   />
                 </q-td>
@@ -304,27 +294,20 @@
                 outlined
                 :rules="[(val) => !!val || 'Código é obrigatório']"
                 class="form-field"
-              />
-            </div>
-
-            <div class="form-row">
-              <q-select
-                v-model="cartaData.curso"
-                :options="cursoOptions"
-                label="Curso *"
-                outlined
-                :rules="[(val) => !!val || 'Curso é obrigatório']"
-                class="form-field"
-              />
-
-              <q-input
-                v-model="cartaData.ano_ingresso"
-                label="Ano de Ingresso *"
-                type="number"
-                outlined
-                :rules="[(val) => !!val || 'Ano é obrigatório']"
-                class="form-field"
-              />
+              >
+                <template v-slot:append>
+                  <q-btn
+                    flat
+                    icon="refresh"
+                    @click="gerarCodigoAleatorio"
+                    :loading="salvandoCarta"
+                    color="primary"
+                    size="sm"
+                  >
+                    <q-tooltip>Gerar código automático</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
             </div>
 
             <div class="form-row">
@@ -440,6 +423,7 @@
 </template>
 
 <script setup>
+import { useAdminStore } from "@/stores/admin";
 import { useQuasar } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -447,54 +431,25 @@ import { useRouter } from "vue-router";
 // Composables
 const router = useRouter();
 const $q = useQuasar();
-
+const adminStore = useAdminStore();
 // Estado
 const leftDrawerOpen = ref(false);
 const activeTab = ref("dashboard");
-const loading = ref(false);
 const cartaDialog = ref(false);
 const deleteDialog = ref(false);
 const cartaEditando = ref(null);
 const cartaParaDeletar = ref(null);
-const salvandoCarta = ref(false);
-const deletandoCarta = ref(false);
+const salvandoCarta = computed(() => adminStore.salvando); // USAR do store
+const deletandoCarta = computed(() => adminStore.salvando); // USAR do store
 const imagemFile = ref(null);
+const loading = computed(() => adminStore.loading); // USAR do store
 
 // Dados
-const cartas = ref([
-  {
-    id: 1,
-    nome: "João Silva",
-    curso: "Sistemas de Informação",
-    ano_ingresso: 2024,
-    raridade: "comum",
-    pontos_valor: 10,
-    codigo_unico: "SI001",
-    foto_url: "/img/default-avatar.jpg",
-    descricao: "Calouro dedicado aos estudos",
-  },
-  {
-    id: 2,
-    nome: "Maria Santos",
-    curso: "Engenharia da Computação",
-    ano_ingresso: 2024,
-    raridade: "raro",
-    pontos_valor: 25,
-    codigo_unico: "EC002",
-    foto_url: "/img/default-avatar.jpg",
-    descricao: "Especialista em algoritmos",
-  },
-]);
-
-const usuarios = ref([
-  { id: 1, nome: "Admin", email: "admin@bixo.com" },
-  { id: 2, nome: "Usuário 1", email: "user1@bixo.com" },
-]);
+const cartas = computed(() => adminStore.cartas);
+const usuarios = computed(() => adminStore.usuarios);
 
 const cartaData = ref({
   nome: "",
-  curso: "",
-  ano_ingresso: new Date().getFullYear(),
   raridade: "",
   pontos_valor: 10,
   codigo_unico: "",
@@ -502,27 +457,8 @@ const cartaData = ref({
   descricao: "",
 });
 
-// Filtros
-const filtro = ref({
-  busca: "",
-  raridade: null,
-  curso: null,
-});
-
 // Opções
-const raridadeOptions = [
-  { label: "Comum", value: "comum" },
-  { label: "Raro", value: "raro" },
-  { label: "Épico", value: "epico" },
-  { label: "Lendário", value: "lendario" },
-];
-
-const cursoOptions = [
-  "Sistemas de Informação",
-  "Engenharia da Computação",
-  "Ciência da Computação",
-  "Análise e Desenvolvimento de Sistemas",
-];
+const raridadeOptions = ["comum", "raro", "epico", "lendario"];
 
 // Configuração da tabela
 const cartasColumns = [
@@ -538,20 +474,6 @@ const cartasColumns = [
     label: "Nome",
     field: "nome",
     align: "left",
-    sortable: true,
-  },
-  {
-    name: "curso",
-    label: "Curso",
-    field: "curso",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "ano",
-    label: "Ano",
-    field: "ano_ingresso",
-    align: "center",
     sortable: true,
   },
   {
@@ -584,34 +506,17 @@ const cartasColumns = [
   },
 ];
 
+// Atualizar filtros - remover curso
+const filtro = ref({
+  busca: "",
+  raridade: null,
+});
+
 const pagination = ref({
   sortBy: "nome",
   descending: false,
   page: 1,
   rowsPerPage: 10,
-});
-
-// Computed
-const cartasFiltradas = computed(() => {
-  let resultado = cartas.value;
-
-  if (filtro.value.busca) {
-    resultado = resultado.filter((carta) =>
-      carta.nome.toLowerCase().includes(filtro.value.busca.toLowerCase())
-    );
-  }
-
-  if (filtro.value.raridade) {
-    resultado = resultado.filter(
-      (carta) => carta.raridade === filtro.value.raridade.value
-    );
-  }
-
-  if (filtro.value.curso) {
-    resultado = resultado.filter((carta) => carta.curso === filtro.value.curso);
-  }
-
-  return resultado;
 });
 
 const codigosUsados = computed(() => {
@@ -627,88 +532,41 @@ const logout = () => {
   router.push("/login");
 };
 
-const openCartaDialog = (carta = null) => {
-  cartaEditando.value = carta;
+const salvarCarta = async () => {
+  // Validação básica no frontend
+  if (!cartaData.value.nome || !cartaData.value.codigo_unico) {
+    $q.notify({
+      type: "negative",
+      message: "Nome e código são obrigatórios",
+    });
+    return;
+  }
 
-  if (carta) {
-    cartaData.value = { ...carta };
+  let resultado;
+
+  if (cartaEditando.value) {
+    // Editar carta existente
+    resultado = await adminStore.atualizarCarta(
+      cartaEditando.value.id,
+      cartaData.value
+    );
   } else {
+    // Criar nova carta - enviar os dados do formulário
+    resultado = await adminStore.criarCarta(cartaData.value);
+  }
+
+  if (resultado.success) {
+    cartaDialog.value = false;
+    // Resetar o formulário
     cartaData.value = {
       nome: "",
-      curso: "",
-      ano_ingresso: new Date().getFullYear(),
       raridade: "",
       pontos_valor: 10,
       codigo_unico: "",
       foto_url: "",
       descricao: "",
     };
-  }
-
-  cartaDialog.value = true;
-};
-
-const salvarCarta = async () => {
-  salvandoCarta.value = true;
-
-  try {
-    // Validação básica
-    if (!cartaData.value.nome || !cartaData.value.codigo_unico) {
-      $q.notify({
-        type: "negative",
-        message: "Nome e código são obrigatórios",
-      });
-      return;
-    }
-
-    // Verificar se código já existe
-    const codigoExiste = cartas.value.some(
-      (carta) =>
-        carta.codigo_unico === cartaData.value.codigo_unico &&
-        carta.id !== cartaEditando.value?.id
-    );
-
-    if (codigoExiste) {
-      $q.notify({
-        type: "negative",
-        message: "Este código já está sendo usado",
-      });
-      return;
-    }
-
-    if (cartaEditando.value) {
-      // Editar carta existente
-      const index = cartas.value.findIndex(
-        (carta) => carta.id === cartaEditando.value.id
-      );
-      cartas.value[index] = { ...cartaData.value, id: cartaEditando.value.id };
-
-      $q.notify({
-        type: "positive",
-        message: "Carta atualizada com sucesso!",
-      });
-    } else {
-      // Criar nova carta
-      const novaCarta = {
-        ...cartaData.value,
-        id: Date.now(), // ID temporário
-      };
-      cartas.value.push(novaCarta);
-
-      $q.notify({
-        type: "positive",
-        message: "Carta criada com sucesso!",
-      });
-    }
-
-    cartaDialog.value = false;
-  } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Erro ao salvar carta",
-    });
-  } finally {
-    salvandoCarta.value = false;
+    cartaEditando.value = null;
   }
 };
 
@@ -752,15 +610,31 @@ const getRaridadeColor = (raridade) => {
   return cores[raridade] || "grey";
 };
 
-const handleImageUpload = (file) => {
+// No AdminPanel.vue - método handleImageUpload
+const handleImageUpload = async (file) => {
   if (file) {
-    // Aqui você implementaria o upload real da imagem
-    // Por enquanto, vamos simular com um URL local
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      cartaData.value.foto_url = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Mostrar preview local imediatamente
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        cartaData.value.foto_url = e.target.result; // Preview local
+      };
+      reader.readAsDataURL(file);
+
+      // Fazer upload para Cloudinary
+      const resultado = await adminStore.uploadImagem(file);
+
+      if (resultado.success) {
+        // Substituir preview local pela URL do Cloudinary
+        cartaData.value.foto_url = resultado.url;
+
+        // Salvar o publicId para possível exclusão futura
+        cartaData.value.cloudinary_public_id = resultado.publicId;
+      }
+      // Se falhar, mantém o preview local
+    } catch (error) {
+      console.error("Erro no upload:", error);
+    }
   }
 };
 
@@ -768,6 +642,75 @@ const handleImageUpload = (file) => {
 onMounted(() => {
   // Carregar dados iniciais se necessário
 });
+
+const cartasFiltradas = computed(() => {
+  let resultado = cartas.value;
+
+  if (filtro.value.busca) {
+    resultado = resultado.filter((carta) =>
+      carta.nome.toLowerCase().includes(filtro.value.busca.toLowerCase())
+    );
+  }
+
+  // CORREÇÃO: comparar string diretamente
+  if (filtro.value.raridade) {
+    resultado = resultado.filter(
+      (carta) => carta.raridade === filtro.value.raridade
+    );
+  }
+
+  return resultado;
+});
+
+// ADICIONAR método para formatação na tabela
+const formatarRaridade = (raridade) => {
+  const nomes = {
+    comum: "Comum",
+    raro: "Raro",
+    epico: "Épico",
+    lendario: "Lendário",
+  };
+  return nomes[raridade] || raridade;
+};
+
+// Adicionar método para gerar código automático
+const gerarCodigoAleatorio = async () => {
+  try {
+    const codigo = await adminStore.gerarCodigoUnico();
+    cartaData.value.codigo_unico = codigo;
+
+    $q.notify({
+      type: "positive",
+      message: "Código gerado automaticamente!",
+      timeout: 1000,
+    });
+  } catch (error) {
+    $q.notify({
+      type: "negative",
+      message: "Erro ao gerar código",
+    });
+  }
+};
+
+// Atualizar openCartaDialog
+const openCartaDialog = (carta = null) => {
+  cartaEditando.value = carta;
+
+  if (carta) {
+    cartaData.value = { ...carta };
+  } else {
+    cartaData.value = {
+      nome: "",
+      raridade: "",
+      pontos_valor: 10,
+      codigo_unico: "",
+      foto_url: "",
+      descricao: "",
+    };
+  }
+
+  cartaDialog.value = true;
+};
 </script>
 
 <style scoped>

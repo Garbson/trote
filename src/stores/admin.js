@@ -1,41 +1,14 @@
 // src/stores/admin.js
+import { supabase } from '@/lib/supabase'
+import { cloudinaryUploader } from '@/utils/cloudinary'
 import { defineStore } from 'pinia'
 import { Notify } from 'quasar'
 import { computed, ref } from 'vue'
 
-// Simulando uma conexão com Supabase/banco de dados
-// Em produção, você substituiria essas funções por chamadas reais à API
 
 export const useAdminStore = defineStore('admin', () => {
-  // Estado
-  const cartas = ref([
-    {
-      id: 1,
-      nome: "João Silva",
-      descricao: "Calouro dedicado aos estudos",
-      foto_url: "/img/default-avatar.jpg",
-      raridade: "comum",
-      pontos_valor: 10,
-      codigo_unico: "SI001",
-      qr_code_hash: "qr_hash_001",
-      ativa: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      nome: "Maria Santos",
-      descricao: "Especialista em algoritmos",
-      foto_url: "/img/default-avatar.jpg",
-      raridade: "raro",
-      pontos_valor: 25,
-      codigo_unico: "EC002",
-      qr_code_hash: "qr_hash_002",
-      ativa: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ])
+
+  const cartas = ref([])
 
   const usuarios = ref([
     { id: 1, nome: "Admin", email: "admin@bixo.com" },
@@ -66,18 +39,43 @@ export const useAdminStore = defineStore('admin', () => {
     return counts
   })
 
-  // Actions
   const fetchCartas = async () => {
     loading.value = true
     try {
-      // Simula carregamento do banco de dados
+      // Simular carregamento com dados iniciais
       await new Promise(resolve => setTimeout(resolve, 500))
 
-      // Em produção, aqui seria:
-      // const { data, error } = await supabase
-      //   .from('cartas')
-      //   .select('*')
-      //   .order('created_at', { ascending: false })
+      // Adicionar algumas cartas de exemplo se não existirem
+      if (cartas.value.length === 0) {
+        cartas.value = [
+          {
+            id: 1,
+            nome: "João Silva",
+            descricao: "Calouro dedicado aos estudos",
+            foto_url: "/img/default-avatar.jpg",
+            raridade: "comum",
+            pontos_valor: 10,
+            codigo_unico: "SI001",
+            qr_code_hash: "qr_hash_001",
+            ativa: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: 2,
+            nome: "Maria Santos",
+            descricao: "Especialista em algoritmos",
+            foto_url: "/img/default-avatar.jpg",
+            raridade: "raro",
+            pontos_valor: 25,
+            codigo_unico: "EC002",
+            qr_code_hash: "qr_hash_002",
+            ativa: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ]
+      }
 
       Notify.create({
         type: 'positive',
@@ -95,6 +93,7 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   const criarCarta = async (dadosCarta) => {
+    console.log("criando carta")
     salvando.value = true
     try {
       // Validações
@@ -103,11 +102,13 @@ export const useAdminStore = defineStore('admin', () => {
       }
 
       // Verificar se código já existe
-      const codigoExiste = cartas.value.some(
-        carta => carta.codigo_unico === dadosCarta.codigo_unico
-      )
+      const { data: cartaExistente } = await supabase
+        .from('cartas')
+        .select('id')
+        .eq('codigo_unico', dadosCarta.codigo_unico)
+        .single()
 
-      if (codigoExiste) {
+      if (cartaExistente) {
         throw new Error('Este código já está sendo usado')
       }
 
@@ -115,25 +116,26 @@ export const useAdminStore = defineStore('admin', () => {
       const qrCodeHash = `qr_${dadosCarta.codigo_unico}_${Date.now()}`
 
       const novaCarta = {
-        id: Date.now(), // Em produção seria um UUID
-        ...dadosCarta,
+        nome: dadosCarta.nome,
+        descricao: dadosCarta.descricao || null,
+        foto_url: dadosCarta.foto_url || null,
+        raridade: dadosCarta.raridade,
+        pontos_valor: parseInt(dadosCarta.pontos_valor),
+        codigo_unico: dadosCarta.codigo_unico,
         qr_code_hash: qrCodeHash,
-        ativa: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        ativa: true
       }
 
-      // Simula inserção no banco
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const { data, error } = await supabase
+        .from('cartas')
+        .insert(novaCarta)
+        .select()
+        .single()
 
-      // Em produção seria:
-      // const { data, error } = await supabase
-      //   .from('cartas')
-      //   .insert(novaCarta)
-      //   .select()
-      //   .single()
+      if (error) throw error
 
-      cartas.value.unshift(novaCarta)
+      // Adicionar à lista local
+      cartas.value.unshift(data)
 
       Notify.create({
         type: 'positive',
@@ -141,7 +143,7 @@ export const useAdminStore = defineStore('admin', () => {
         avatar: dadosCarta.foto_url
       })
 
-      return { success: true, carta: novaCarta }
+      return { success: true, carta: data }
     } catch (error) {
       console.error('Erro ao criar carta:', error)
       Notify.create({
@@ -177,10 +179,11 @@ export const useAdminStore = defineStore('admin', () => {
       const cartaAtualizada = {
         ...cartas.value[index],
         ...dadosAtualizados,
+        pontos_valor: parseInt(dadosAtualizados.pontos_valor),
         updated_at: new Date().toISOString()
       }
 
-      // Simula atualização no banco
+      // Simular atualização no banco
       await new Promise(resolve => setTimeout(resolve, 600))
 
       cartas.value[index] = cartaAtualizada
@@ -202,6 +205,7 @@ export const useAdminStore = defineStore('admin', () => {
       salvando.value = false
     }
   }
+
 
   const excluirCarta = async (id) => {
     salvando.value = true
@@ -264,24 +268,36 @@ export const useAdminStore = defineStore('admin', () => {
 
   const uploadImagem = async (arquivo) => {
     try {
-      // Simula upload de imagem
-      // Em produção seria algo como:
-      // const fileName = `cartas/${Date.now()}_${arquivo.name}`
-      // const { data, error } = await supabase.storage
-      //   .from('imagens')
-      //   .upload(fileName, arquivo)
+      // Upload para o Cloudinary
+      const resultado = await cloudinaryUploader.uploadImage(arquivo)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Retorna URL simulada
-      return {
-        success: true,
-        url: `/img/uploaded_${Date.now()}.jpg`
+      if (resultado.success) {
+        Notify.create({
+          type: 'positive',
+          message: 'Imagem enviada com sucesso!'
+        })
+
+        return {
+          success: true,
+          url: resultado.url,
+          publicId: resultado.publicId
+        }
+      } else {
+        throw new Error(resultado.error)
       }
+
     } catch (error) {
+      console.error('Erro no upload:', error)
+
+      Notify.create({
+        type: 'negative',
+        message: `Erro no upload: ${error.message}`
+      })
+
       return {
         success: false,
-        error: 'Erro ao fazer upload da imagem'
+        error: error.message
       }
     }
   }

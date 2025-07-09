@@ -1,5 +1,180 @@
 <template>
   <q-layout view="hHh lpR fFf" class="clash-layout">
+    <!-- Header responsivo -->
+    <q-header elevated class="clash-header" v-if="authStore.isAuthenticated">
+      <q-toolbar>
+        <!-- Logo -->
+        <q-icon name="shield" size="md" color="amber" />
+        <q-toolbar-title class="header-title clash-title">
+          BIXO ROYALE
+        </q-toolbar-title>
+
+        <!-- Botões desktop -->
+        <div class="desktop-actions">
+          <q-btn
+            v-if="isAdmin"
+            flat
+            round
+            icon="admin_panel_settings"
+            @click="$router.push('/admin')"
+            class="desktop-btn"
+            size="md"
+          >
+            <q-tooltip>Painel Admin</q-tooltip>
+          </q-btn>
+          
+          <q-btn
+            flat
+            label="Adicionar Código"
+            icon="add"
+            @click="openCodeDialog"
+            :loading="cartasStore.loadingObter"
+            class="desktop-btn"
+          />
+          
+          <q-btn
+            flat
+            label="Ranking"
+            icon="emoji_events"
+            @click="$router.push('/ranking')"
+            class="desktop-btn"
+          />
+          
+          <q-btn
+            flat
+            round
+            icon="logout"
+            @click="logout"
+            class="desktop-btn logout-desktop"
+            size="md"
+          >
+            <q-tooltip>Sair</q-tooltip>
+          </q-btn>
+        </div>
+
+        <!-- Menu hambúrguer mobile -->
+        <q-btn
+          flat
+          round
+          icon="menu"
+          @click="mobileMenuOpen = !mobileMenuOpen"
+          class="mobile-menu-btn"
+          size="md"
+        />
+      </q-toolbar>
+    </q-header>
+
+    <!-- Menu mobile slide -->
+    <q-drawer
+      v-model="mobileMenuOpen"
+      side="right"
+      overlay
+      behavior="mobile"
+      :width="280"
+      class="mobile-drawer"
+      v-if="authStore.isAuthenticated"
+    >
+      <div class="mobile-menu">
+        <!-- Header do menu -->
+        <div class="mobile-menu-header">
+          <q-avatar size="60px" class="user-avatar">
+            <q-icon name="person" size="35px" />
+          </q-avatar>
+          <div class="user-info">
+            <div class="user-name">{{ authStore.user?.nome || "Colecionador" }}</div>
+            <div class="user-level">Nível {{ authStore.user?.nivel || 1 }}</div>
+          </div>
+        </div>
+
+        <!-- Stats rápidas -->
+        <div class="mobile-stats">
+          <div class="mobile-stat">
+            <q-icon name="stars" color="amber" />
+            <span>{{ authStore.user?.pontos_totais || 0 }} pts</span>
+          </div>
+          <div class="mobile-stat">
+            <q-icon name="collections" color="blue" />
+            <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+          </div>
+        </div>
+
+        <!-- Menu items -->
+        <q-list class="menu-list">
+          <q-item
+            clickable
+            v-ripple
+            @click="openCodeDialog"
+            class="menu-item primary-item"
+          >
+            <q-item-section avatar>
+              <q-icon name="add_circle" color="primary" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="menu-label">Adicionar Código</q-item-label>
+              <q-item-label caption>Digite o código da carta</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-spinner v-if="cartasStore.loadingObter" size="sm" />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            @click="$router.push('/ranking')"
+            class="menu-item"
+          >
+            <q-item-section avatar>
+              <q-icon name="emoji_events" color="orange" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="menu-label">Ranking</q-item-label>
+              <q-item-label caption>Ver posição no ranking</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="arrow_forward_ios" size="sm" />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            v-if="isAdmin"
+            clickable
+            v-ripple
+            @click="$router.push('/admin')"
+            class="menu-item"
+          >
+            <q-item-section avatar>
+              <q-icon name="admin_panel_settings" color="purple" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="menu-label">Painel Admin</q-item-label>
+              <q-item-label caption>Administrar sistema</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="arrow_forward_ios" size="sm" />
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="menu-separator" />
+
+          <q-item
+            clickable
+            v-ripple
+            @click="logout"
+            class="menu-item logout-item"
+          >
+            <q-item-section avatar>
+              <q-icon name="logout" color="negative" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="menu-label">Sair</q-item-label>
+              <q-item-label caption>Fazer logout</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </q-drawer>
+
     <q-page-container>
       <q-page class="page">
         <q-page-container class="page-container">
@@ -47,6 +222,17 @@
                 <span>@dev_garbson</span>
                 <q-icon name="open_in_new" size="xs" />
               </q-btn>
+            </div>
+
+            <!-- CTA para entrar -->
+            <div class="cta-section">
+              <q-btn
+                label="Entrar na Arena"
+                color="primary"
+                size="xl"
+                class="clash-btn clash-btn-primary cta-btn"
+                @click="$router.push('/login')"
+              />
             </div>
           </div>
 
@@ -105,7 +291,7 @@
           </div>
 
           <!-- Grid de cartas -->
-          <div class="cards-grid">
+          <div v-if="authStore.isAuthenticated" class="cards-grid">
             <PokemonCard
               v-for="carta in cartasOrdenadas"
               :key="carta.id"
@@ -129,63 +315,6 @@
         </q-page-container>
       </q-page>
     </q-page-container>
-
-    <q-footer elevated class="clash-footer">
-      <q-toolbar class="footer-toolbar">
-        <div class="footer-logo">
-          <q-icon name="shield" size="md" color="amber" />
-          <span class="footer-title clash-title">BIXO ROYALE</span>
-        </div>
-
-        <div class="footer-actions">
-          <q-btn
-            v-if="!authStore.isAuthenticated"
-            label="Entrar na Arena"
-            color="primary"
-            class="clash-btn clash-btn-primary"
-            @click="$router.push('/login')"
-          />
-          <div v-else class="action-buttons">
-            <q-btn
-              v-if="authStore.isAuthenticated && isAdmin"
-              flat
-              round
-              icon="admin_panel_settings"
-              label="painel admin"
-              @click="$router.push('/admin')"
-              class="admin-access-btn"
-              size="md"
-            />
-            <q-btn
-              label="Adicionar Código"
-              color="legendary"
-              class="clash-btn clash-btn-legendary"
-              @click="openCodeDialog"
-              :loading="cartasStore.loadingObter"
-            >
-              <q-icon name="add" left />
-            </q-btn>
-            <q-btn
-              label="Ranking"
-              color="secondary"
-              class="clash-btn clash-btn-secondary"
-              @click="$router.push('/ranking')"
-            >
-              <q-icon name="emoji_events" left />
-            </q-btn>
-            <q-btn
-              flat
-              round
-              icon="logout"
-              color="white"
-              @click="logout"
-              class="logout-btn"
-              size="md"
-            />
-          </div>
-        </div>
-      </q-toolbar>
-    </q-footer>
 
     <!-- Overlay para animação -->
     <div v-if="activeCarta" class="overlay"></div>
@@ -245,6 +374,7 @@ const codeDialog = ref(false);
 const inputCode = ref("");
 const activeCarta = ref(null);
 const typedMessage = ref("");
+const mobileMenuOpen = ref(false);
 
 // Mensagem de boas-vindas para visitantes
 const message = `
@@ -303,18 +433,19 @@ const mapearCartaParaPokemon = (carta) => {
   return {
     id: carta.id,
     name: carta.nome,
-    acao: `${carta.curso} - ${carta.ano_ingresso}`,
     image: carta.foto_url || "/img/default-avatar.jpg",
     acquired: cartasStore.verificarCartaObtida(carta.id),
     code: carta.codigo_unico,
     raridade: carta.raridade,
     pontos: carta.pontos_valor,
+    curso: carta.descricao || "Calouro da Arena",
   };
 };
 
 const openCodeDialog = () => {
   codeDialog.value = true;
   inputCode.value = "";
+  mobileMenuOpen.value = false; // Fechar menu mobile
 };
 
 const aplicarCodigo = async () => {
@@ -348,6 +479,7 @@ const scrollToCarta = (cartaId) => {
 };
 
 const logout = async () => {
+  mobileMenuOpen.value = false; // Fechar menu mobile
   await authStore.signOut();
   router.push("/login");
 };
@@ -381,6 +513,181 @@ onMounted(async () => {
   position: relative;
 }
 
+/* ===== HEADER RESPONSIVO ===== */
+.clash-header {
+  background: linear-gradient(135deg, var(--cr-blue-dark), var(--cr-purple));
+  border-bottom: 3px solid var(--cr-gold);
+}
+
+.header-title {
+  color: var(--cr-gold);
+  font-size: 1.2rem;
+  margin-left: 12px;
+}
+
+/* Botões desktop - visíveis apenas em desktop */
+.desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.desktop-btn {
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.desktop-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.logout-desktop {
+  background: rgba(239, 35, 60, 0.2);
+  margin-left: 8px;
+}
+
+/* Menu hambúrguer - visível apenas em mobile */
+.mobile-menu-btn {
+  color: white;
+  display: none;
+}
+
+/* ===== MENU MOBILE ===== */
+.mobile-drawer {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.mobile-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.mobile-menu-header {
+  padding: 30px 20px 20px 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, var(--cr-gold), #ffa000);
+  color: white;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.user-level {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.mobile-stats {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.menu-list {
+  flex: 1;
+  padding: 10px 0;
+}
+
+.menu-item {
+  margin: 4px 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.primary-item {
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.logout-item {
+  background: rgba(239, 35, 60, 0.2);
+  border: 1px solid rgba(239, 35, 60, 0.3);
+}
+
+.menu-label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.menu-separator {
+  margin: 15px 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  /* Esconder botões desktop */
+  .desktop-actions {
+    display: none;
+  }
+  
+  /* Mostrar menu hambúrguer */
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .welcome-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .epic-title {
+    font-size: 1.6rem;
+  }
+
+  .epic-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Em desktop, sempre esconder o drawer mobile */
+  .mobile-drawer {
+    display: none !important;
+  }
+}
+
+/* ===== RESTO DOS ESTILOS (mantidos iguais) ===== */
 .page-container {
   padding: 20px;
   position: relative;
@@ -570,6 +877,25 @@ onMounted(async () => {
   box-shadow: 0 6px 20px rgba(131, 58, 180, 0.4);
 }
 
+.cta-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.cta-btn {
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+}
+
 .user-dashboard {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -672,53 +998,6 @@ onMounted(async () => {
   color: white;
 }
 
-.clash-footer {
-  background: linear-gradient(135deg, var(--cr-blue-dark), var(--cr-purple));
-  border-top: 3px solid var(--cr-gold);
-}
-
-.footer-toolbar {
-  padding: 12px 20px;
-  min-height: 70px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.footer-title {
-  color: var(--cr-gold);
-  font-size: 1.2rem;
-  margin: 0;
-}
-
-.footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logout-btn {
-  background: rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
 .overlay {
   position: fixed;
   top: 0;
@@ -743,47 +1022,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .stats-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .welcome-header {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .epic-title {
-    font-size: 1.6rem;
-  }
-
-  .epic-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .footer-toolbar {
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .action-buttons .clash-btn {
-    width: 100%;
-  }
-}
-
 @media (max-width: 480px) {
   .page-container {
     padding: 15px;
@@ -799,6 +1037,22 @@ onMounted(async () => {
 
   .stats-container {
     grid-template-columns: 1fr;
+  }
+
+  .mobile-menu-header {
+    padding: 20px 15px 15px 15px;
+  }
+
+  .user-name {
+    font-size: 1rem;
+  }
+
+  .mobile-stats {
+    padding: 12px 15px;
+  }
+
+  .mobile-stat {
+    font-size: 0.85rem;
   }
 }
 
@@ -875,5 +1129,50 @@ onMounted(async () => {
 
 .card-item[data-rarity="raro"] {
   box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+}
+
+/* Animação do drawer mobile */
+.mobile-drawer {
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Efeito hover nos itens do menu mobile */
+.menu-item {
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  border-left-color: var(--cr-gold);
+  transform: translateX(5px);
+}
+
+.primary-item:hover {
+  border-left-color: #4a90e2;
+}
+
+.logout-item:hover {
+  border-left-color: #ef233c;
+}
+
+/* Melhorar visualização das stats mobile */
+.mobile-stat q-icon {
+  font-size: 1.2rem;
+}
+
+/* Animação de abertura do menu */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.mobile-drawer .q-drawer__content {
+  animation: slideInRight 0.3s ease-out;
 }
 </style>

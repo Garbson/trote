@@ -82,7 +82,6 @@ export const useCartasStore = defineStore('cartas', () => {
           cartas (
             id,
             nome,
-            curso,
             foto_url,
             raridade,
             pontos_valor

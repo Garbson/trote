@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="admin-layout">
-    <!-- Header -->
+    <!-- Header Responsivo -->
     <q-header elevated class="admin-header">
       <q-toolbar>
         <q-avatar size="40px" class="admin-avatar">
@@ -8,23 +8,222 @@
         </q-avatar>
 
         <q-toolbar-title class="admin-title">
-          🛡️ Painel Administrativo - BIXO ROYALE
+          🛡️ BIXO ROYALE - Admin
         </q-toolbar-title>
 
-        <q-btn flat round icon="logout" color="white" @click="logout" size="md">
+        <!-- Navegação Desktop -->
+        <div class="desktop-nav">
+          <q-btn
+            flat
+            :label="getTabLabel('dashboard')"
+            :color="activeTab === 'dashboard' ? 'amber' : 'white'"
+            @click="activeTab = 'dashboard'"
+            class="nav-btn"
+          />
+          <q-btn
+            flat
+            :label="getTabLabel('cartas')"
+            :color="activeTab === 'cartas' ? 'amber' : 'white'"
+            @click="activeTab = 'cartas'"
+            class="nav-btn"
+          >
+            <q-badge v-if="cartas.length > 0" color="orange" floating>
+              {{ cartas.length }}
+            </q-badge>
+          </q-btn>
+          <q-btn
+            flat
+            :label="getTabLabel('usuarios')"
+            :color="activeTab === 'usuarios' ? 'amber' : 'white'"
+            @click="activeTab = 'usuarios'"
+            class="nav-btn"
+          />
+          <q-btn
+            flat
+            :label="getTabLabel('estatisticas')"
+            :color="activeTab === 'estatisticas' ? 'amber' : 'white'"
+            @click="activeTab = 'estatisticas'"
+            class="nav-btn"
+          />
+        </div>
+
+        <!-- Botão logout desktop -->
+        <q-btn
+          flat
+          round
+          icon="logout"
+          color="white"
+          @click="logout"
+          size="md"
+          class="desktop-logout"
+        >
           <q-tooltip>Sair</q-tooltip>
         </q-btn>
+
+        <!-- Menu hambúrguer mobile -->
+        <q-btn
+          flat
+          round
+          icon="menu"
+          @click="mobileMenuOpen = !mobileMenuOpen"
+          class="mobile-menu-btn"
+          size="md"
+          color="white"
+        />
       </q-toolbar>
     </q-header>
 
-    <!-- Sidebar -->
+    <!-- Menu Mobile Drawer -->
+    <q-drawer
+      v-model="mobileMenuOpen"
+      side="right"
+      overlay
+      behavior="mobile"
+      :width="300"
+      class="admin-mobile-drawer"
+    >
+      <div class="mobile-admin-menu">
+        <!-- Header do menu admin -->
+        <div class="mobile-admin-header">
+          <q-avatar size="60px" class="admin-avatar-large">
+            <q-icon name="admin_panel_settings" size="35px" />
+          </q-avatar>
+          <div class="admin-info">
+            <div class="admin-name">Administrador</div>
+            <div class="admin-role">Painel de Controle</div>
+          </div>
+        </div>
+
+        <!-- Stats rápidas -->
+        <div class="mobile-admin-stats">
+          <div class="admin-stat">
+            <q-icon name="collections" color="blue" />
+            <span>{{ cartas.length }} cartas</span>
+          </div>
+          <div class="admin-stat">
+            <q-icon name="people" color="green" />
+            <span>{{ usuarios.length }} usuários</span>
+          </div>
+        </div>
+
+        <!-- Menu items admin -->
+        <q-list class="admin-menu-list">
+          <q-item
+            clickable
+            v-ripple
+            @click="selectTab('dashboard')"
+            :class="['admin-menu-item', { active: activeTab === 'dashboard' }]"
+          >
+            <q-item-section avatar>
+              <q-icon name="dashboard" color="primary" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="admin-menu-label">Dashboard</q-item-label>
+              <q-item-label caption>Visão geral do sistema</q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="activeTab === 'dashboard'">
+              <q-icon name="check_circle" color="primary" />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            @click="selectTab('cartas')"
+            :class="['admin-menu-item', { active: activeTab === 'cartas' }]"
+          >
+            <q-item-section avatar>
+              <q-icon name="collections" color="purple" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="admin-menu-label"
+                >Gerenciar Cartas</q-item-label
+              >
+              <q-item-label caption>Criar e editar cartas</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-badge
+                v-if="cartas.length > 0"
+                color="purple"
+                :label="cartas.length"
+              />
+              <q-icon
+                v-if="activeTab === 'cartas'"
+                name="check_circle"
+                color="purple"
+              />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            @click="selectTab('usuarios')"
+            :class="['admin-menu-item', { active: activeTab === 'usuarios' }]"
+          >
+            <q-item-section avatar>
+              <q-icon name="people" color="green" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="admin-menu-label">Usuários</q-item-label>
+              <q-item-label caption>Gerenciar usuários</q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="activeTab === 'usuarios'">
+              <q-icon name="check_circle" color="green" />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            @click="selectTab('estatisticas')"
+            :class="[
+              'admin-menu-item',
+              { active: activeTab === 'estatisticas' },
+            ]"
+          >
+            <q-item-section avatar>
+              <q-icon name="analytics" color="orange" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="admin-menu-label">Estatísticas</q-item-label>
+              <q-item-label caption>Relatórios e métricas</q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="activeTab === 'estatisticas'">
+              <q-icon name="check_circle" color="orange" />
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="admin-menu-separator" />
+
+          <q-item
+            clickable
+            v-ripple
+            @click="logout"
+            class="admin-menu-item logout-item"
+          >
+            <q-item-section avatar>
+              <q-icon name="logout" color="negative" size="lg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="admin-menu-label"
+                >Sair do Admin</q-item-label
+              >
+              <q-item-label caption>Voltar ao sistema</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </q-drawer>
+
+    <!-- Sidebar Desktop (mantido para desktop) -->
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
       :width="280"
-      :breakpoint="400"
+      :breakpoint="769"
       bordered
-      class="admin-drawer"
+      class="admin-drawer desktop-drawer"
     >
       <q-scroll-area class="fit">
         <q-list>
@@ -260,10 +459,38 @@
           </q-card>
         </div>
 
-        <!-- Outras tabs aqui... -->
+        <!-- Tabs para Usuários e Estatísticas -->
+        <div v-if="activeTab === 'usuarios'" class="usuarios-content">
+          <div class="page-header">
+            <h3 class="page-title">👥 Gerenciar Usuários</h3>
+          </div>
+          <q-card class="placeholder-card">
+            <q-card-section class="text-center">
+              <q-icon name="people" size="80px" color="grey-5" />
+              <h5>Gerenciamento de Usuários</h5>
+              <p>Esta funcionalidade será implementada em breve.</p>
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <div v-if="activeTab === 'estatisticas'" class="estatisticas-content">
+          <div class="page-header">
+            <h3 class="page-title">📈 Estatísticas</h3>
+          </div>
+          <q-card class="placeholder-card">
+            <q-card-section class="text-center">
+              <q-icon name="analytics" size="80px" color="grey-5" />
+              <h5>Relatórios e Métricas</h5>
+              <p>
+                Gráficos e relatórios detalhados serão implementados em breve.
+              </p>
+            </q-card-section>
+          </q-card>
+        </div>
       </q-page>
     </q-page-container>
 
+    <!-- Dialogs permanecem iguais... -->
     <!-- Dialog para Criar/Editar Carta -->
     <q-dialog v-model="cartaDialog" persistent>
       <q-card class="carta-dialog">
@@ -432,17 +659,19 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const $q = useQuasar();
 const adminStore = useAdminStore();
+
 // Estado
-const leftDrawerOpen = ref(false);
+const leftDrawerOpen = ref(true);
+const mobileMenuOpen = ref(false);
 const activeTab = ref("dashboard");
 const cartaDialog = ref(false);
 const deleteDialog = ref(false);
 const cartaEditando = ref(null);
 const cartaParaDeletar = ref(null);
-const salvandoCarta = computed(() => adminStore.salvando); // USAR do store
-const deletandoCarta = computed(() => adminStore.salvando); // USAR do store
+const salvandoCarta = computed(() => adminStore.salvando);
+const deletandoCarta = computed(() => adminStore.salvando);
 const imagemFile = ref(null);
-const loading = computed(() => adminStore.loading); // USAR do store
+const loading = computed(() => adminStore.loading);
 
 // Dados
 const cartas = computed(() => adminStore.cartas);
@@ -455,6 +684,12 @@ const cartaData = ref({
   codigo_unico: "",
   foto_url: "",
   descricao: "",
+});
+
+// Filtros
+const filtro = ref({
+  busca: "",
+  raridade: null,
 });
 
 // Opções
@@ -506,12 +741,6 @@ const cartasColumns = [
   },
 ];
 
-// Atualizar filtros - remover curso
-const filtro = ref({
-  busca: "",
-  raridade: null,
-});
-
 const pagination = ref({
   sortBy: "nome",
   descending: false,
@@ -519,128 +748,13 @@ const pagination = ref({
   rowsPerPage: 10,
 });
 
+// Computed
 const codigosUsados = computed(() => {
-  return Math.floor(cartas.value.length * 0.7); // Simulação
+  return Math.floor(cartas.value.length * 0.7);
 });
 
 const cartasLendarias = computed(() => {
   return cartas.value.filter((carta) => carta.raridade === "lendario").length;
-});
-
-// Methods
-const logout = () => {
-  router.push("/login");
-};
-
-const salvarCarta = async () => {
-  // Validação básica no frontend
-  if (!cartaData.value.nome || !cartaData.value.codigo_unico) {
-    $q.notify({
-      type: "negative",
-      message: "Nome e código são obrigatórios",
-    });
-    return;
-  }
-
-  let resultado;
-
-  if (cartaEditando.value) {
-    // Editar carta existente
-    resultado = await adminStore.atualizarCarta(
-      cartaEditando.value.id,
-      cartaData.value
-    );
-  } else {
-    // Criar nova carta - enviar os dados do formulário
-    resultado = await adminStore.criarCarta(cartaData.value);
-  }
-
-  if (resultado.success) {
-    cartaDialog.value = false;
-    // Resetar o formulário
-    cartaData.value = {
-      nome: "",
-      raridade: "",
-      pontos_valor: 10,
-      codigo_unico: "",
-      foto_url: "",
-      descricao: "",
-    };
-    cartaEditando.value = null;
-  }
-};
-
-const confirmarDelete = (carta) => {
-  cartaParaDeletar.value = carta;
-  deleteDialog.value = true;
-};
-
-const deletarCarta = async () => {
-  deletandoCarta.value = true;
-
-  try {
-    const index = cartas.value.findIndex(
-      (carta) => carta.id === cartaParaDeletar.value.id
-    );
-    cartas.value.splice(index, 1);
-
-    $q.notify({
-      type: "positive",
-      message: "Carta excluída com sucesso!",
-    });
-
-    deleteDialog.value = false;
-  } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Erro ao excluir carta",
-    });
-  } finally {
-    deletandoCarta.value = false;
-  }
-};
-
-const getRaridadeColor = (raridade) => {
-  const cores = {
-    comum: "grey",
-    raro: "blue",
-    epico: "purple",
-    lendario: "orange",
-  };
-  return cores[raridade] || "grey";
-};
-
-// No AdminPanel.vue - método handleImageUpload
-const handleImageUpload = async (file) => {
-  if (file) {
-    try {
-      // Mostrar preview local imediatamente
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        cartaData.value.foto_url = e.target.result; // Preview local
-      };
-      reader.readAsDataURL(file);
-
-      // Fazer upload para Cloudinary
-      const resultado = await adminStore.uploadImagem(file);
-
-      if (resultado.success) {
-        // Substituir preview local pela URL do Cloudinary
-        cartaData.value.foto_url = resultado.url;
-
-        // Salvar o publicId para possível exclusão futura
-        cartaData.value.cloudinary_public_id = resultado.publicId;
-      }
-      // Se falhar, mantém o preview local
-    } catch (error) {
-      console.error("Erro no upload:", error);
-    }
-  }
-};
-
-// Lifecycle
-onMounted(() => {
-  // Carregar dados iniciais se necessário
 });
 
 const cartasFiltradas = computed(() => {
@@ -652,7 +766,6 @@ const cartasFiltradas = computed(() => {
     );
   }
 
-  // CORREÇÃO: comparar string diretamente
   if (filtro.value.raridade) {
     resultado = resultado.filter(
       (carta) => carta.raridade === filtro.value.raridade
@@ -662,37 +775,27 @@ const cartasFiltradas = computed(() => {
   return resultado;
 });
 
-// ADICIONAR método para formatação na tabela
-const formatarRaridade = (raridade) => {
-  const nomes = {
-    comum: "Comum",
-    raro: "Raro",
-    epico: "Épico",
-    lendario: "Lendário",
+// Methods
+const getTabLabel = (tab) => {
+  const labels = {
+    dashboard: "Dashboard",
+    cartas: "Cartas",
+    usuarios: "Usuários",
+    estatisticas: "Stats",
   };
-  return nomes[raridade] || raridade;
+  return labels[tab] || tab;
 };
 
-// Adicionar método para gerar código automático
-const gerarCodigoAleatorio = async () => {
-  try {
-    const codigo = await adminStore.gerarCodigoUnico();
-    cartaData.value.codigo_unico = codigo;
-
-    $q.notify({
-      type: "positive",
-      message: "Código gerado automaticamente!",
-      timeout: 1000,
-    });
-  } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Erro ao gerar código",
-    });
-  }
+const selectTab = (tab) => {
+  activeTab.value = tab;
+  mobileMenuOpen.value = false;
 };
 
-// Atualizar openCartaDialog
+const logout = () => {
+  mobileMenuOpen.value = false;
+  router.push("/");
+};
+
 const openCartaDialog = (carta = null) => {
   cartaEditando.value = carta;
 
@@ -711,6 +814,117 @@ const openCartaDialog = (carta = null) => {
 
   cartaDialog.value = true;
 };
+
+const salvarCarta = async () => {
+  if (!cartaData.value.nome || !cartaData.value.codigo_unico) {
+    $q.notify({
+      type: "negative",
+      message: "Nome e código são obrigatórios",
+    });
+    return;
+  }
+
+  let resultado;
+
+  if (cartaEditando.value) {
+    resultado = await adminStore.atualizarCarta(
+      cartaEditando.value.id,
+      cartaData.value
+    );
+  } else {
+    resultado = await adminStore.criarCarta(cartaData.value);
+  }
+
+  if (resultado.success) {
+    cartaDialog.value = false;
+    cartaData.value = {
+      nome: "",
+      raridade: "",
+      pontos_valor: 10,
+      codigo_unico: "",
+      foto_url: "",
+      descricao: "",
+    };
+    cartaEditando.value = null;
+  }
+};
+
+const confirmarDelete = (carta) => {
+  cartaParaDeletar.value = carta;
+  deleteDialog.value = true;
+};
+
+const deletarCarta = async () => {
+  const resultado = await adminStore.excluirCarta(cartaParaDeletar.value.id);
+
+  if (resultado.success) {
+    deleteDialog.value = false;
+  }
+};
+
+const getRaridadeColor = (raridade) => {
+  const cores = {
+    comum: "grey",
+    raro: "blue",
+    epico: "purple",
+    lendario: "orange",
+  };
+  return cores[raridade] || "grey";
+};
+
+const formatarRaridade = (raridade) => {
+  const nomes = {
+    comum: "Comum",
+    raro: "Raro",
+    epico: "Épico",
+    lendario: "Lendário",
+  };
+  return nomes[raridade] || raridade;
+};
+
+const gerarCodigoAleatorio = async () => {
+  try {
+    const codigo = adminStore.gerarCodigoUnico();
+    cartaData.value.codigo_unico = codigo;
+
+    $q.notify({
+      type: "positive",
+      message: "Código gerado automaticamente!",
+      timeout: 1000,
+    });
+  } catch (error) {
+    $q.notify({
+      type: "negative",
+      message: "Erro ao gerar código",
+    });
+  }
+};
+
+const handleImageUpload = async (file) => {
+  if (file) {
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        cartaData.value.foto_url = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      const resultado = await adminStore.uploadImagem(file);
+
+      if (resultado.success) {
+        cartaData.value.foto_url = resultado.url;
+        cartaData.value.cloudinary_public_id = resultado.publicId;
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+    }
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  adminStore.fetchCartas();
+});
 </script>
 
 <style scoped>
@@ -729,9 +943,142 @@ const openCartaDialog = (carta = null) => {
 .admin-title {
   font-weight: bold;
   color: white;
+  margin-left: 12px;
 }
 
-.admin-drawer {
+/* ===== NAVEGAÇÃO DESKTOP ===== */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.nav-btn {
+  position: relative;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.desktop-logout {
+  background: rgba(239, 35, 60, 0.2);
+  transition: all 0.3s ease;
+}
+
+.desktop-logout:hover {
+  background: rgba(239, 35, 60, 0.3);
+  transform: scale(1.05);
+}
+
+/* ===== MENU HAMBÚRGUER MOBILE ===== */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* ===== MENU MOBILE DRAWER ===== */
+.admin-mobile-drawer {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.mobile-admin-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.mobile-admin-header {
+  padding: 30px 20px 20px 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-avatar-large {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.admin-info {
+  flex: 1;
+}
+
+.admin-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.admin-role {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.mobile-admin-stats {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-menu-list {
+  flex: 1;
+  padding: 10px 0;
+}
+
+.admin-menu-item {
+  margin: 4px 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.admin-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: #ffd700;
+  transform: translateX(5px);
+}
+
+.admin-menu-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-left-color: #ffd700;
+}
+
+.logout-item {
+  background: rgba(239, 35, 60, 0.2);
+  border: 1px solid rgba(239, 35, 60, 0.3);
+}
+
+.logout-item:hover {
+  border-left-color: #ef233c;
+}
+
+.admin-menu-label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.admin-menu-separator {
+  margin: 15px 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== DRAWER DESKTOP ===== */
+.desktop-drawer {
   background: white;
 }
 
@@ -747,11 +1094,37 @@ const openCartaDialog = (carta = null) => {
   border-radius: 8px;
 }
 
-.drawer-item.q-router-link--active {
+.drawer-item.q-item--active {
   background: rgba(102, 126, 234, 0.1);
   color: #667eea;
 }
 
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  /* Esconder navegação desktop */
+  .desktop-nav,
+  .desktop-logout {
+    display: none;
+  }
+
+  /* Mostrar menu hambúrguer */
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .admin-title {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Em desktop, sempre esconder o drawer mobile */
+  .admin-mobile-drawer {
+    display: none !important;
+  }
+}
+
+/* ===== CONTENT STYLES (mantidos) ===== */
 .admin-page {
   padding: 24px;
   background: #f8f9fa;
@@ -844,7 +1217,7 @@ const openCartaDialog = (carta = null) => {
 
 .filters-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 16px;
   align-items: center;
 }
@@ -949,7 +1322,25 @@ const openCartaDialog = (carta = null) => {
   border-radius: 12px;
 }
 
-/* Responsividade */
+/* ===== PLACEHOLDER CARDS ===== */
+.placeholder-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.placeholder-card h5 {
+  color: #2c3e50;
+  margin: 16px 0 8px 0;
+}
+
+.placeholder-card p {
+  color: #6c757d;
+  margin: 0;
+}
+
+/* ===== RESPONSIVIDADE MOBILE ===== */
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
@@ -982,6 +1373,22 @@ const openCartaDialog = (carta = null) => {
   .admin-page {
     padding: 16px;
   }
+
+  .mobile-admin-header {
+    padding: 20px 15px 15px 15px;
+  }
+
+  .admin-name {
+    font-size: 1rem;
+  }
+
+  .mobile-admin-stats {
+    padding: 12px 15px;
+  }
+
+  .admin-stat {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -995,6 +1402,41 @@ const openCartaDialog = (carta = null) => {
 
   .stat-number {
     font-size: 1.6rem;
+  }
+
+  .admin-title {
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.admin-mobile-drawer .q-drawer__content {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* ===== BADGES COLORIDOS ===== */
+.nav-btn .q-badge {
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
   }
 }
 </style>

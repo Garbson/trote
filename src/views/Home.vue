@@ -22,7 +22,7 @@
           >
             <q-tooltip>Painel Admin</q-tooltip>
           </q-btn>
-          
+
           <q-btn
             flat
             label="Adicionar Código"
@@ -31,7 +31,7 @@
             :loading="cartasStore.loadingObter"
             class="desktop-btn"
           />
-          
+
           <q-btn
             flat
             label="Ranking"
@@ -39,7 +39,7 @@
             @click="$router.push('/ranking')"
             class="desktop-btn"
           />
-          
+
           <q-btn
             flat
             round
@@ -81,7 +81,9 @@
             <q-icon name="person" size="35px" />
           </q-avatar>
           <div class="user-info">
-            <div class="user-name">{{ authStore.user?.nome || "Colecionador" }}</div>
+            <div class="user-name">
+              {{ authStore.user?.nome || "Colecionador" }}
+            </div>
             <div class="user-level">Nível {{ authStore.user?.nivel || 1 }}</div>
           </div>
         </div>
@@ -94,7 +96,11 @@
           </div>
           <div class="mobile-stat">
             <q-icon name="collections" color="blue" />
-            <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+            <span
+              >{{ cartasStore.estatisticas.total_cartas }}/{{
+                cartasStore.estatisticas.total_disponiveis
+              }}</span
+            >
           </div>
         </div>
 
@@ -306,11 +312,6 @@
                 },
               ]"
             />
-          </div>
-
-          <div v-if="cartasStore.loading" class="loading-container">
-            <q-spinner-dots size="50px" color="amber" />
-            <p class="clash-subtitle">Carregando cartas da arena...</p>
           </div>
         </q-page-container>
       </q-page>
@@ -562,7 +563,8 @@ onMounted(async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  color: white;
+  color: rgb(208, 208, 208);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
 }
 
 .mobile-menu-header {
@@ -650,12 +652,12 @@ onMounted(async () => {
   .desktop-actions {
     display: none;
   }
-  
+
   /* Mostrar menu hambúrguer */
   .mobile-menu-btn {
     display: block;
   }
-  
+
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 20px;

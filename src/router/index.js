@@ -27,10 +27,6 @@ const routes = [
     path: '/admin',
     name: 'AdminPanel',
     component: AdminPanel,
-    // meta: {
-    //   requiresAuth: true,
-    //   requiresAdmin: true
-    // }
   }
 ];
 
@@ -39,8 +35,23 @@ const router = createRouter({
   routes,
 });
 
+// Variável para controlar se a auth já foi inicializada
+let authInitialized = false;
+
 // Guard para rotas protegidas
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  // Inicializar auth apenas uma vez
+  if (!authInitialized) {
+    try {
+      const { useAuthStore } = await import('../stores/auth');
+      const authStore = useAuthStore();
+      await authStore.initAuth();
+      authInitialized = true;
+    } catch (error) {
+      console.error('Erro ao inicializar auth:', error);
+    }
+  }
+
   const user = Cookies.get('user');
   const isAuthenticated = !!user;
 
@@ -59,11 +70,9 @@ router.beforeEach((to, from, next) => {
 
     try {
       const userData = JSON.parse(user);
-      // Usar a configuração centralizada de admin
       const isAdmin = checkAdminAccess(userData);
 
       if (!isAdmin) {
-        // Redireciona para home se não for admin
         next('/');
         return;
       }

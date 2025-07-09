@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { Notify } from 'quasar'
 import { computed, ref } from 'vue'
 
+
 export const useAuthStore = defineStore('auth', () => {
   // Estado
   const user = ref(null)
@@ -201,26 +202,57 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Listener para mudanças na autenticação
   const initAuth = () => {
+    // Configurar listener para mudanças na autenticação
     supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state changed:', event, newSession?.user?.email)
       session.value = newSession
 
       if (event === 'SIGNED_IN' && newSession?.user) {
         await fetchUserProfile()
+
+        // Carregar cartas do usuário após login/restauração da sessão
+        try {
+          const { useCartasStore } = await import('./cartas')
+          const cartasStore = useCartasStore()
+          await cartasStore.fetchCartasUsuario()
+        } catch (error) {
+          console.error('Erro ao carregar cartas do usuário:', error)
+        }
+
       } else if (event === 'SIGNED_OUT') {
         user.value = null
         session.value = null
       }
     })
 
-    // Verifica se já existe uma sessão ativa
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      if (existingSession) {
-        session.value = existingSession
-        fetchUserProfile()
+    // Verifica sessão existente na inicialização
+    const initializeSession = async () => {
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession()
+
+        if (existingSession) {
+          console.log('Sessão existente encontrada:', existingSession.user.email)
+          session.value = existingSession
+          await fetchUserProfile()
+
+          // Carregar cartas do usuário na restauração da sessão
+          try {
+            const { useCartasStore } = await import('./cartas')
+            const cartasStore = useCartasStore()
+            await cartasStore.fetchCartasUsuario()
+          } catch (error) {
+            console.error('Erro ao carregar cartas do usuário na inicialização:', error)
+          }
+        } else {
+          console.log('Nenhuma sessão ativa encontrada')
+        }
+      } catch (error) {
+        console.error('Erro ao inicializar sessão:', error)
       }
-    })
+    }
+
+    initializeSession()
   }
 
   return {

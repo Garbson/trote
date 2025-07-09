@@ -38,13 +38,6 @@
             @click="activeTab = 'usuarios'"
             class="nav-btn"
           />
-          <q-btn
-            flat
-            :label="getTabLabel('estatisticas')"
-            :color="activeTab === 'estatisticas' ? 'amber' : 'white'"
-            @click="activeTab = 'estatisticas'"
-            class="nav-btn"
-          />
         </div>
 
         <!-- Botão logout desktop -->
@@ -79,50 +72,53 @@
       side="right"
       overlay
       behavior="mobile"
-      :width="300"
-      class="admin-mobile-drawer"
+      :width="280"
+      class="mobile-drawer"
     >
-      <div class="mobile-admin-menu">
+      <div class="mobile-menu">
         <!-- Header do menu admin -->
-        <div class="mobile-admin-header">
-          <q-avatar size="60px" class="admin-avatar-large">
+        <div class="mobile-menu-header">
+          <q-avatar size="60px" class="user-avatar">
             <q-icon name="admin_panel_settings" size="35px" />
           </q-avatar>
-          <div class="admin-info">
-            <div class="admin-name">Administrador</div>
-            <div class="admin-role">Painel de Controle</div>
+          <div class="user-info">
+            <div class="user-name">Administrador</div>
+            <div class="user-level">Painel de Controle</div>
           </div>
         </div>
 
         <!-- Stats rápidas -->
-        <div class="mobile-admin-stats">
-          <div class="admin-stat">
+        <div class="mobile-stats">
+          <div class="mobile-stat">
             <q-icon name="collections" color="blue" />
             <span>{{ cartas.length }} cartas</span>
           </div>
-          <div class="admin-stat">
+          <div class="mobile-stat">
             <q-icon name="people" color="green" />
             <span>{{ usuarios.length }} usuários</span>
           </div>
         </div>
 
         <!-- Menu items admin -->
-        <q-list class="admin-menu-list">
+        <q-list class="menu-list">
           <q-item
             clickable
             v-ripple
             @click="selectTab('dashboard')"
-            :class="['admin-menu-item', { active: activeTab === 'dashboard' }]"
+            :class="[
+              'menu-item',
+              { 'primary-item': activeTab === 'dashboard' },
+            ]"
           >
             <q-item-section avatar>
               <q-icon name="dashboard" color="primary" size="lg" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="admin-menu-label">Dashboard</q-item-label>
+              <q-item-label class="menu-label">Dashboard</q-item-label>
               <q-item-label caption>Visão geral do sistema</q-item-label>
             </q-item-section>
             <q-item-section side v-if="activeTab === 'dashboard'">
-              <q-icon name="check_circle" color="primary" />
+              <q-icon name="arrow_forward_ios" size="sm" />
             </q-item-section>
           </q-item>
 
@@ -130,15 +126,13 @@
             clickable
             v-ripple
             @click="selectTab('cartas')"
-            :class="['admin-menu-item', { active: activeTab === 'cartas' }]"
+            :class="['menu-item', { 'primary-item': activeTab === 'cartas' }]"
           >
             <q-item-section avatar>
               <q-icon name="collections" color="purple" size="lg" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="admin-menu-label"
-                >Gerenciar Cartas</q-item-label
-              >
+              <q-item-label class="menu-label">Gerenciar Cartas</q-item-label>
               <q-item-label caption>Criar e editar cartas</q-item-label>
             </q-item-section>
             <q-item-section side>
@@ -149,8 +143,8 @@
               />
               <q-icon
                 v-if="activeTab === 'cartas'"
-                name="check_circle"
-                color="purple"
+                name="arrow_forward_ios"
+                size="sm"
               />
             </q-item-section>
           </q-item>
@@ -159,134 +153,38 @@
             clickable
             v-ripple
             @click="selectTab('usuarios')"
-            :class="['admin-menu-item', { active: activeTab === 'usuarios' }]"
+            :class="['menu-item', { 'primary-item': activeTab === 'usuarios' }]"
           >
             <q-item-section avatar>
               <q-icon name="people" color="green" size="lg" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="admin-menu-label">Usuários</q-item-label>
+              <q-item-label class="menu-label">Usuários</q-item-label>
               <q-item-label caption>Gerenciar usuários</q-item-label>
             </q-item-section>
             <q-item-section side v-if="activeTab === 'usuarios'">
-              <q-icon name="check_circle" color="green" />
+              <q-icon name="arrow_forward_ios" size="sm" />
             </q-item-section>
           </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            @click="selectTab('estatisticas')"
-            :class="[
-              'admin-menu-item',
-              { active: activeTab === 'estatisticas' },
-            ]"
-          >
-            <q-item-section avatar>
-              <q-icon name="analytics" color="orange" size="lg" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="admin-menu-label">Estatísticas</q-item-label>
-              <q-item-label caption>Relatórios e métricas</q-item-label>
-            </q-item-section>
-            <q-item-section side v-if="activeTab === 'estatisticas'">
-              <q-icon name="check_circle" color="orange" />
-            </q-item-section>
-          </q-item>
-
-          <q-separator class="admin-menu-separator" />
+          <q-separator class="menu-separator" />
 
           <q-item
             clickable
             v-ripple
             @click="logout"
-            class="admin-menu-item logout-item"
+            class="menu-item logout-item"
           >
             <q-item-section avatar>
               <q-icon name="logout" color="negative" size="lg" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="admin-menu-label"
-                >Sair do Admin</q-item-label
-              >
+              <q-item-label class="menu-label">Sair do Admin</q-item-label>
               <q-item-label caption>Voltar ao sistema</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
       </div>
-    </q-drawer>
-
-    <!-- Sidebar Desktop (mantido para desktop) -->
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      :width="280"
-      :breakpoint="769"
-      bordered
-      class="admin-drawer desktop-drawer"
-    >
-      <q-scroll-area class="fit">
-        <q-list>
-          <q-item-label header class="drawer-header">
-            📊 Painel de Controle
-          </q-item-label>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="activeTab === 'dashboard'"
-            @click="activeTab = 'dashboard'"
-            class="drawer-item"
-          >
-            <q-item-section avatar>
-              <q-icon name="dashboard" />
-            </q-item-section>
-            <q-item-section>Dashboard</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="activeTab === 'cartas'"
-            @click="activeTab = 'cartas'"
-            class="drawer-item"
-          >
-            <q-item-section avatar>
-              <q-icon name="collections" />
-            </q-item-section>
-            <q-item-section>Gerenciar Cartas</q-item-section>
-            <q-item-section side>
-              <q-badge color="primary" :label="cartas.length" />
-            </q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="activeTab === 'usuarios'"
-            @click="activeTab = 'usuarios'"
-            class="drawer-item"
-          >
-            <q-item-section avatar>
-              <q-icon name="people" />
-            </q-item-section>
-            <q-item-section>Usuários</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="activeTab === 'estatisticas'"
-            @click="activeTab = 'estatisticas'"
-            class="drawer-item"
-          >
-            <q-item-section avatar>
-              <q-icon name="analytics" />
-            </q-item-section>
-            <q-item-section>Estatísticas</q-item-section>
-          </q-item>
-        </q-list>
-      </q-scroll-area>
     </q-drawer>
 
     <!-- Main Content -->
@@ -459,7 +357,7 @@
           </q-card>
         </div>
 
-        <!-- Tabs para Usuários e Estatísticas -->
+        <!-- Tab Usuários -->
         <div v-if="activeTab === 'usuarios'" class="usuarios-content">
           <div class="page-header">
             <h3 class="page-title">👥 Gerenciar Usuários</h3>
@@ -472,25 +370,9 @@
             </q-card-section>
           </q-card>
         </div>
-
-        <div v-if="activeTab === 'estatisticas'" class="estatisticas-content">
-          <div class="page-header">
-            <h3 class="page-title">📈 Estatísticas</h3>
-          </div>
-          <q-card class="placeholder-card">
-            <q-card-section class="text-center">
-              <q-icon name="analytics" size="80px" color="grey-5" />
-              <h5>Relatórios e Métricas</h5>
-              <p>
-                Gráficos e relatórios detalhados serão implementados em breve.
-              </p>
-            </q-card-section>
-          </q-card>
-        </div>
       </q-page>
     </q-page-container>
 
-    <!-- Dialogs permanecem iguais... -->
     <!-- Dialog para Criar/Editar Carta -->
     <q-dialog v-model="cartaDialog" persistent>
       <q-card class="carta-dialog">
@@ -661,7 +543,6 @@ const $q = useQuasar();
 const adminStore = useAdminStore();
 
 // Estado
-const leftDrawerOpen = ref(true);
 const mobileMenuOpen = ref(false);
 const activeTab = ref("dashboard");
 const cartaDialog = ref(false);
@@ -781,7 +662,6 @@ const getTabLabel = (tab) => {
     dashboard: "Dashboard",
     cartas: "Cartas",
     usuarios: "Usuários",
-    estatisticas: "Stats",
   };
   return labels[tab] || tab;
 };
@@ -928,21 +808,27 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import "@/assets/clash-royale-theme.css";
+
 .admin-layout {
-  background: #f5f5f5;
+  background: var(--cr-bg-primary);
+  min-height: 100vh;
+  position: relative;
 }
 
+/* ===== HEADER ===== */
 .admin-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--cr-blue-dark), var(--cr-purple));
+  border-bottom: 3px solid var(--cr-gold);
 }
 
 .admin-avatar {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, var(--cr-gold), #ffa000);
 }
 
 .admin-title {
   font-weight: bold;
-  color: white;
+  color: var(--cr-gold);
   margin-left: 12px;
 }
 
@@ -958,15 +844,18 @@ onMounted(() => {
   position: relative;
   transition: all 0.3s ease;
   border-radius: 8px;
+  color: white;
 }
 
 .nav-btn:hover {
   background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
 }
 
 .desktop-logout {
   background: rgba(239, 35, 60, 0.2);
   transition: all 0.3s ease;
+  margin-left: 8px;
 }
 
 .desktop-logout:hover {
@@ -977,21 +866,23 @@ onMounted(() => {
 /* ===== MENU HAMBÚRGUER MOBILE ===== */
 .mobile-menu-btn {
   display: none;
-}
-
-/* ===== MENU MOBILE DRAWER ===== */
-.admin-mobile-drawer {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-}
-
-.mobile-admin-menu {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
   color: white;
 }
 
-.mobile-admin-header {
+/* ===== MENU MOBILE ===== */
+.mobile-drawer {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.mobile-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: rgb(208, 208, 208);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.mobile-menu-header {
   padding: 30px 20px 20px 20px;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
   display: flex;
@@ -999,27 +890,27 @@ onMounted(() => {
   gap: 15px;
 }
 
-.admin-avatar-large {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+.user-avatar {
+  background: linear-gradient(135deg, var(--cr-gold), #ffa000);
   color: white;
 }
 
-.admin-info {
+.user-info {
   flex: 1;
 }
 
-.admin-name {
+.user-name {
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 4px;
 }
 
-.admin-role {
+.user-level {
   font-size: 0.9rem;
   opacity: 0.8;
 }
 
-.mobile-admin-stats {
+.mobile-stats {
   padding: 15px 20px;
   display: flex;
   justify-content: space-around;
@@ -1027,7 +918,7 @@ onMounted(() => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.admin-stat {
+.mobile-stat {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1035,27 +926,24 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.admin-menu-list {
+.menu-list {
   flex: 1;
   padding: 10px 0;
 }
 
-.admin-menu-item {
+.menu-item {
   margin: 4px 12px;
   border-radius: 12px;
   transition: all 0.3s ease;
-  border-left: 3px solid transparent;
 }
 
-.admin-menu-item:hover {
+.menu-item:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-left-color: #ffd700;
-  transform: translateX(5px);
 }
 
-.admin-menu-item.active {
-  background: rgba(255, 255, 255, 0.15);
-  border-left-color: #ffd700;
+.primary-item {
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.3);
 }
 
 .logout-item {
@@ -1063,51 +951,23 @@ onMounted(() => {
   border: 1px solid rgba(239, 35, 60, 0.3);
 }
 
-.logout-item:hover {
-  border-left-color: #ef233c;
-}
-
-.admin-menu-label {
+.menu-label {
   font-weight: 600;
   font-size: 1rem;
 }
 
-.admin-menu-separator {
+.menu-separator {
   margin: 15px 20px;
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ===== DRAWER DESKTOP ===== */
-.desktop-drawer {
-  background: white;
-}
-
-.drawer-header {
-  background: #f8f9fa;
-  color: #495057;
-  font-weight: bold;
-  padding: 16px;
-}
-
-.drawer-item {
-  margin: 4px 8px;
-  border-radius: 8px;
-}
-
-.drawer-item.q-item--active {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-}
-
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
-  /* Esconder navegação desktop */
   .desktop-nav,
   .desktop-logout {
     display: none;
   }
 
-  /* Mostrar menu hambúrguer */
   .mobile-menu-btn {
     display: block;
   }
@@ -1118,13 +978,12 @@ onMounted(() => {
 }
 
 @media (min-width: 769px) {
-  /* Em desktop, sempre esconder o drawer mobile */
-  .admin-mobile-drawer {
+  .mobile-drawer {
     display: none !important;
   }
 }
 
-/* ===== CONTENT STYLES (mantidos) ===== */
+/* ===== CONTENT STYLES ===== */
 .admin-page {
   padding: 24px;
   background: #f8f9fa;
@@ -1245,6 +1104,7 @@ onMounted(() => {
   font-weight: bold;
 }
 
+/* ===== DIALOGS ===== */
 .carta-dialog {
   min-width: 600px;
   max-width: 800px;
@@ -1374,19 +1234,19 @@ onMounted(() => {
     padding: 16px;
   }
 
-  .mobile-admin-header {
+  .mobile-menu-header {
     padding: 20px 15px 15px 15px;
   }
 
-  .admin-name {
+  .user-name {
     font-size: 1rem;
   }
 
-  .mobile-admin-stats {
+  .mobile-stats {
     padding: 12px 15px;
   }
 
-  .admin-stat {
+  .mobile-stat {
     font-size: 0.85rem;
   }
 }
@@ -1421,7 +1281,7 @@ onMounted(() => {
   }
 }
 
-.admin-mobile-drawer .q-drawer__content {
+.mobile-drawer .q-drawer__content {
   animation: slideInRight 0.3s ease-out;
 }
 
@@ -1438,5 +1298,58 @@ onMounted(() => {
   50% {
     transform: scale(1.1);
   }
+}
+
+/* ===== EFEITOS HOVER ===== */
+.menu-item {
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  border-left-color: var(--cr-gold);
+  transform: translateX(5px);
+}
+
+.primary-item:hover {
+  border-left-color: #4a90e2;
+}
+
+.logout-item:hover {
+  border-left-color: #ef233c;
+}
+
+/* ===== MELHORIAS VISUAIS ===== */
+.mobile-stat q-icon {
+  font-size: 1.2rem;
+}
+
+.nav-btn:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(248, 250, 252, 0.9)
+  );
+}
+
+.filters-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(248, 250, 252, 0.95)
+  );
+}
+
+.table-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(248, 250, 252, 0.95)
+  );
 }
 </style>

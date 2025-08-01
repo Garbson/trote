@@ -2,19 +2,22 @@
 // Configuração centralizada para controle de acesso administrativo
 
 export const ADMIN_CONFIG = {
-  // Email do administrador principal
-  ADMIN_EMAIL: 'garbsonsouza2602@gmail.com',
+  // Emails dos administradores
+  ADMIN_EMAILS: [
+    'garbsonsouza2602@gmail.com',
+    'luisgeovanixl@gmail.com'
+  ],
 
   // Função para verificar se um usuário é admin
   isAdmin: (user) => {
     if (!user || !user.email) return false;
-    return user.email === ADMIN_CONFIG.ADMIN_EMAIL;
+    return ADMIN_CONFIG.ADMIN_EMAILS.includes(user.email);
   },
 
   // Função para verificar se um email é admin
   isAdminEmail: (email) => {
     if (!email) return false;
-    return email === ADMIN_CONFIG.ADMIN_EMAIL;
+    return ADMIN_CONFIG.ADMIN_EMAILS.includes(email);
   }
 };
 

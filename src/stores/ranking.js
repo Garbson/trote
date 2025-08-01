@@ -114,7 +114,7 @@ export const useRankingStore = defineStore('ranking', () => {
 
       if (salvarError) throw salvarError
 
-      console.log('Ranking diário salvo com sucesso')
+
     } catch (error) {
       console.error('Erro ao salvar ranking diário:', error)
     } finally {

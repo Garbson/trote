@@ -4,16 +4,56 @@ import { defineStore } from 'pinia'
 import { Notify } from 'quasar'
 import { computed, ref } from 'vue'
 
-
 export const useAuthStore = defineStore('auth', () => {
   // Estado
   const user = ref(null)
   const session = ref(null)
   const loading = ref(false)
+  const initialized = ref(false)
 
   // Getters
-  const isAuthenticated = computed(() => !!user.value)
+  const isAuthenticated = computed(() => !!session.value && !!user.value)
   const userProfile = computed(() => user.value)
+
+  // Função para salvar estado no localStorage
+  const saveToStorage = () => {
+    try {
+      if (user.value && session.value) {
+        localStorage.setItem('bixo_user', JSON.stringify(user.value))
+        localStorage.setItem('bixo_session', JSON.stringify(session.value))
+      }
+    } catch (error) {
+      console.error('Erro ao salvar no localStorage:', error)
+    }
+  }
+
+  // Função para carregar estado do localStorage
+  const loadFromStorage = () => {
+    try {
+      const savedUser = localStorage.getItem('bixo_user')
+      const savedSession = localStorage.getItem('bixo_session')
+      
+      if (savedUser && savedSession) {
+        user.value = JSON.parse(savedUser)
+        session.value = JSON.parse(savedSession)
+        return true
+      }
+    } catch (error) {
+      console.error('Erro ao carregar do localStorage:', error)
+      clearStorage()
+    }
+    return false
+  }
+
+  // Função para limpar localStorage
+  const clearStorage = () => {
+    try {
+      localStorage.removeItem('bixo_user')
+      localStorage.removeItem('bixo_session')
+    } catch (error) {
+      console.error('Erro ao limpar localStorage:', error)
+    }
+  }
 
   // Actions
   const signUp = async (email, password, nome) => {
@@ -43,7 +83,6 @@ export const useAuthStore = defineStore('auth', () => {
 
         // Se falhar por RLS, usar função que bypassa RLS
         if (profileError) {
-          console.log('Tentativa direta falhou, usando função...', profileError)
 
           const { error: functionError } = await supabase.rpc('criar_usuario_completo', {
             user_id: authData.user.id,
@@ -79,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
   const signIn = async (email, password) => {
     loading.value = true
     try {
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -86,8 +126,12 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (error) throw error
 
-      // Buscar dados do perfil do usuário
+      // Definir sessão e buscar perfil
+      session.value = data.session
       await fetchUserProfile()
+
+      // Salvar no localStorage
+      saveToStorage()
 
       Notify.create({
         type: 'positive',
@@ -96,7 +140,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       return { data, error: null }
     } catch (error) {
-      console.error('Erro no login:', error)
+      console.error('❌ Erro no login:', error)
+      clearStorage()
       Notify.create({
         type: 'negative',
         message: error.message || 'Erro ao fazer login'
@@ -110,18 +155,21 @@ export const useAuthStore = defineStore('auth', () => {
   const signOut = async () => {
     loading.value = true
     try {
+      
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
+      // Limpar estado
       user.value = null
       session.value = null
+      clearStorage()
 
       Notify.create({
         type: 'positive',
         message: 'Logout realizado com sucesso!'
       })
     } catch (error) {
-      console.error('Erro no logout:', error)
+      console.error('❌ Erro no logout:', error)
       Notify.create({
         type: 'negative',
         message: 'Erro ao fazer logout'
@@ -146,7 +194,6 @@ export const useAuthStore = defineStore('auth', () => {
           console.error('Erro ao buscar perfil:', error)
           // Se não encontrar o perfil, tentar criar
           if (error.code === 'PGRST116') { // Not found
-            console.log('Perfil não encontrado, tentando criar...')
             await supabase.rpc('criar_usuario_completo', {
               user_id: authUser.id,
               user_email: authUser.email,
@@ -183,6 +230,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (error) throw error
 
       user.value = { ...user.value, ...data }
+      saveToStorage() // Atualizar localStorage
 
       Notify.create({
         type: 'positive',
@@ -202,57 +250,80 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const initAuth = () => {
-    // Configurar listener para mudanças na autenticação
-    supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('Auth state changed:', event, newSession?.user?.email)
-      session.value = newSession
+  const initAuth = async () => {
+    if (initialized.value) {
+      return
+    }
 
-      if (event === 'SIGNED_IN' && newSession?.user) {
+    
+    try {
+      // 1. Verificar se há dados no localStorage
+      const hasStoredData = loadFromStorage()
+
+      // 2. Verificar sessão no Supabase
+      const { data: { session: supabaseSession }, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        console.error('❌ Erro ao verificar sessão:', error)
+        clearStorage()
+        return
+      }
+
+      if (supabaseSession) {
+        session.value = supabaseSession
         await fetchUserProfile()
-
-        // Carregar cartas do usuário após login/restauração da sessão
+        saveToStorage()
+        
+        // Carregar cartas do usuário na restauração da sessão
         try {
           const { useCartasStore } = await import('./cartas')
           const cartasStore = useCartasStore()
           await cartasStore.fetchCartasUsuario()
         } catch (error) {
-          console.error('Erro ao carregar cartas do usuário:', error)
+          console.error('❌ Erro ao carregar cartas:', error)
         }
-
-      } else if (event === 'SIGNED_OUT') {
+      } else {
+        clearStorage()
         user.value = null
         session.value = null
       }
-    })
 
-    // Verifica sessão existente na inicialização
-    const initializeSession = async () => {
-      try {
-        const { data: { session: existingSession } } = await supabase.auth.getSession()
+      // 3. Configurar listener para mudanças na autenticação
+      supabase.auth.onAuthStateChange(async (event, newSession) => {
 
-        if (existingSession) {
-          console.log('Sessão existente encontrada:', existingSession.user.email)
-          session.value = existingSession
+        
+        if (event === 'SIGNED_IN' && newSession?.user) {
+          session.value = newSession
           await fetchUserProfile()
+          saveToStorage()
 
-          // Carregar cartas do usuário na restauração da sessão
+          // Carregar cartas do usuário após login
           try {
             const { useCartasStore } = await import('./cartas')
             const cartasStore = useCartasStore()
             await cartasStore.fetchCartasUsuario()
           } catch (error) {
-            console.error('Erro ao carregar cartas do usuário na inicialização:', error)
+            console.error('❌ Erro ao carregar cartas após login:', error)
           }
-        } else {
-          console.log('Nenhuma sessão ativa encontrada')
-        }
-      } catch (error) {
-        console.error('Erro ao inicializar sessão:', error)
-      }
-    }
 
-    initializeSession()
+        } else if (event === 'SIGNED_OUT') {
+          user.value = null
+          session.value = null
+          clearStorage()
+        } else if (event === 'TOKEN_REFRESHED' && newSession) {
+          session.value = newSession
+          saveToStorage()
+        }
+      })
+
+      initialized.value = true
+
+    } catch (error) {
+      console.error('❌ Erro crítico ao inicializar auth:', error)
+      clearStorage()
+      user.value = null
+      session.value = null
+    }
   }
 
   return {
@@ -260,6 +331,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     session,
     loading,
+    initialized,
 
     // Getters
     isAuthenticated,
@@ -272,5 +344,11 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     updateProfile,
     initAuth
+  }
+}, {
+  persist: {
+    key: 'bixo-auth-store',
+    storage: localStorage,
+    paths: ['user', 'session']
   }
 })

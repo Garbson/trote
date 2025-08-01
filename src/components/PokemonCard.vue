@@ -201,7 +201,6 @@ const getRaridadeColor = (raridade) => {
 };
 
 const playUnlockAnimation = () => {
-  console.log("🎉 Iniciando animação de desbloqueio!");
 
   isUnlocking.value = true;
 

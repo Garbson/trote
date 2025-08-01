@@ -7,7 +7,6 @@ export const ADMIN_CONFIG = {
 
   // Função para verificar se um usuário é admin
   isAdmin: (user) => {
-    console.log(user)
     if (!user || !user.email) return false;
     return user.email === ADMIN_CONFIG.ADMIN_EMAIL;
   },

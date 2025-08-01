@@ -93,7 +93,6 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   const criarCarta = async (dadosCarta) => {
-    console.log("criando carta")
     salvando.value = true
     try {
       // Validações

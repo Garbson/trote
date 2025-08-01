@@ -491,6 +491,7 @@ const openInstagram = () => {
 
 // Lifecycle
 onMounted(async () => {
+
   // Só executa a animação de digitação para visitantes
   if (!authStore.isAuthenticated) {
     typeMessage();

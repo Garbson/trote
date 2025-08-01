@@ -6,10 +6,6 @@ class CloudinaryUploader {
 
     if (!this.cloudName || !this.uploadPreset) {
       console.error('❌ Configurações do Cloudinary não encontradas no .env')
-      console.log('VITE_CLOUDINARY_CLOUD_NAME:', this.cloudName)
-      console.log('VITE_CLOUDINARY_UPLOAD_PRESET:', this.uploadPreset)
-    } else {
-      console.log('✅ Cloudinary configurado com sucesso')
     }
 
     this.apiUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`
@@ -17,7 +13,7 @@ class CloudinaryUploader {
 
   async uploadImage(file) {
     try {
-      console.log('🚀 Iniciando upload para Cloudinary...')
+
 
       // Validações básicas
       if (!file) {
@@ -41,8 +37,6 @@ class CloudinaryUploader {
       formData.append('upload_preset', this.uploadPreset)
       formData.append('folder', 'bixo-royale/cartas')
 
-      console.log('📤 Enviando para:', this.apiUrl)
-      console.log('📁 Upload preset:', this.uploadPreset)
 
       // Fazer upload
       const response = await fetch(this.apiUrl, {
@@ -57,7 +51,6 @@ class CloudinaryUploader {
       }
 
       const result = await response.json()
-      console.log('✅ Upload bem-sucedido:', result)
 
       // Retornar informações úteis
       return {

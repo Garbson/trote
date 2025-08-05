@@ -58,11 +58,6 @@ class CloudinaryUploader {
       errors.push('Formato não suportado. Use JPEG, PNG ou WebP')
     }
 
-    // Verificar tamanho (máximo 10MB)
-    const maxSize = 10 * 1024 * 1024 // 10MB
-    if (file.size > maxSize) {
-      errors.push('Arquivo muito grande (máximo 10MB)')
-    }
 
     // Verificar tamanho mínimo (para evitar imagens muito pequenas)
     const minSize = 1024 // 1KB

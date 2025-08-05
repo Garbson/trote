@@ -198,50 +198,129 @@
           </div>
 
           <div class="stats-grid">
-            <q-card class="stat-card">
+            <q-card class="stat-card" :class="{ 'loading-card': loading }">
               <q-card-section class="stat-content">
                 <div class="stat-icon">
                   <q-icon name="collections" size="40px" color="primary" />
                 </div>
                 <div class="stat-info">
-                  <div class="stat-number">{{ cartas.length }}</div>
+                  <div class="stat-number">
+                    <q-skeleton v-if="loading || loadingEstatisticas" type="text" width="60px" />
+                    <span v-else>{{ adminStore.estatisticas.total_cartas || 0 }}</span>
+                  </div>
                   <div class="stat-label">Total de Cartas</div>
+                  <div class="stat-sublabel">
+                    {{ adminStore.estatisticas.cartas_ativas || 0 }} ativas
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
 
-            <q-card class="stat-card">
+            <q-card class="stat-card" :class="{ 'loading-card': loadingUsuarios }">
               <q-card-section class="stat-content">
                 <div class="stat-icon">
                   <q-icon name="people" size="40px" color="green" />
                 </div>
                 <div class="stat-info">
-                  <div class="stat-number">{{ usuarios.length }}</div>
-                  <div class="stat-label">Usuários Ativos</div>
+                  <div class="stat-number">
+                    <q-skeleton v-if="loadingUsuarios" type="text" width="60px" />
+                    <span v-else>{{ adminStore.estatisticas.total_usuarios || 0 }}</span>
+                  </div>
+                  <div class="stat-label">Usuários Cadastrados</div>
+                  <div class="stat-sublabel">
+                    {{ adminStore.estatisticas.usuarios_ativos || 0 }} ativos
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
 
-            <q-card class="stat-card">
+            <q-card class="stat-card" :class="{ 'loading-card': loadingEstatisticas }">
               <q-card-section class="stat-content">
                 <div class="stat-icon">
                   <q-icon name="trending_up" size="40px" color="orange" />
                 </div>
                 <div class="stat-info">
-                  <div class="stat-number">{{ codigosUsados }}</div>
+                  <div class="stat-number">
+                    <q-skeleton v-if="loadingEstatisticas" type="text" width="60px" />
+                    <span v-else>{{ adminStore.estatisticas.codigos_usados || 0 }}</span>
+                  </div>
                   <div class="stat-label">Códigos Usados</div>
+                  <div class="stat-sublabel">
+                    Cartas coletadas
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
 
-            <q-card class="stat-card">
+            <q-card class="stat-card" :class="{ 'loading-card': loading }">
               <q-card-section class="stat-content">
                 <div class="stat-icon">
                   <q-icon name="star" size="40px" color="amber" />
                 </div>
                 <div class="stat-info">
-                  <div class="stat-number">{{ cartasLendarias }}</div>
+                  <div class="stat-number">
+                    <q-skeleton v-if="loading" type="text" width="60px" />
+                    <span v-else>{{ adminStore.estatisticas.cartas_lendarias || 0 }}</span>
+                  </div>
                   <div class="stat-label">Cartas Lendárias</div>
+                  <div class="stat-sublabel">
+                    Mais raras do jogo
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+
+          <!-- Seção de Gráficos Rápidos -->
+          <div class="charts-section">
+            <q-card class="chart-card">
+              <q-card-section>
+                <div class="chart-header">
+                  <h5>📊 Distribuição por Raridade</h5>
+                </div>
+                <div class="rarity-distribution">
+                  <div 
+                    v-for="(count, raridade) in adminStore.cartasPorRaridade" 
+                    :key="raridade"
+                    class="rarity-item"
+                    :class="raridade"
+                  >
+                    <div class="rarity-bar">
+                      <div 
+                        class="rarity-fill" 
+                        :style="{ width: `${(count / Math.max(...Object.values(adminStore.cartasPorRaridade))) * 100}%` }"
+                      ></div>
+                    </div>
+                    <div class="rarity-info">
+                      <span class="rarity-name">{{ formatarRaridade(raridade) }}</span>
+                      <span class="rarity-count">{{ count }}</span>
+                    </div>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card class="chart-card">
+              <q-card-section>
+                <div class="chart-header">
+                  <h5>🏆 Top 5 Usuários</h5>
+                </div>
+                <div class="top-users">
+                  <div 
+                    v-for="(usuario, index) in adminStore.topUsuarios.slice(0, 5)" 
+                    :key="usuario.id"
+                    class="top-user-item"
+                  >
+                    <div class="user-rank">{{ index + 1 }}º</div>
+                    <div class="user-info">
+                      <div class="user-name">{{ usuario.nome }}</div>
+                      <div class="user-points">{{ usuario.pontos_totais || 0 }} pts</div>
+                    </div>
+                  </div>
+                  <div v-if="adminStore.topUsuarios.length === 0" class="no-users">
+                    <q-icon name="people_outline" size="lg" color="grey" />
+                    <span>Nenhum usuário ainda</span>
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
@@ -331,26 +410,52 @@
 
               <template v-slot:body-cell-acoes="props">
                 <q-td :props="props">
-                  <q-btn
-                    flat
-                    round
-                    icon="edit"
-                    color="primary"
-                    size="sm"
-                    @click="openCartaDialog(props.row)"
-                  >
-                    <q-tooltip>Editar</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    flat
-                    round
-                    icon="delete"
-                    color="negative"
-                    size="sm"
-                    @click="confirmarDelete(props.row)"
-                  >
-                    <q-tooltip>Excluir</q-tooltip>
-                  </q-btn>
+                  <div class="action-buttons">
+                    <q-btn
+                      flat
+                      round
+                      icon="edit"
+                      color="primary"
+                      size="sm"
+                      @click="openCartaDialog(props.row)"
+                    >
+                      <q-tooltip>Editar carta</q-tooltip>
+                    </q-btn>
+                    
+                    <q-btn
+                      v-if="!props.row.ativa"
+                      flat
+                      round
+                      icon="play_arrow"
+                      color="positive"
+                      size="sm"
+                      @click="reativarCarta(props.row)"
+                    >
+                      <q-tooltip>Reativar carta</q-tooltip>
+                    </q-btn>
+                    
+                    <q-btn
+                      flat
+                      round
+                      :icon="props.row.ativa ? 'delete' : 'delete_forever'"
+                      :color="props.row.ativa ? 'warning' : 'negative'"
+                      size="sm"
+                      @click="confirmarDelete(props.row)"
+                    >
+                      <q-tooltip>{{ props.row.ativa ? 'Desativar/Excluir' : 'Excluir permanentemente' }}</q-tooltip>
+                    </q-btn>
+
+                    <q-btn
+                      flat
+                      round
+                      icon="info"
+                      color="info"
+                      size="sm"
+                      @click="verDetalhes(props.row)"
+                    >
+                      <q-tooltip>Ver detalhes</q-tooltip>
+                    </q-btn>
+                  </div>
                 </q-td>
               </template>
             </q-table>
@@ -361,12 +466,125 @@
         <div v-if="activeTab === 'usuarios'" class="usuarios-content">
           <div class="page-header">
             <h3 class="page-title">👥 Gerenciar Usuários</h3>
+            <div class="header-actions">
+              <q-btn
+                flat
+                icon="refresh"
+                label="Atualizar"
+                @click="adminStore.fetchUsuarios()"
+                :loading="loadingUsuarios"
+                color="primary"
+              />
+            </div>
           </div>
-          <q-card class="placeholder-card">
-            <q-card-section class="text-center">
-              <q-icon name="people" size="80px" color="grey-5" />
-              <h5>Gerenciamento de Usuários</h5>
-              <p>Esta funcionalidade será implementada em breve.</p>
+
+          <!-- Estatísticas de usuários -->
+          <div class="user-stats-grid">
+            <q-card class="user-stat-card">
+              <q-card-section class="text-center">
+                <q-icon name="people" size="40px" color="primary" />
+                <div class="stat-number">{{ usuarios.length }}</div>
+                <div class="stat-label">Total de Usuários</div>
+              </q-card-section>
+            </q-card>
+
+            <q-card class="user-stat-card">
+              <q-card-section class="text-center">
+                <q-icon name="star" size="40px" color="amber" />
+                <div class="stat-number">
+                  {{ usuarios.reduce((sum, u) => sum + (u.pontos_totais || 0), 0) }}
+                </div>
+                <div class="stat-label">Pontos Totais</div>
+              </q-card-section>
+            </q-card>
+
+            <q-card class="user-stat-card">
+              <q-card-section class="text-center">
+                <q-icon name="trending_up" size="40px" color="green" />
+                <div class="stat-number">
+                  {{ Math.round(usuarios.reduce((sum, u) => sum + (u.pontos_totais || 0), 0) / Math.max(usuarios.length, 1)) }}
+                </div>
+                <div class="stat-label">Média de Pontos</div>
+              </q-card-section>
+            </q-card>
+          </div>
+
+          <!-- Tabela de usuários -->
+          <q-card class="table-card">
+            <q-card-section>
+              <div class="table-header">
+                <h5>📋 Lista de Usuários</h5>
+                <q-input
+                  v-model="filtroUsuarios"
+                  placeholder="Buscar usuário..."
+                  outlined
+                  dense
+                  clearable
+                  style="min-width: 250px"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+
+              <q-table
+                :rows="usuariosFiltrados"
+                :columns="usuariosColumns"
+                row-key="id"
+                :pagination="{ rowsPerPage: 10 }"
+                :loading="loadingUsuarios"
+                class="admin-table"
+              >
+                <template v-slot:body-cell-avatar="props">
+                  <q-td :props="props">
+                    <q-avatar size="40px">
+                      <q-icon name="person" />
+                    </q-avatar>
+                  </q-td>
+                </template>
+
+                <template v-slot:body-cell-nivel="props">
+                  <q-td :props="props">
+                    <q-badge 
+                      :color="getNivelColor(props.value)" 
+                      :label="`Nível ${props.value}`"
+                    />
+                  </q-td>
+                </template>
+
+                <template v-slot:body-cell-pontos="props">
+                  <q-td :props="props">
+                    <div class="pontos-display">
+                      <q-icon name="star" color="amber" size="sm" />
+                      <span>{{ props.value || 0 }}</span>
+                    </div>
+                  </q-td>
+                </template>
+
+                <template v-slot:body-cell-cadastro="props">
+                  <q-td :props="props">
+                    <div class="date-display">
+                      {{ new Date(props.value).toLocaleDateString('pt-BR') }}
+                    </div>
+                  </q-td>
+                </template>
+
+                <template v-slot:body-cell-acoes="props">
+                  <q-td :props="props">
+                    <q-btn
+                      flat
+                      round
+                      icon="info"
+                      color="primary"
+                      size="sm"
+                      @click="verDetalhesUsuario(props.row)"
+                    >
+                      <q-tooltip>Ver detalhes</q-tooltip>
+                    </q-btn>
+                  </q-td>
+                </template>
+              </q-table>
             </q-card-section>
           </q-card>
         </div>
@@ -388,6 +606,83 @@
             @submit.prevent="salvarCarta"
             class="carta-form"
           >
+            <!-- Upload de Imagem - MOVIDO PARA O TOPO -->
+            <div class="image-section">
+              <div class="image-preview">
+                <q-avatar size="120px" rounded class="preview-avatar">
+                  <img
+                    v-if="cartaData.foto_url"
+                    :src="cartaData.foto_url"
+                    alt="Preview"
+                  />
+                  <q-icon v-else name="person" size="60px" color="grey-5" />
+                  
+                  <!-- Loading overlay -->
+                  <div v-if="uploadingImage" class="upload-overlay">
+                    <q-spinner-cube color="primary" size="30px" />
+                  </div>
+                </q-avatar>
+                
+                <!-- Status da imagem -->
+                <div v-if="cartaData.foto_url && !uploadingImage" class="image-status">
+                  <q-icon name="check_circle" color="positive" size="20px">
+                    <q-tooltip>Imagem carregada</q-tooltip>
+                  </q-icon>
+                </div>
+              </div>
+
+              <div class="image-controls">
+                <q-file
+                  v-model="imagemFile"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  outlined
+                  label="Selecionar Imagem"
+                  @update:model-value="handleImageUpload"
+                  :loading="uploadingImage"
+                  :disable="uploadingImage"
+                  class="image-upload"
+                  :error="!!imageValidationError"
+                  :error-message="imageValidationError"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                  <template v-slot:append v-if="uploadingImage">
+                    <q-spinner color="primary" size="20px" />
+                  </template>
+                </q-file>
+
+                <!-- Progress info -->
+                <div v-if="uploadProgress.show" class="upload-progress">
+                  <q-linear-progress 
+                    indeterminate 
+                    color="primary" 
+                    class="q-mt-sm"
+                  />
+                  <div class="progress-text">{{ uploadProgress.info }}</div>
+                </div>
+
+                <q-input
+                  v-model="cartaData.foto_url"
+                  label="URL da Imagem (alternativo)"
+                  outlined
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  class="url-input"
+                  :disable="uploadingImage"
+                />
+                
+                <!-- Dicas de upload -->
+                <div class="upload-tips">
+                  <q-icon name="info" size="16px" color="grey-6" />
+                  <span class="tips-text">
+                    Formatos: JPEG, PNG, WebP | Máx: 10MB | 
+                    Será otimizada automaticamente
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campos de Dados da Carta -->
             <div class="form-row">
               <q-input
                 v-model="cartaData.nome"
@@ -447,43 +742,6 @@
               rows="3"
               class="form-field full-width"
             />
-
-            <!-- Upload de Imagem -->
-            <div class="image-section">
-              <div class="image-preview">
-                <q-avatar size="120px" rounded class="preview-avatar">
-                  <img
-                    v-if="cartaData.foto_url"
-                    :src="cartaData.foto_url"
-                    alt="Preview"
-                  />
-                  <q-icon v-else name="person" size="60px" color="grey-5" />
-                </q-avatar>
-              </div>
-
-              <div class="image-controls">
-                <q-file
-                  v-model="imagemFile"
-                  accept="image/*"
-                  outlined
-                  label="Selecionar Imagem"
-                  @update:model-value="handleImageUpload"
-                  class="image-upload"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="attach_file" />
-                  </template>
-                </q-file>
-
-                <q-input
-                  v-model="cartaData.foto_url"
-                  label="URL da Imagem"
-                  outlined
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  class="url-input"
-                />
-              </div>
-            </div>
           </q-form>
         </q-card-section>
 
@@ -553,6 +811,8 @@ const salvandoCarta = computed(() => adminStore.salvando);
 const deletandoCarta = computed(() => adminStore.salvando);
 const imagemFile = ref(null);
 const loading = computed(() => adminStore.loading);
+const loadingUsuarios = computed(() => adminStore.loadingUsuarios);
+const loadingEstatisticas = computed(() => adminStore.loadingEstatisticas);
 
 // Dados
 const cartas = computed(() => adminStore.cartas);
@@ -572,6 +832,8 @@ const filtro = ref({
   busca: "",
   raridade: null,
 });
+
+const filtroUsuarios = ref("");
 
 // Opções
 const raridadeOptions = ["comum", "raro", "epico", "lendario"];
@@ -629,14 +891,60 @@ const pagination = ref({
   rowsPerPage: 10,
 });
 
-// Computed
-const codigosUsados = computed(() => {
-  return Math.floor(cartas.value.length * 0.7);
-});
+// Configuração da tabela de usuários
+const usuariosColumns = [
+  {
+    name: "avatar",
+    label: "",
+    field: "avatar",
+    align: "center",
+    sortable: false,
+  },
+  {
+    name: "nome",
+    label: "Nome",
+    field: "nome",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "email",
+    label: "Email",
+    field: "email",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "nivel",
+    label: "Nível",
+    field: "nivel",
+    align: "center",
+    sortable: true,
+  },
+  {
+    name: "pontos",
+    label: "Pontos",
+    field: "pontos_totais",
+    align: "center",
+    sortable: true,
+  },
+  {
+    name: "cadastro",
+    label: "Cadastro",
+    field: "created_at",
+    align: "center",
+    sortable: true,
+  },
+  {
+    name: "acoes",
+    label: "Ações",
+    field: "acoes",
+    align: "center",
+    sortable: false,
+  },
+];
 
-const cartasLendarias = computed(() => {
-  return cartas.value.filter((carta) => carta.raridade === "lendario").length;
-});
+// Computed (mantidos para compatibilidade com a interface)
 
 const cartasFiltradas = computed(() => {
   let resultado = cartas.value;
@@ -650,6 +958,20 @@ const cartasFiltradas = computed(() => {
   if (filtro.value.raridade) {
     resultado = resultado.filter(
       (carta) => carta.raridade === filtro.value.raridade
+    );
+  }
+
+  return resultado;
+});
+
+const usuariosFiltrados = computed(() => {
+  let resultado = usuarios.value;
+
+  if (filtroUsuarios.value) {
+    const termo = filtroUsuarios.value.toLowerCase();
+    resultado = resultado.filter((usuario) =>
+      usuario.nome.toLowerCase().includes(termo) ||
+      usuario.email.toLowerCase().includes(termo)
     );
   }
 
@@ -679,6 +1001,13 @@ const logout = () => {
 const openCartaDialog = (carta = null) => {
   cartaEditando.value = carta;
 
+  // Limpar estados de upload
+  uploadingImage.value = false;
+  imageValidationError.value = '';
+  previewUrl.value = '';
+  uploadProgress.value = { show: false, info: '' };
+  imagemFile.value = null;
+
   if (carta) {
     cartaData.value = { ...carta };
   } else {
@@ -696,10 +1025,29 @@ const openCartaDialog = (carta = null) => {
 };
 
 const salvarCarta = async () => {
+  // Verificar se há upload em progresso
+  if (uploadingImage.value) {
+    $q.notify({
+      type: "warning",
+      message: "Aguarde o upload da imagem terminar",
+    });
+    return;
+  }
+
+  // Validações básicas
   if (!cartaData.value.nome || !cartaData.value.codigo_unico) {
     $q.notify({
       type: "negative",
       message: "Nome e código são obrigatórios",
+    });
+    return;
+  }
+
+  // Verificar se há erro de validação de imagem
+  if (imageValidationError.value) {
+    $q.notify({
+      type: "negative",
+      message: "Corrija o erro na imagem antes de salvar",
     });
     return;
   }
@@ -717,6 +1065,8 @@ const salvarCarta = async () => {
 
   if (resultado.success) {
     cartaDialog.value = false;
+    
+    // Limpar dados e estados
     cartaData.value = {
       nome: "",
       raridade: "",
@@ -726,6 +1076,13 @@ const salvarCarta = async () => {
       descricao: "",
     };
     cartaEditando.value = null;
+    
+    // Limpar estados de upload
+    uploadingImage.value = false;
+    imageValidationError.value = '';
+    previewUrl.value = '';
+    uploadProgress.value = { show: false, info: '' };
+    imagemFile.value = null;
   }
 };
 
@@ -764,7 +1121,7 @@ const formatarRaridade = (raridade) => {
 
 const gerarCodigoAleatorio = async () => {
   try {
-    const codigo = adminStore.gerarCodigoUnico();
+    const codigo = await adminStore.gerarCodigoUnico();
     cartaData.value.codigo_unico = codigo;
 
     $q.notify({
@@ -775,35 +1132,155 @@ const gerarCodigoAleatorio = async () => {
   } catch (error) {
     $q.notify({
       type: "negative",
-      message: "Erro ao gerar código",
+      message: "Erro ao gerar código: " + error.message,
     });
   }
 };
 
+const reativarCarta = async (carta) => {
+  const resultado = await adminStore.reativarCarta(carta.id);
+  
+  if (resultado.success) {
+    // Dados já foram atualizados no store
+    console.log('✅ Carta reativada:', carta.nome);
+  }
+};
+
+const verDetalhes = (carta) => {
+  $q.dialog({
+    title: `📋 Detalhes da Carta: ${carta.nome}`,
+    message: `
+      <div style="text-align: left;">
+        <p><strong>ID:</strong> ${carta.id}</p>
+        <p><strong>Código:</strong> ${carta.codigo_unico}</p>
+        <p><strong>Raridade:</strong> ${formatarRaridade(carta.raridade)}</p>
+        <p><strong>Pontos:</strong> ${carta.pontos_valor}</p>
+        <p><strong>Status:</strong> ${carta.ativa ? '✅ Ativa' : '❌ Inativa'}</p>
+        <p><strong>Criada em:</strong> ${new Date(carta.created_at).toLocaleString('pt-BR')}</p>
+        <p><strong>Última atualização:</strong> ${new Date(carta.updated_at).toLocaleString('pt-BR')}</p>
+        ${carta.descricao ? `<p><strong>Descrição:</strong> ${carta.descricao}</p>` : ''}
+      </div>
+    `,
+    html: true,
+    ok: 'Fechar'
+  });
+};
+
+const verDetalhesUsuario = (usuario) => {
+  // Buscar cartas do usuário
+  const cartasDoUsuario = adminStore.usuarioCartas.filter(uc => uc.usuario_id === usuario.id);
+  
+  $q.dialog({
+    title: `👤 Detalhes do Usuário: ${usuario.nome}`,
+    message: `
+      <div style="text-align: left;">
+        <p><strong>ID:</strong> ${usuario.id}</p>
+        <p><strong>Nome:</strong> ${usuario.nome}</p>
+        <p><strong>Email:</strong> ${usuario.email}</p>
+        <p><strong>Nível:</strong> ${usuario.nivel || 1}</p>
+        <p><strong>Pontos Totais:</strong> ${usuario.pontos_totais || 0}</p>
+        <p><strong>Cartas Coletadas:</strong> ${cartasDoUsuario.length}</p>
+        <p><strong>Data de Cadastro:</strong> ${new Date(usuario.created_at).toLocaleString('pt-BR')}</p>
+        ${usuario.updated_at ? `<p><strong>Última Atividade:</strong> ${new Date(usuario.updated_at).toLocaleString('pt-BR')}</p>` : ''}
+      </div>
+    `,
+    html: true,
+    ok: 'Fechar'
+  });
+};
+
+const getNivelColor = (nivel) => {
+  if (nivel >= 10) return 'purple';
+  if (nivel >= 5) return 'orange';
+  if (nivel >= 3) return 'blue';
+  return 'grey';
+};
+
+const uploadingImage = ref(false);
+const imageValidationError = ref('');
+const previewUrl = ref('');
+const uploadProgress = ref({ show: false, info: '' });
+
 const handleImageUpload = async (file) => {
-  if (file) {
-    try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        cartaData.value.foto_url = e.target.result;
-      };
-      reader.readAsDataURL(file);
+  if (!file) return;
 
-      const resultado = await adminStore.uploadImagem(file);
+  try {
+    // Limpar erros e estado anterior
+    imageValidationError.value = '';
+    uploadingImage.value = true;
+    uploadProgress.value = { show: true, info: 'Validando imagem...' };
 
-      if (resultado.success) {
-        cartaData.value.foto_url = resultado.url;
-        cartaData.value.cloudinary_public_id = resultado.publicId;
-      }
-    } catch (error) {
-      console.error("Erro no upload:", error);
+    // Validação usando o novo método do Cloudinary
+    const { cloudinaryUploader } = await import('@/utils/cloudinary');
+    const validation = cloudinaryUploader.validateImage(file);
+    
+    if (!validation.valid) {
+      imageValidationError.value = validation.errors.join(', ');
+      uploadingImage.value = false;
+      uploadProgress.value.show = false;
+      return;
     }
+
+    // Gerar preview local primeiro
+    uploadProgress.value.info = 'Gerando preview...';
+    const preview = await cloudinaryUploader.generatePreview(file);
+    previewUrl.value = preview;
+    cartaData.value.foto_url = preview; // Preview temporário
+
+    // Upload para Cloudinary com compressão
+    uploadProgress.value.info = 'Fazendo upload...';
+    const resultado = await adminStore.uploadImagem(file, {
+      compress: true,
+      quality: 0.8,
+      maxWidth: 400,
+      maxHeight: 400
+    });
+
+    if (resultado.success) {
+      cartaData.value.foto_url = resultado.url;
+      cartaData.value.cloudinary_public_id = resultado.publicId;
+      
+      const compressionInfo = resultado.compressionRatio > 0 
+        ? `Compressão: ${resultado.compressionRatio}%` 
+        : 'Sem compressão necessária';
+      
+      uploadProgress.value.info = `Upload concluído! ${compressionInfo}`;
+      
+      $q.notify({
+        type: 'positive',
+        message: 'Imagem enviada com sucesso!',
+        caption: compressionInfo,
+        timeout: 3000
+      });
+      
+      setTimeout(() => {
+        uploadProgress.value.show = false;
+      }, 2000);
+    } else {
+      throw new Error(resultado.error);
+    }
+  } catch (error) {
+    console.error("Erro no upload:", error);
+    imageValidationError.value = error.message;
+    
+    $q.notify({
+      type: 'negative',
+      message: 'Erro no upload da imagem',
+      caption: error.message
+    });
+    
+    uploadProgress.value.show = false;
+  } finally {
+    uploadingImage.value = false;
   }
 };
 
 // Lifecycle
-onMounted(() => {
-  adminStore.fetchCartas();
+onMounted(async () => {
+  console.log('🛡️ Admin Panel montado');
+  
+  // Carregar todos os dados do admin
+  await adminStore.fetchTodosOsDados();
 });
 </script>
 
@@ -1319,6 +1796,223 @@ onMounted(() => {
   border-left-color: #ef233c;
 }
 
+/* ===== MELHORIAS DE UPLOAD ===== */
+.image-preview {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.preview-avatar {
+  border: 3px solid #dee2e6;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+}
+
+.image-status {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-progress {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #667eea;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.upload-tips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.tips-text {
+  font-size: 0.8rem;
+  color: #6c757d;
+  line-height: 1.3;
+}
+
+.image-upload.q-field--error .q-field__control {
+  border-color: #ef233c;
+}
+
+/* ===== MELHORIAS DE DASHBOARD ===== */
+.charts-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.chart-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header h5 {
+  margin: 0 0 16px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.rarity-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rarity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rarity-bar {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rarity-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.rarity-item.comum .rarity-fill {
+  background: #a8a8a8;
+}
+
+.rarity-item.raro .rarity-fill {
+  background: #4a90e2;
+}
+
+.rarity-item.epico .rarity-fill {
+  background: #9c27b0;
+}
+
+.rarity-item.lendario .rarity-fill {
+  background: #ff9500;
+}
+
+.rarity-info {
+  display: flex;
+  justify-content: space-between;
+  min-width: 80px;
+  font-size: 0.9rem;
+}
+
+.rarity-name {
+  font-weight: 500;
+}
+
+.rarity-count {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.top-users {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.top-user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+.user-rank {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #667eea;
+  min-width: 25px;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.user-points {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.no-users {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+}
+
+.no-users span {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.stat-sublabel {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.loading-card {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
 /* ===== MELHORIAS VISUAIS ===== */
 .mobile-stat q-icon {
   font-size: 1.2rem;
@@ -1351,5 +2045,78 @@ onMounted(() => {
     rgba(255, 255, 255, 0.95),
     rgba(248, 250, 252, 0.95)
   );
+}
+
+/* ===== SEÇÃO DE USUÁRIOS ===== */
+.user-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.user-stat-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.user-stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.table-header h5 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.pontos-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.date-display {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===== RESPONSIVIDADE PARA DASHBOARD ===== */
+@media (max-width: 768px) {
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+
+  .user-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-actions {
+    align-self: stretch;
+  }
 }
 </style>

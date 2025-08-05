@@ -72,7 +72,18 @@ export const useCartasStore = defineStore('cartas', () => {
 
   const fetchCartasUsuario = async () => {
     const authStore = useAuthStore()
-    if (!authStore.isAuthenticated) return
+    
+    if (!authStore.isAuthenticated) {
+      console.log('❌ Usuario não autenticado, pulando carregamento de cartas')
+      return
+    }
+
+    if (!authStore.user?.id) {
+      console.log('❌ ID do usuário não disponível, pulando carregamento de cartas')
+      return
+    }
+
+    console.log('🔄 Buscando cartas do usuário:', authStore.user.id)
 
     try {
       const { data, error } = await supabase
@@ -90,11 +101,34 @@ export const useCartasStore = defineStore('cartas', () => {
         .eq('usuario_id', authStore.user.id)
         .order('data_obtencao', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erro na query:', error)
+        throw error
+      }
 
       cartasUsuario.value = data || []
+      console.log('✅ Cartas do usuário carregadas:', cartasUsuario.value.length)
+      
+      // Log das cartas obtidas para debug
+      if (cartasUsuario.value.length > 0) {
+        console.log('📝 Cartas obtidas:', cartasUsuario.value.map(uc => ({
+          carta_id: uc.carta_id,
+          nome: uc.cartas?.nome,
+          data_obtencao: uc.data_obtencao
+        })))
+      }
+      
     } catch (error) {
-      console.error('Erro ao buscar cartas do usuário:', error)
+      console.error('❌ Erro ao buscar cartas do usuário:', error)
+      
+      // Não resetar as cartas em caso de erro - manter estado anterior
+      Notify.create({
+        type: 'warning',
+        message: 'Erro ao carregar suas cartas. Tentando novamente...',
+        timeout: 2000
+      })
+      
+      throw error // Re-throw para permitir retry
     }
   }
 
@@ -255,7 +289,14 @@ export const useCartasStore = defineStore('cartas', () => {
   }
 
   const verificarCartaObtida = (cartaId) => {
-    return cartasUsuario.value.some(uc => uc.carta_id === cartaId)
+    const obtida = cartasUsuario.value.some(uc => uc.carta_id === cartaId)
+    
+    // Log apenas em desenvolvimento para debug
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 Verificando carta ${cartaId}: ${obtida ? '✅ obtida' : '❌ não obtida'}`)
+    }
+    
+    return obtida
   }
 
   return {

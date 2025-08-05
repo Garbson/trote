@@ -1,66 +1,135 @@
 <template>
   <q-layout view="hHh lpR fFf" class="clash-layout">
-    <!-- Header responsivo -->
-    <q-header elevated class="clash-header" v-if="authStore.isAuthenticated">
-      <q-toolbar>
-        <!-- Logo -->
-        <q-icon name="shield" size="md" color="amber" />
-        <q-toolbar-title class="header-title clash-title">
-          BIXO ROYALE
-        </q-toolbar-title>
+    <!-- Header responsivo melhorado -->
+    <q-header elevated class="clash-header enhanced-header" v-if="authStore.isAuthenticated">
+      <q-toolbar class="enhanced-toolbar">
+        <!-- Logo e título aprimorados -->
+        <div class="logo-section">
+          <q-avatar size="40px" class="logo-avatar">
+            <q-icon name="shield" size="24px" color="white" />
+          </q-avatar>
+          <div class="title-section">
+            <div class="header-title clash-title">BIXO ROYALE</div>
+          </div>
+        </div>
 
-        <!-- Botões desktop -->
+        <!-- Stats rápidas no header (desktop) -->
+        <div class="header-stats desktop-only">
+          <div class="stat-item">
+            <q-icon name="collections" size="sm" color="amber" />
+            <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+          </div>
+          <div class="stat-item">
+            <q-icon name="star" size="sm" color="gold" />
+            <span>{{ authStore.user?.pontos_totais || 0 }}</span>
+          </div>
+        </div>
+
+        <!-- Ações principais desktop -->
         <div class="desktop-actions">
+          <!-- Botão Admin com badge -->
           <q-btn
             v-if="isAdmin"
             flat
-            round
             icon="admin_panel_settings"
+            label="Admin"
             @click="$router.push('/admin')"
-            class="desktop-btn"
-            size="md"
+            class="desktop-btn admin-btn"
           >
-            <q-tooltip>Painel Admin</q-tooltip>
+            <q-badge color="red" floating rounded>!</q-badge>
+            <q-tooltip>Painel Administrativo</q-tooltip>
           </q-btn>
 
+          <!-- Botão principal de adicionar código -->
           <q-btn
-            flat
-            label="Adicionar Código"
-            icon="add"
+            color="primary"
+            icon="add_circle"
+            label="Código"
             @click="openCodeDialog"
             :loading="cartasStore.loadingObter"
-            class="desktop-btn"
-          />
-
-          <q-btn
-            flat
-            label="Ranking"
-            icon="emoji_events"
-            @click="$router.push('/ranking')"
-            class="desktop-btn"
-          />
-
-          <q-btn
-            flat
-            round
-            icon="logout"
-            @click="logout"
-            class="desktop-btn logout-desktop"
-            size="md"
+            class="desktop-btn primary-btn"
+            glossy
           >
-            <q-tooltip>Sair</q-tooltip>
+            <q-tooltip>Adicionar código de carta</q-tooltip>
           </q-btn>
+
+          <!-- Botão de ranking -->
+          <q-btn
+            flat
+            icon="emoji_events"
+            label="Ranking"
+            @click="$router.push('/ranking')"
+            class="desktop-btn ranking-btn"
+          >
+            <q-tooltip>Ver ranking de jogadores</q-tooltip>
+          </q-btn>
+
+          <!-- Menu do usuário -->
+          <q-btn-dropdown
+            flat
+            class="user-dropdown desktop-btn"
+            :icon="authStore.user?.nome ? 'account_circle' : 'person'"
+          >
+            <template v-slot:label>
+              <div class="user-info-dropdown">
+                <div class="user-name-short">{{ (authStore.user?.nome || 'Usuário').split(' ')[0] }}</div>
+                <div class="user-level-badge">Nv.{{ authStore.user?.nivel || 1 }}</div>
+              </div>
+            </template>
+
+            <q-list>
+              <q-item clickable @click="verPerfil">
+                <q-item-section avatar>
+                  <q-icon name="person" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Meu Perfil</q-item-label>
+                  <q-item-label caption>{{ authStore.user?.email }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-separator />
+
+              <q-item clickable @click="verColetao">
+                <q-item-section avatar>
+                  <q-icon name="collections_bookmark" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Minha Coleção</q-item-label>
+                  <q-item-label caption>{{ cartasStore.estatisticas.total_cartas }} cartas</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-separator />
+
+              <q-item clickable @click="logout" class="logout-item">
+                <q-item-section avatar>
+                  <q-icon name="logout" color="negative" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Sair</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
         </div>
 
-        <!-- Menu hambúrguer mobile -->
+        <!-- Menu hambúrguer mobile melhorado -->
         <q-btn
           flat
           round
           icon="menu"
           @click="mobileMenuOpen = !mobileMenuOpen"
-          class="mobile-menu-btn"
+          class="mobile-menu-btn enhanced-mobile-btn"
           size="md"
-        />
+        >
+          <q-badge v-if="cartasStore.estatisticas.total_cartas > 0" 
+                   color="primary" 
+                   floating 
+                   rounded
+                   :label="cartasStore.estatisticas.total_cartas"
+          />
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -178,6 +247,23 @@
             </q-item-section>
           </q-item>
         </q-list>
+
+        <!-- Marketing Dev_garbson no menu mobile -->
+        <div class="mobile-footer">
+          <q-btn 
+            flat 
+            no-caps 
+            class="developer-credit-mobile" 
+            @click="openWhatsApp"
+            icon="code"
+          >
+            <div class="dev-info">
+              <div class="dev-text">Desenvolvido com ❤️</div>
+              <div class="dev-name">@dev_garbson</div>
+            </div>
+            <q-icon name="open_in_new" size="xs" />
+          </q-btn>
+        </div>
       </div>
     </q-drawer>
 
@@ -217,17 +303,52 @@
               </div>
             </div>
 
-            <!-- Marketing do Instagram -->
-            <div class="creator-section">
-              <div class="creator-header">
-                <q-icon name="palette" color="pink" size="md" />
-                <span class="creator-title">Criado por</span>
+            <!-- Marketing expandido do Dev_garbson -->
+            <div class="creator-section enhanced">
+              <div class="creator-card">
+                <div class="creator-header">
+                  <q-avatar size="50px" class="dev-avatar">
+                    <q-icon name="code" size="24px" color="white" />
+                  </q-avatar>
+                  <div class="creator-info">
+                    <div class="creator-title">Desenvolvido por</div>
+                    <div class="creator-name">@dev_garbson</div>
+                  </div>
+                </div>
+                
+                <div class="creator-stats">
+                  <div class="stat-badge">
+                    <q-icon name="engineering" size="sm" />
+                    <span>Full Stack Developer</span>
+                  </div>
+                  <div class="stat-badge">
+                    <q-icon name="code" size="sm" />
+                    <span>Vue.js Expert</span>
+                  </div>
+                </div>
+
+                <div class="creator-actions">
+                  <q-btn 
+                    color="green" 
+                    icon="chat" 
+                    label="Falar no WhatsApp"
+                    @click="openWhatsApp"
+                    class="whatsapp-btn-enhanced"
+                    glossy
+                  >
+                    <q-icon name="open_in_new" size="xs" />
+                  </q-btn>
+                  
+                  <q-btn 
+                    flat 
+                    icon="favorite" 
+                    label="Feito com ❤️"
+                    color="pink"
+                    class="love-btn"
+                    @click="mostrarCreditos"
+                  />
+                </div>
               </div>
-              <q-btn flat no-caps class="instagram-btn" @click="openInstagram">
-                <q-icon name="photo_camera" size="sm" />
-                <span>@dev_garbson</span>
-                <q-icon name="open_in_new" size="xs" />
-              </q-btn>
             </div>
 
             <!-- CTA para entrar -->
@@ -313,6 +434,53 @@
               ]"
             />
           </div>
+
+          <!-- Footer com marketing Dev_garbson (para usuários logados) -->
+          <div v-if="authStore.isAuthenticated" class="app-footer">
+            <div class="footer-content">
+              <div class="footer-branding">
+                <q-icon name="shield" size="md" color="primary" />
+                <div class="footer-text">
+                  <div class="app-name">BIXO ROYALE</div>
+                  <div class="version-info">v1.0 - Sistema de Cartas Colecionáveis</div>
+                </div>
+              </div>
+
+              <div class="footer-developer">
+                <div class="developer-badge">
+                  <div class="badge-content">
+                    <q-icon name="code" size="sm" color="primary" />
+                    <div class="badge-text">
+                      <div class="made-by">Desenvolvido com ❤️ por</div>
+                      <div class="dev-link" @click="openWhatsApp">
+                        <strong>@dev_garbson</strong>
+                        <q-icon name="open_in_new" size="xs" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="footer-links">
+                <q-btn 
+                  flat 
+                  size="sm" 
+                  icon="chat" 
+                  label="WhatsApp"
+                  @click="openWhatsApp"
+                  class="footer-btn"
+                />
+                <q-btn 
+                  flat 
+                  size="sm" 
+                  icon="info" 
+                  label="Sobre"
+                  @click="mostrarCreditos"
+                  class="footer-btn"
+                />
+              </div>
+            </div>
+          </div>
         </q-page-container>
       </q-page>
     </q-page-container>
@@ -363,12 +531,14 @@ import { useAuthStore } from "@/stores/auth";
 import { useCartasStore } from "@/stores/cartas";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 import { checkAdminAccess } from "../admin";
 
 // Stores e router
 const authStore = useAuthStore();
 const cartasStore = useCartasStore();
 const router = useRouter();
+const $q = useQuasar();
 
 // Estado local
 const codeDialog = ref(false);
@@ -485,25 +655,132 @@ const logout = async () => {
   router.push("/login");
 };
 
-const openInstagram = () => {
-  window.open("https://www.instagram.com/dev_garbson/", "_blank");
+const openWhatsApp = () => {
+  window.open("https://wa.me/5568992490198", "_blank");
+};
+
+const verPerfil = () => {
+  mobileMenuOpen.value = false;
+  // Implementar visualização do perfil (pode ser um dialog ou rota)
+  $q.notify({
+    type: 'info',
+    message: 'Funcionalidade em desenvolvimento',
+    caption: 'Em breve você poderá editar seu perfil!'
+  });
+};
+
+const verColetao = () => {
+  mobileMenuOpen.value = false;
+  // Scroll para a seção de cartas ou implementar view dedicada
+  const cardsGrid = document.querySelector('.cards-grid');
+  if (cardsGrid) {
+    cardsGrid.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+const mostrarCreditos = () => {
+  $q.dialog({
+    title: '🎮 Sobre o BIXO ROYALE',
+    message: `
+      <div style="text-align: center; padding: 20px;">
+        <div style="margin-bottom: 20px;">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24'%3E%3Cpath fill='%23667eea' d='M14.6 16.6l4.6-4.6l-4.6-4.6L16 6l6 6l-6 6l-1.4-1.4zm-5.2 0L4.8 12l4.6-4.6L8 6l-6 6l6 6l1.4-1.4z'/%3E%3C/svg%3E" alt="Code Icon">
+        </div>
+        
+        <h4 style="color: #667eea; margin: 10px 0;">Sistema desenvolvido por</h4>
+        <h3 style="color: #2c3e50; margin: 5px 0;">@dev_garbson</h3>
+        
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <p><strong>🚀 Tecnologias utilizadas:</strong></p>
+          <p>Vue.js 3 • Quasar Framework • Supabase • Cloudinary</p>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <p>💼 <strong>Full Stack Developer</strong></p>
+          <p>🎯 Especialista em Vue.js e sistemas web modernos</p>
+          <p>❤️ Apaixonado por criar experiências incríveis</p>
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <p style="color: #6c757d; font-size: 0.9rem;">
+            Desenvolvido com muito ❤️ e ☕<br>
+            Quer um sistema como este? Entre em contato!
+          </p>
+        </div>
+      </div>
+    `,
+    html: true,
+    ok: {
+      label: 'Falar no WhatsApp',
+      color: 'green'
+    },
+    cancel: {
+      label: 'Fechar',
+      flat: true
+    }
+  }).onOk(() => {
+    openWhatsApp();
+  });
 };
 
 // Lifecycle
 onMounted(async () => {
+  console.log('🏠 Home montado - Estado auth:', authStore.isAuthenticated);
+  console.log('🏠 Auth inicializado:', authStore.initialized);
+
+  // Aguardar inicialização da autenticação se necessário
+  if (!authStore.initialized) {
+    console.log('⏳ Aguardando inicialização da autenticação...');
+    
+    // Aguardar até 5 segundos pela inicialização
+    const maxWait = 5000;
+    const startTime = Date.now();
+    
+    while (!authStore.initialized && (Date.now() - startTime) < maxWait) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    console.log('✅ Autenticação inicializada:', authStore.initialized);
+  }
 
   // Só executa a animação de digitação para visitantes
   if (!authStore.isAuthenticated) {
     typeMessage();
   }
 
-  // Carregar dados
+  // Sempre carregar cartas disponíveis primeiro
   await cartasStore.fetchCartas();
+  console.log('📦 Cartas disponíveis carregadas:', cartasStore.cartas.length);
 
+  // Carregar cartas do usuário com retry
   if (authStore.isAuthenticated) {
-    await cartasStore.fetchCartasUsuario();
+    await loadUserCardsWithRetry();
   }
 });
+
+// Função para carregar cartas do usuário com retry
+const loadUserCardsWithRetry = async (maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 Tentativa ${attempt} de carregar cartas do usuário...`);
+      await cartasStore.fetchCartasUsuario();
+      
+      console.log('✅ Cartas do usuário carregadas:', cartasStore.cartasUsuario.length);
+      console.log('📊 Estatísticas:', cartasStore.estatisticas);
+      
+      return; // Sucesso - sair da função
+    } catch (error) {
+      console.error(`❌ Erro na tentativa ${attempt}:`, error);
+      
+      if (attempt < maxRetries) {
+        // Aguardar antes da próxima tentativa
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      } else {
+        console.error('❌ Falha ao carregar cartas do usuário após todas as tentativas');
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -513,6 +790,374 @@ onMounted(async () => {
   background: var(--cr-bg-primary);
   min-height: 100vh;
   position: relative;
+}
+
+/* ===== NAVBAR MELHORADO ===== */
+.enhanced-header {
+  background: linear-gradient(135deg, var(--cr-blue-dark), var(--cr-purple), #667eea);
+  border-bottom: 3px solid var(--cr-gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.enhanced-toolbar {
+  padding: 8px 24px;
+  min-height: 75px;
+  justify-content: space-between;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-width: 250px;
+}
+
+.logo-avatar {
+  background: linear-gradient(135deg, var(--cr-gold), #ffa000);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--cr-gold);
+  line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+
+.header-stats {
+  display: flex;
+  gap: 24px;
+  margin: 0 auto;
+  flex: 1;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: white;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+.desktop-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-height: 42px;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+
+.admin-btn {
+  color: #ff6b9d;
+  background: rgba(255, 107, 157, 0.1);
+}
+
+.admin-btn:hover {
+  background: rgba(255, 107, 157, 0.2);
+  transform: scale(1.05);
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.ranking-btn {
+  color: #ffa726;
+  background: rgba(255, 167, 38, 0.1);
+}
+
+.ranking-btn:hover {
+  background: rgba(255, 167, 38, 0.2);
+  transform: scale(1.05);
+}
+
+.user-dropdown {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.user-info-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.user-name-short {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-level-badge {
+  font-size: 0.7rem;
+  color: var(--cr-gold);
+  font-weight: bold;
+}
+
+.enhanced-mobile-btn {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.desktop-only {
+  display: flex;
+}
+
+/* ===== MENU MOBILE MELHORADO ===== */
+.mobile-footer {
+  margin-top: auto;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.developer-credit-mobile {
+  width: 100%;
+  color: rgba(255, 255, 255, 0.9);
+  justify-content: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.3s ease;
+}
+
+.developer-credit-mobile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dev-info {
+  flex: 1;
+  text-align: left;
+  margin-left: 8px;
+}
+
+.dev-text {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.dev-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--cr-gold);
+}
+
+/* ===== MARKETING EXPANDIDO ===== */
+.creator-section.enhanced {
+  margin: 30px 0;
+}
+
+.creator-card {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  transform: perspective(1000px) rotateX(2deg);
+}
+
+.creator-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dev-avatar {
+  background: linear-gradient(135deg, var(--cr-gold), #ffa000);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.creator-info {
+  flex: 1;
+}
+
+.creator-title {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.creator-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--cr-gold);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.creator-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(10px);
+}
+
+.creator-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.whatsapp-btn-enhanced {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  flex: 1;
+  min-width: 200px;
+  color: white;
+}
+
+.love-btn {
+  border: 2px solid #ff4081;
+  border-radius: 8px;
+  color: #ff4081;
+}
+
+.love-btn:hover {
+  background: rgba(255, 64, 129, 0.1);
+}
+
+/* ===== FOOTER APP ===== */
+.app-footer {
+  margin-top: 60px;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-top: 3px solid var(--cr-gold);
+  border-radius: 20px 20px 0 0;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 30px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-text {
+  color: #2c3e50;
+}
+
+.app-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--cr-blue-dark);
+}
+
+.version-info {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.footer-developer {
+  text-align: center;
+}
+
+.developer-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: white;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
+
+.badge-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-text {
+  text-align: left;
+}
+
+.made-by {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.dev-link {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--cr-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s ease;
+}
+
+.dev-link:hover {
+  transform: scale(1.05);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.footer-btn {
+  color: #6c757d;
+  border-radius: 6px;
+}
+
+.footer-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
 }
 
 /* ===== HEADER RESPONSIVO ===== */
@@ -650,13 +1295,27 @@ onMounted(async () => {
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
   /* Esconder botões desktop */
-  .desktop-actions {
+  .desktop-actions, .header-stats, .desktop-only {
     display: none;
   }
 
   /* Mostrar menu hambúrguer */
   .mobile-menu-btn {
     display: block;
+  }
+
+  /* Ajustar toolbar mobile */
+  .enhanced-toolbar {
+    min-height: 60px;
+    padding: 8px 12px;
+  }
+
+  .logo-section {
+    flex: 1;
+  }
+
+  .header-title {
+    font-size: 1.1rem;
   }
 
   .cards-grid {
@@ -675,11 +1334,43 @@ onMounted(async () => {
   }
 
   .epic-title {
-    font-size: 1.6rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
   }
 
   .epic-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+  }
+
+  /* Marketing responsivo */
+  .creator-card {
+    padding: 20px;
+  }
+
+  .creator-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .creator-actions {
+    flex-direction: column;
+  }
+
+  .whatsapp-btn-enhanced {
+    min-width: auto;
+    width: 100%;
+  }
+
+  /* Footer responsivo */
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .footer-links {
+    justify-content: center;
   }
 }
 
@@ -733,14 +1424,14 @@ onMounted(async () => {
 
 .epic-title {
   font-family: "Press Start 2P", cursive;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   color: var(--cr-gold);
   text-shadow: 2px 2px 0px #ff6b35, 4px 4px 0px #d63031,
     6px 6px 10px rgba(0, 0, 0, 0.8);
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   animation: epic-title-pulse 2s ease-in-out infinite;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 @keyframes epic-title-pulse {
@@ -1025,6 +1716,33 @@ onMounted(async () => {
   margin: 0;
 }
 
+/* ===== RESPONSIVIDADE TABLET ===== */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .header-stats {
+    gap: 15px;
+  }
+
+  .stat-item {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+  }
+
+  .desktop-btn {
+    min-height: 36px;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+
+  .creator-actions {
+    gap: 8px;
+  }
+
+  .footer-content {
+    gap: 20px;
+  }
+}
+
+/* ===== RESPONSIVIDADE MOBILE PEQUENO ===== */
 @media (max-width: 480px) {
   .page-container {
     padding: 15px;
@@ -1052,10 +1770,63 @@ onMounted(async () => {
 
   .mobile-stats {
     padding: 12px 15px;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .mobile-stat {
     font-size: 0.85rem;
+    justify-content: center;
+  }
+
+  /* Logo section mobile pequeno */
+  .logo-avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .header-title {
+    font-size: 1rem;
+    line-height: 1.1;
+  }
+
+  /* Creator card mobile pequeno */
+  .creator-card {
+    padding: 16px;
+  }
+
+  .creator-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .creator-name {
+    font-size: 1.2rem;
+  }
+
+  .stat-badge {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  /* Footer mobile pequeno */
+  .app-footer {
+    padding: 20px 15px;
+  }
+
+  .developer-badge {
+    padding: 12px 16px;
+  }
+
+  .badge-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .dev-link {
+    justify-content: center;
   }
 }
 

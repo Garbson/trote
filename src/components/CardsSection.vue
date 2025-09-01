@@ -3,8 +3,10 @@
     <!-- Barra de progresso da coleção -->
     <div class="progress-section">
       <div class="progress-header">
-        <span class="progress-label acampja-subtitle">Progresso da Coleção</span>
-        <span class="progress-percentage">{{ cartasStore.estatisticas.percentual_completo }}%</span>
+        <span class="progress-label acampja-subtitle">Progresso da Arca</span>
+        <span class="progress-percentage"
+          >{{ cartasStore.estatisticas.percentual_completo }}%</span
+        >
       </div>
       <div class="acampja-progress">
         <div
@@ -14,13 +16,13 @@
       </div>
     </div>
 
-    <!-- Grid de cartas -->
+    <!-- Grid de animais -->
     <div class="cards-grid">
-      <PokemonCard
+      <AnimalCard
         v-for="carta in cartasOrdenadas"
         :key="carta.id"
         :id="'carta-' + carta.id"
-        :pokemon="mapearCartaParaPokemon(carta)"
+        :animal="mapearCartaParaAnimal(carta)"
         :class="[
           'card-item acampja-card-hover',
           {
@@ -35,16 +37,16 @@
 </template>
 
 <script setup>
-import PokemonCard from "@/components/PokemonCard.vue";
 import { useCartasStore } from "@/stores/cartas";
 import { computed } from "vue";
+import AnimalCard from "./AnimalCard.vue";
 
 // Props
 const props = defineProps({
   activeCarta: {
     type: [String, Number],
-    default: null
-  }
+    default: null,
+  },
 });
 
 // Stores
@@ -64,7 +66,7 @@ const cartasOrdenadas = computed(() => {
 });
 
 // Methods
-const mapearCartaParaPokemon = (carta) => {
+const mapearCartaParaAnimal = (carta) => {
   return {
     id: carta.id,
     name: carta.nome,
@@ -73,7 +75,7 @@ const mapearCartaParaPokemon = (carta) => {
     code: carta.codigo_unico,
     raridade: carta.raridade,
     pontos: carta.pontos_valor,
-    curso: carta.descricao || "Acampista da Arena",
+    habitat: carta.descricao || "Animal da Arca",
   };
 };
 </script>
@@ -119,7 +121,11 @@ const mapearCartaParaPokemon = (carta) => {
 
 .acampja-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    90deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   border-radius: 20px;
   position: relative;
   transition: width 0.8s ease;
@@ -202,12 +208,24 @@ const mapearCartaParaPokemon = (carta) => {
   animation: card-reveal 0.6s ease-out;
 }
 
-.card-item:nth-child(1) { animation-delay: 0.1s; }
-.card-item:nth-child(2) { animation-delay: 0.2s; }
-.card-item:nth-child(3) { animation-delay: 0.3s; }
-.card-item:nth-child(4) { animation-delay: 0.4s; }
-.card-item:nth-child(5) { animation-delay: 0.5s; }
-.card-item:nth-child(6) { animation-delay: 0.6s; }
+.card-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.card-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.card-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.card-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.card-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.card-item:nth-child(6) {
+  animation-delay: 0.6s;
+}
 
 /* Efeitos especiais para cartas obtidas */
 .card-item.acquired {
@@ -225,7 +243,8 @@ const mapearCartaParaPokemon = (carta) => {
 }
 
 @keyframes sparkle {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 0.7;
   }

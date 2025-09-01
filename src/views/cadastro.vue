@@ -5,22 +5,22 @@
         <!-- Logo/Título -->
         <div class="game-logo">
           <q-icon name="shield" size="60px" color="amber" />
-          <h1 class="game-title">ACAMPJA 2025</h1>
-          <p class="game-subtitle">Junte-se à Arena</p>
+          <h1 class="game-title">ARCA DE NOÉ</h1>
+          <p class="game-subtitle">Junte-se à Arca</p>
         </div>
 
         <!-- Card de Cadastro -->
         <q-card class="cadastro-card">
           <q-card-section class="card-header">
             <div class="text-h5 text-center">🏆 Criar Conta</div>
-            <p class="header-subtitle">Torne-se um Colecionador Lendário</p>
+            <p class="header-subtitle">Torne-se um Colecionador da Arca</p>
           </q-card-section>
 
           <q-card-section class="card-content">
             <q-form @submit.prevent="handleCadastro" class="cadastro-form">
               <q-input
                 v-model="nome"
-                label="Nome de Guerreiro"
+                label="Nome de Explorador"
                 outlined
                 color="primary"
                 class="input-field"
@@ -90,7 +90,7 @@
               <!-- Termos e condições -->
               <q-checkbox
                 v-model="aceitaTermos"
-                label="Aceito os termos e condições da Arena"
+                label="Aceito os termos e condições da Arca"
                 color="primary"
                 class="terms-checkbox"
               />
@@ -120,11 +120,13 @@
 
           <!-- Benefícios -->
           <q-card-section class="card-footer">
-            <div class="benefits-title">🎁 Benefícios de Colecionador:</div>
+            <div class="benefits-title">
+              🐾 Benefícios de Colecionador da Arca:
+            </div>
             <div class="benefits-list">
               <div class="benefit-item">
                 <q-icon name="collections" color="purple" />
-                <span>Colecione cartas únicas dos calouros</span>
+                <span>Colecione cartas únicas dos animais</span>
               </div>
               <div class="benefit-item">
                 <q-icon name="emoji_events" color="amber" />
@@ -206,7 +208,12 @@ const goToLogin = () => {
 
 <style scoped>
 .layout {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(
+    135deg,
+    var(--arca-wood) 0%,
+    var(--arca-gold) 50%,
+    var(--arca-green) 100%
+  );
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -284,7 +291,7 @@ const goToLogin = () => {
 }
 
 .card-header {
-  background: linear-gradient(135deg, #ff6b35 0%, #f093fb 100%);
+  background: linear-gradient(135deg, var(--arca-wood), var(--arca-gold));
   color: white;
   text-align: center;
   padding: 25px 20px;
@@ -345,7 +352,7 @@ const goToLogin = () => {
 }
 
 .cadastro-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--arca-wood), var(--arca-gold));
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 

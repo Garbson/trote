@@ -5,21 +5,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
 
 /* Paleta de cores AcampJA 2025 */
-/* ===== TEMA ARCA DE NOÉ - ACAMPJA 2025 ===== */
 :root {
-  /* Cores principais da Arca de Noé */
-  --acampja-primary: #8b4513; /* Marrom madeira */
-  --acampja-secondary: #daa520; /* Dourado */
-  --acampja-accent: #228b22; /* Verde natureza */
-  --acampja-sky: #87ceeb; /* Azul céu */
-  --acampja-earth: #cd853f; /* Terra */
-
-  /* Cores da Arca */
-  --arca-wood: #8b4513;
-  --arca-gold: #ffd700;
-  --arca-green: #228b22;
-  --arca-blue: #4169e1;
-  --arca-white: #f8f8ff;
+  /* Cores principais AcampJA */
+  --acampja-primary: #2ecc71;
+  --acampja-secondary: #e67e22;
+  --acampja-accent: #9b59b6;
 
   /* Cores de destaque */
   --acampja-yellow: #f1c40f;
@@ -109,8 +99,8 @@
   }
 }
 
-/* Botões estilo AcampJA 2025 */
-.acampja-btn {
+/* Botões estilo Clash Royale */
+.clash-btn {
   border-radius: 12px;
   font-weight: bold;
   text-transform: uppercase;
@@ -121,7 +111,7 @@
   overflow: hidden;
 }
 
-.acampja-btn::before {
+.clash-btn::before {
   content: "";
   position: absolute;
   top: 0;
@@ -137,11 +127,11 @@
   transition: left 0.5s;
 }
 
-.acampja-btn:hover::before {
+.clash-btn:hover::before {
   left: 100%;
 }
 
-.acampja-btn-primary {
+.clash-btn-primary {
   background: linear-gradient(
     135deg,
     var(--cr-blue-primary),
@@ -150,7 +140,7 @@
   box-shadow: var(--cr-shadow-button);
 }
 
-.acampja-btn-secondary {
+.clash-btn-secondary {
   background: linear-gradient(135deg, var(--cr-purple), var(--cr-orange));
 }
 
@@ -393,11 +383,11 @@
   }
 }
 
-.acampja-pulse {
-  animation: acampja-pulse 2s ease-in-out infinite;
+.clash-pulse {
+  animation: clash-pulse 2s ease-in-out infinite;
 }
 
-@keyframes acampja-pulse {
+@keyframes clash-pulse {
   0%,
   100% {
     transform: scale(1);

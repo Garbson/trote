@@ -83,7 +83,7 @@ const router = useRouter();
 const $q = useQuasar();
 
 // Estado local
-const activeTab = ref('dashboard');
+const activeTab = ref("dashboard");
 const drawerOpen = ref(false);
 const loading = ref(false);
 const loadingUsuarios = ref(false);
@@ -95,18 +95,18 @@ const usuarios = ref([]);
 onMounted(async () => {
   if (!authStore.isAuthenticated || !checkAdminAccess(authStore.user)) {
     $q.notify({
-      type: 'negative',
-      message: 'Acesso negado! Apenas administradores podem acessar esta área.',
-      timeout: 3000
+      type: "negative",
+      message: "Acesso negado! Apenas administradores podem acessar esta área.",
+      timeout: 3000,
     });
-    router.push('/');
+    router.push("/");
     return;
   }
 
   await Promise.all([
     carregarCartas(),
     carregarUsuarios(),
-    carregarEstatisticas()
+    carregarEstatisticas(),
   ]);
 });
 
@@ -118,8 +118,8 @@ const carregarCartas = async () => {
     cartas.value = adminStore.cartas;
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar animais: ' + error.message
+      type: "negative",
+      message: "Erro ao carregar animais: " + error.message,
     });
   } finally {
     loading.value = false;
@@ -133,8 +133,8 @@ const carregarUsuarios = async () => {
     usuarios.value = adminStore.usuarios;
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar usuários: ' + error.message
+      type: "negative",
+      message: "Erro ao carregar usuários: " + error.message,
     });
   } finally {
     loadingUsuarios.value = false;
@@ -147,8 +147,8 @@ const carregarEstatisticas = async () => {
     await adminStore.carregarEstatisticas();
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar estatísticas: ' + error.message
+      type: "negative",
+      message: "Erro ao carregar estatísticas: " + error.message,
     });
   } finally {
     loadingEstatisticas.value = false;
@@ -160,13 +160,13 @@ const adicionarCarta = async (novaCarta) => {
     await adminStore.adicionarCarta(novaCarta);
     await carregarCartas();
     $q.notify({
-      type: 'positive',
-      message: 'Animal adicionado com sucesso!'
+      type: "positive",
+      message: "Animal adicionado com sucesso!",
     });
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao adicionar animal: ' + error.message
+      type: "negative",
+      message: "Erro ao adicionar animal: " + error.message,
     });
   }
 };
@@ -174,29 +174,29 @@ const adicionarCarta = async (novaCarta) => {
 const editarCarta = async (carta) => {
   // Implementar edição
   $q.notify({
-    type: 'info',
-    message: 'Função de edição em desenvolvimento'
+    type: "info",
+    message: "Função de edição em desenvolvimento",
   });
 };
 
 const excluirCarta = async (carta) => {
   $q.dialog({
-    title: 'Confirmar exclusão',
+    title: "Confirmar exclusão",
     message: `Tem certeza que deseja excluir o animal "${carta.nome}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     try {
       await adminStore.excluirCarta(carta.id);
       await carregarCartas();
       $q.notify({
-        type: 'positive',
-        message: 'Animal excluído com sucesso!'
+        type: "positive",
+        message: "Animal excluído com sucesso!",
       });
     } catch (error) {
       $q.notify({
-        type: 'negative',
-        message: 'Erro ao excluir animal: ' + error.message
+        type: "negative",
+        message: "Erro ao excluir animal: " + error.message,
       });
     }
   });
@@ -204,43 +204,43 @@ const excluirCarta = async (carta) => {
 
 const buscarUsuarios = (termo) => {
   // Implementar busca
-  console.log('Buscar:', termo);
+  console.log("Buscar:", termo);
 };
 
 const filtrarPorStatus = (status) => {
   // Implementar filtro
-  console.log('Filtrar por status:', status);
+  console.log("Filtrar por status:", status);
 };
 
 const exportarUsuarios = () => {
   // Implementar exportação
   $q.notify({
-    type: 'info',
-    message: 'Função de exportação em desenvolvimento'
+    type: "info",
+    message: "Função de exportação em desenvolvimento",
   });
 };
 
 const exportarDados = () => {
   // Implementar exportação de dados
   $q.notify({
-    type: 'info',
-    message: 'Função de exportação em desenvolvimento'
+    type: "info",
+    message: "Função de exportação em desenvolvimento",
   });
 };
 
 const visualizarUsuario = (usuario) => {
   // Implementar visualização
   $q.notify({
-    type: 'info',
-    message: `Visualizar usuário: ${usuario.nome}`
+    type: "info",
+    message: `Visualizar usuário: ${usuario.nome}`,
   });
 };
 
 const editarUsuario = (usuario) => {
   // Implementar edição
   $q.notify({
-    type: 'info',
-    message: `Editar usuário: ${usuario.nome}`
+    type: "info",
+    message: `Editar usuário: ${usuario.nome}`,
   });
 };
 
@@ -249,13 +249,13 @@ const alternarStatusUsuario = async (usuario) => {
     await adminStore.alternarStatusUsuario(usuario.id);
     await carregarUsuarios();
     $q.notify({
-      type: 'positive',
-      message: `Status do usuário ${usuario.nome} alterado com sucesso!`
+      type: "positive",
+      message: `Status do usuário ${usuario.nome} alterado com sucesso!`,
     });
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao alterar status: ' + error.message
+      type: "negative",
+      message: "Erro ao alterar status: " + error.message,
     });
   }
 };
@@ -263,11 +263,11 @@ const alternarStatusUsuario = async (usuario) => {
 const logout = async () => {
   try {
     await authStore.logout();
-    router.push('/login');
+    router.push("/login");
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao fazer logout: ' + error.message
+      type: "negative",
+      message: "Erro ao fazer logout: " + error.message,
     });
   }
 };

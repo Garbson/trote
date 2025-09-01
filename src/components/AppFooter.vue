@@ -15,7 +15,7 @@
           <div class="badge-content">
             <q-icon name="code" size="sm" color="primary" />
             <div class="badge-text">
-              <div class="made-by">Desenvolvido com ❤️ por</div>
+              <div class="made-by">Desenvolvido por</div>
               <div class="dev-link" @click="openWhatsApp">
                 <strong>@dev_garbson</strong>
                 <q-icon name="open_in_new" size="xs" />
@@ -26,18 +26,18 @@
       </div>
 
       <div class="footer-links">
-        <q-btn 
-          flat 
-          size="sm" 
-          icon="chat" 
+        <q-btn
+          flat
+          size="sm"
+          icon="chat"
           label="WhatsApp"
           @click="openWhatsApp"
           class="footer-btn"
         />
-        <q-btn 
-          flat 
-          size="sm" 
-          icon="info" 
+        <q-btn
+          flat
+          size="sm"
+          icon="info"
           label="Sobre"
           @click="mostrarCreditos"
           class="footer-btn"
@@ -62,7 +62,7 @@ const openWhatsApp = () => {
 
 const mostrarCreditos = () => {
   $q.dialog({
-    title: '🎮 Sobre o ACAMPJA 2025',
+    title: "🎮 Sobre o ACAMPJA 2025",
     message: `
       <div style="text-align: center; padding: 20px;">
         <div style="margin-bottom: 20px;">
@@ -93,13 +93,13 @@ const mostrarCreditos = () => {
     `,
     html: true,
     ok: {
-      label: 'Falar no WhatsApp',
-      color: 'green'
+      label: "Falar no WhatsApp",
+      color: "green",
     },
     cancel: {
-      label: 'Fechar',
-      flat: true
-    }
+      label: "Fechar",
+      flat: true,
+    },
   }).onOk(() => {
     openWhatsApp();
   });
@@ -151,7 +151,11 @@ const mostrarCreditos = () => {
 }
 
 .developer-badge {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   border-radius: 12px;
   padding: 16px 20px;
   color: white;

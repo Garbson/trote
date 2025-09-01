@@ -3,7 +3,7 @@
     :class="[
       'acampja-card-container',
       { acquired },
-      pokemon.raridade,
+      animal.raridade,
       {
         unlocking: isUnlocking,
         'just-unlocked': justUnlocked,
@@ -22,37 +22,37 @@
         ></div>
       </div>
       <div class="unlock-text">
-        <div class="unlock-message">CARTA DESBLOQUEADA!</div>
+        <div class="unlock-message">ANIMAL ENCONTRADO!</div>
         <div class="unlock-rarity">
-          {{ formatarRaridade(pokemon.raridade) }}
+          {{ formatarRaridade(animal.raridade) }}
         </div>
       </div>
     </div>
 
     <!-- Brilho da raridade - APENAS se obtida -->
     <div
-      v-if="acquired && pokemon.raridade"
-      :class="['rarity-glow', pokemon.raridade]"
+      v-if="acquired && animal.raridade"
+      :class="['rarity-glow', animal.raridade]"
     ></div>
 
     <!-- Header da carta -->
     <q-card-section class="card-header">
       <!-- Nome só aparece se a carta foi obtida -->
       <div class="card-title acampja-subtitle">
-        {{ acquired ? pokemon.name : "???" }}
+        {{ acquired ? animal.name : "???" }}
       </div>
 
       <!-- Badge de raridade só aparece se obtida -->
       <div
-        v-if="acquired && pokemon.raridade"
-        :class="['raridade-badge', 'rarity-' + pokemon.raridade]"
+        v-if="acquired && animal.raridade"
+        :class="['raridade-badge', 'rarity-' + animal.raridade]"
       >
-        {{ formatarRaridade(pokemon.raridade) }}
+        {{ formatarRaridade(animal.raridade) }}
       </div>
 
       <!-- Hint de raridade para cartas não obtidas -->
-      <div v-if="!acquired && pokemon.raridade" class="mystery-rarity-badge">
-        <div :class="['rarity-dot-badge', pokemon.raridade]"></div>
+      <div v-if="!acquired && animal.raridade" class="mystery-rarity-badge">
+        <div :class="['rarity-dot-badge', animal.raridade]"></div>
       </div>
     </q-card-section>
 
@@ -61,14 +61,14 @@
       <!-- Imagem real - APENAS se carta foi obtida -->
       <q-img
         v-if="acquired"
-        :src="pokemon.image"
+        :src="animal.image"
         class="card-image"
         :loading="false"
         fit="cover"
       >
         <template v-slot:error>
           <div class="image-placeholder">
-            <q-icon name="person" size="60px" color="grey-5" />
+            <q-icon name="pets" size="60px" color="grey-5" />
           </div>
         </template>
       </q-img>
@@ -82,15 +82,15 @@
             color="white"
             class="acampja-pulse"
           />
-          <div class="mystery-text">Carta Misteriosa</div>
-          <div class="mystery-subtitle">Digite o código para revelar</div>
+          <div class="mystery-text">Animal Misterioso</div>
+          <div class="mystery-subtitle">Digite o código para encontrar</div>
         </div>
       </div>
 
       <!-- Indicador de pontos - APENAS se obtida -->
       <div v-if="acquired" class="level-indicator">
         <q-icon name="star" size="sm" />
-        <span>{{ pokemon.pontos || 10 }}</span>
+        <span>{{ animal.pontos || 10 }}</span>
       </div>
     </div>
 
@@ -103,7 +103,7 @@
             <q-icon name="school" size="sm" color="primary" />
             <span class="info-label">Descrição:</span>
             <span class="info-value">{{
-              pokemon.curso || "Acampista da Arena"
+              animal.habitat || "Animal da Arca"
             }}</span>
           </div>
         </div>
@@ -111,11 +111,11 @@
         <div class="stats-row">
           <div class="stat-chip">
             <q-icon name="stars" size="sm" />
-            <span>{{ pokemon.pontos || 10 }} pts</span>
+            <span>{{ animal.pontos || 10 }} pts</span>
           </div>
-          <div class="stat-chip rarity-chip" :class="pokemon.raridade">
-            <q-icon name="diamond" size="sm" />
-            <span>{{ formatarRaridade(pokemon.raridade) }}</span>
+          <div class="stat-chip rarity-chip" :class="animal.raridade">
+            <q-icon name="star" size="xs" />
+            <span>{{ formatarRaridade(animal.raridade) }}</span>
           </div>
         </div>
       </div>
@@ -127,23 +127,23 @@
             <q-icon name="qr_code" size="lg" color="gold" />
           </div>
           <div class="instruction-content">
-            <div class="instruction-title">Como desbloquear:</div>
+            <div class="instruction-title">Como encontrar:</div>
             <div class="instruction-text">
-              Encontre o calouro no campus e digite o código da placa
+              Encontre o acampista no campus e digite o código da placa
             </div>
           </div>
         </div>
 
         <div class="rarity-info">
-          <div :class="['rarity-indicator', pokemon.raridade]"></div>
-          <span>{{ formatarRaridade(pokemon.raridade) }}</span>
+          <div :class="['rarity-indicator', animal.raridade]"></div>
+          <span>{{ formatarRaridade(animal.raridade) }}</span>
         </div>
       </div>
     </q-card-section>
 
     <!-- Efeitos especiais para carta lendária - APENAS se obtida -->
     <div
-      v-if="acquired && pokemon.raridade === 'lendario'"
+      v-if="acquired && animal.raridade === 'lendario'"
       class="legendary-effects"
     >
       <div class="legendary-sparkle"></div>
@@ -157,21 +157,21 @@ import { computed, ref, watch } from "vue";
 
 // Props
 const props = defineProps({
-  pokemon: {
+  animal: {
     type: Object,
     required: true,
   },
 });
 
 // Emits
-const emit = defineEmits(["carta-desbloqueada"]);
+const emit = defineEmits(["animal-encontrado"]);
 
 // Estado da animação
 const isUnlocking = ref(false);
 const justUnlocked = ref(false);
 
 // Computed
-const acquired = computed(() => props.pokemon.acquired || false);
+const acquired = computed(() => props.animal.acquired || false);
 
 // Watch para detectar quando a carta é desbloqueada
 watch(acquired, (newValue, oldValue) => {
@@ -206,7 +206,7 @@ const playUnlockAnimation = () => {
   isUnlocking.value = true;
 
   // Emitir evento para o componente pai
-  emit("carta-desbloqueada", props.pokemon.id);
+  emit("animal-encontrado", props.animal.id);
 
   // Duração da animação principal
   setTimeout(() => {
@@ -228,7 +228,7 @@ const getParticleStyle = (index) => {
     "--angle": `${angle}deg`,
     "--radius": `${radius}px`,
     "--delay": `${index * 0.1}s`,
-    "--color": getParticleColor(props.pokemon.raridade),
+    "--color": getParticleColor(props.animal.raridade),
   };
 };
 

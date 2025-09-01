@@ -7,16 +7,14 @@
     <div v-if="!authStore.isAuthenticated" class="welcome-message acampja-card">
       <div class="welcome-header">
         <q-icon
-          name="local_fire_department"
+          name="sailing"
           size="60px"
-          color="amber"
+          color="brown"
           class="acampja-pulse"
         />
-        <h2 class="epic-title">Bem-vindo ao ACAMPJA 2025!</h2>
+        <h2 class="epic-title">Bem-vindo à Arca de Noé!</h2>
         <div class="subtitle-container">
-          <p class="epic-subtitle">
-            🎯 Coleção Épica de Acampistas Lendários 🏆
-          </p>
+          <p class="epic-subtitle">🦁 Coleção Épica dos Animais da Arca 🐘</p>
         </div>
       </div>
 
@@ -24,9 +22,9 @@
         <div class="typed-message" v-html="typedMessage"></div>
 
         <div class="battle-cry">
-          <div class="cry-line">🔥 EXPLORE O ACAMPAMENTO 🔥</div>
-          <div class="cry-line">⭐ COLETE OS CÓDIGOS ⭐</div>
-          <div class="cry-line">👑 TORNE-SE LENDÁRIO 👑</div>
+          <div class="cry-line">� EMBARQUE NA ARCA �</div>
+          <div class="cry-line">🦁 COLETE OS ANIMAIS 🐘</div>
+          <div class="cry-line">👑 ENCONTRE OS LENDÁRIOS 👑</div>
         </div>
       </div>
 
@@ -42,7 +40,7 @@
               <div class="creator-name">@dev_garbson</div>
             </div>
           </div>
-          
+
           <div class="creator-stats">
             <div class="stat-badge">
               <q-icon name="engineering" size="sm" />
@@ -55,9 +53,9 @@
           </div>
 
           <div class="creator-actions">
-            <q-btn 
-              color="green" 
-              icon="chat" 
+            <q-btn
+              color="green"
+              icon="chat"
               label="Falar no WhatsApp"
               @click="openWhatsApp"
               class="whatsapp-btn-enhanced"
@@ -65,15 +63,6 @@
             >
               <q-icon name="open_in_new" size="xs" />
             </q-btn>
-            
-            <q-btn 
-              flat 
-              icon="favorite" 
-              label="Feito com ❤️"
-              color="pink"
-              class="love-btn"
-              @click="mostrarCreditos"
-            />
           </div>
         </div>
       </div>
@@ -81,7 +70,7 @@
       <!-- CTA para entrar -->
       <div class="cta-section">
         <q-btn
-          label="Entrar na Arena"
+          label="Entrar na Arca"
           color="primary"
           size="xl"
           class="acampja-btn acampja-btn-primary cta-btn"
@@ -93,7 +82,7 @@
     <!-- Dashboard APENAS para usuários logados -->
     <div v-if="authStore.isAuthenticated" class="user-dashboard">
       <div class="dashboard-header">
-        <h3 class="dashboard-title">🏕️ Sua Arena</h3>
+        <h3 class="dashboard-title">🏕️ Sua Arca</h3>
         <p class="welcome-back">
           Bem-vindo de volta, {{ authStore.user?.nome || "Acampista" }}!
         </p>
@@ -110,7 +99,11 @@
         </div>
         <div class="stat-item acampja-badge rarity-legendary">
           <q-icon name="collections" size="md" />
-          <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+          <span
+            >{{ cartasStore.estatisticas.total_cartas }}/{{
+              cartasStore.estatisticas.total_disponiveis
+            }}</span
+          >
         </div>
         <div class="stat-item acampja-badge rarity-common">
           <q-icon name="percent" size="md" />
@@ -125,7 +118,7 @@
 import { useAuthStore } from "@/stores/auth";
 import { useCartasStore } from "@/stores/cartas";
 import { useQuasar } from "quasar";
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 // Stores e router
@@ -139,23 +132,23 @@ const typedMessage = ref("");
 
 // Mensagem de boas-vindas para visitantes
 const message = `
-🎯 <strong>COMO FUNCIONA O ACAMPJA:</strong><br>
-• Cada carta representa um acampista único com habilidades especiais<br>
+🚢 <strong>COMO FUNCIONA A ARCA DE NOÉ:</strong><br>
+• Cada carta representa um animal único da Arca com características especiais<br>
 • Encontre os acampistas no acampamento e veja a <span style="color: #F1C40F;">placa no peito</span> deles<br>
-• Digite o código da placa em "Adicionar Código" para obter a carta<br>
-• Acumule pontos e suba no ranking da arena<br><br>
+• Digite o código da placa em "Adicionar Código" para obter o animal<br>
+• Acumule pontos e suba no ranking da arca<br><br>
 
-🏆 <strong>MISSÕES ÉPICAS:</strong><br>
-• Colete todas as cartas raras e lendárias<br>
-• Explore o acampamento em busca dos acampistas com placas<br>
-• Desbloqueie cartas especiais com códigos únicos<br>
-• Compete com outros acampistas no ranking<br><br>
+🦁 <strong>MISSÕES DA ARCA:</strong><br>
+• Colete todos os animais da arca, dos comuns aos lendários<br>
+• Explore o acampamento em busca dos códigos dos animais<br>
+• Encontre os animais lendários escondidos (apenas códigos especiais)<br>
+• Compete com outros no ranking da Arca de Noé<br><br>
 
-⚡ <strong>DICAS DE BATALHA:</strong><br>
-• Cartas lendárias valem mais pontos<br>
+🐘 <strong>DICAS DE COLETA:</strong><br>
+• Animais lendários valem mais pontos e são mais raros<br>
 • Os códigos estão nas <span style="color: #E67E22;">placas que os acampistas usam no peito</span><br>
-• Cada acampista tem um código único - não perca nenhum!<br>
-• Mantenha-se ativo para encontrar todos os acampistas
+• Cada animal tem um código único - colete todos!<br>
+• Mantenha-se ativo para encontrar todos os animais da arca
 `;
 
 // Methods
@@ -178,19 +171,20 @@ const openWhatsApp = () => {
 
 const mostrarCreditos = () => {
   $q.dialog({
-    title: '🎮 Sobre o ACAMPJA 2025',
+    title: "🚢 Sobre a Arca de Noé - ACAMPJA 2025",
     message: `
       <div style="text-align: center; padding: 20px;">
         <div style="margin-bottom: 20px;">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24'%3E%3Cpath fill='%232ECC71' d='M14.6 16.6l4.6-4.6l-4.6-4.6L16 6l6 6l-6 6l-1.4-1.4zm-5.2 0L4.8 12l4.6-4.6L8 6l-6 6l6 6l1.4-1.4z'/%3E%3C/svg%3E" alt="Code Icon">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24'%3E%3Cpath fill='%23228B22' d='M14.6 16.6l4.6-4.6l-4.6-4.6L16 6l6 6l-6 6l-1.4-1.4zm-5.2 0L4.8 12l4.6-4.6L8 6l-6 6l6 6l1.4-1.4z'/%3E%3C/svg%3E" alt="Code Icon">
         </div>
         
-        <h4 style="color: #2ECC71; margin: 10px 0;">Sistema desenvolvido por</h4>
-        <h3 style="color: #2c3e50; margin: 5px 0;">@dev_garbson</h3>
+        <h4 style="color: #228B22; margin: 10px 0;">Sistema desenvolvido por</h4>
+        <h3 style="color: #8B4513; margin: 5px 0;">@dev_garbson</h3>
         
         <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-          <p><strong>🚀 Tecnologias utilizadas:</strong></p>
-          <p>Vue.js 3 • Quasar Framework • Supabase • Cloudinary</p>
+          <p><strong>� Tema: Arca de Noé</strong></p>
+          <p>Colete animais, encontre os lendários escondidos!</p>
+          <p><strong>🛠️ Tecnologias:</strong> Vue.js 3 • Quasar • Supabase</p>
         </div>
         
         <div style="margin: 20px 0;">
@@ -209,13 +203,13 @@ const mostrarCreditos = () => {
     `,
     html: true,
     ok: {
-      label: 'Falar no WhatsApp',
-      color: 'green'
+      label: "Falar no WhatsApp",
+      color: "green",
     },
     cancel: {
-      label: 'Fechar',
-      flat: true
-    }
+      label: "Fechar",
+      flat: true,
+    },
   }).onOk(() => {
     openWhatsApp();
   });
@@ -268,7 +262,8 @@ onMounted(() => {
 }
 
 @keyframes float-particles {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
     opacity: 0.7;
   }
@@ -284,23 +279,21 @@ onMounted(() => {
   padding: 40px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.9),
-    rgba(46, 204, 113, 0.3)
-  );
-  border: 4px solid var(--cr-gold);
+  background: linear-gradient(135deg, var(--arca-wood), var(--arca-gold));
+  border: 4px solid var(--arca-gold);
   animation: epic-border-glow 3s ease-in-out infinite;
+  color: white;
 }
 
 @keyframes epic-border-glow {
-  0%, 100% {
-    border-color: var(--cr-gold);
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
+  0%,
+  100% {
+    border-color: var(--arca-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
   }
   50% {
     border-color: #fff;
-    box-shadow: 0 0 30px rgba(241, 196, 15, 0.6);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
   }
 }
 
@@ -326,7 +319,8 @@ onMounted(() => {
 }
 
 @keyframes epic-title-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -335,7 +329,11 @@ onMounted(() => {
 }
 
 .subtitle-container {
-  background: linear-gradient(45deg, var(--acampja-secondary), var(--acampja-accent));
+  background: linear-gradient(
+    45deg,
+    var(--acampja-secondary),
+    var(--acampja-accent)
+  );
   padding: 15px 25px;
   border-radius: 20px;
   border: 2px solid var(--cr-gold);
@@ -353,7 +351,8 @@ onMounted(() => {
 }
 
 @keyframes subtitle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -397,12 +396,19 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-.cry-line:nth-child(1) { animation-delay: 0s; }
-.cry-line:nth-child(2) { animation-delay: 0.5s; }
-.cry-line:nth-child(3) { animation-delay: 1s; }
+.cry-line:nth-child(1) {
+  animation-delay: 0s;
+}
+.cry-line:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.cry-line:nth-child(3) {
+  animation-delay: 1s;
+}
 
 @keyframes cry-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.8;
     transform: scale(1);
   }
@@ -418,7 +424,11 @@ onMounted(() => {
 }
 
 .creator-card {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   border-radius: 16px;
   padding: 24px;
   color: white;
@@ -508,7 +518,11 @@ onMounted(() => {
   padding: 15px 40px;
   font-size: 1.1rem;
   border-radius: 25px;
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
   transition: all 0.3s ease;
 }
@@ -609,7 +623,11 @@ onMounted(() => {
 }
 
 .acampja-btn-primary {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
 }
 
@@ -620,7 +638,7 @@ onMounted(() => {
 
 /* ===== CARDS ACAMPJA ===== */
 .acampja-card {
-  background: var(--cr-bg-card);
+  background: rgba(255, 255, 255, 0.1);
   border: var(--cr-border-card);
   border-radius: var(--cr-border-radius);
   box-shadow: var(--cr-shadow-card);
@@ -650,7 +668,8 @@ onMounted(() => {
 }
 
 @keyframes acampja-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {

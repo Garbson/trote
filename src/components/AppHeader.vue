@@ -1,21 +1,29 @@
 <template>
-  <q-header elevated class="acampja-header enhanced-header" v-if="authStore.isAuthenticated">
+  <q-header
+    elevated
+    class="acampja-header enhanced-header"
+    v-if="authStore.isAuthenticated"
+  >
     <q-toolbar class="enhanced-toolbar">
       <!-- Logo e título -->
       <div class="logo-section">
         <q-avatar size="40px" class="logo-avatar">
-          <q-icon name="local_fire_department" size="24px" color="white" />
+          <q-icon name="sailing" size="24px" color="white" />
         </q-avatar>
         <div class="title-section">
-          <div class="header-title acampja-title">ACAMPJA 2025</div>
+          <div class="header-title acampja-title">ARCA DE NOÉ</div>
         </div>
       </div>
 
       <!-- Stats rápidas no header (desktop) -->
       <div class="header-stats desktop-only">
         <div class="stat-item">
-          <q-icon name="collections" size="sm" color="amber" />
-          <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+          <q-icon name="pets" size="sm" color="amber" />
+          <span
+            >{{ cartasStore.estatisticas.total_cartas }}/{{
+              cartasStore.estatisticas.total_disponiveis
+            }}</span
+          >
         </div>
         <div class="stat-item">
           <q-icon name="star" size="sm" color="gold" />
@@ -48,7 +56,7 @@
           class="desktop-btn primary-btn"
           glossy
         >
-          <q-tooltip>Adicionar código de carta</q-tooltip>
+          <q-tooltip>Adicionar código de animal</q-tooltip>
         </q-btn>
 
         <!-- Botão de ranking -->
@@ -70,8 +78,12 @@
         >
           <template v-slot:label>
             <div class="user-info-dropdown">
-              <div class="user-name-short">{{ (authStore.user?.nome || 'Usuário').split(' ')[0] }}</div>
-              <div class="user-level-badge">Nv.{{ authStore.user?.nivel || 1 }}</div>
+              <div class="user-name-short">
+                {{ (authStore.user?.nome || "Usuário").split(" ")[0] }}
+              </div>
+              <div class="user-level-badge">
+                Nv.{{ authStore.user?.nivel || 1 }}
+              </div>
             </div>
           </template>
 
@@ -94,7 +106,12 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>Minha Coleção</q-item-label>
-                <q-item-label caption>{{ cartasStore.estatisticas.total_cartas }} cartas</q-item-label>
+                <q-item-label caption
+                  >{{
+                    cartasStore.estatisticas.total_cartas
+                  }}
+                  cartas</q-item-label
+                >
               </q-item-section>
             </q-item>
 
@@ -121,10 +138,10 @@
         class="mobile-menu-btn enhanced-mobile-btn"
         size="md"
       >
-        <q-badge 
-          v-if="cartasStore.estatisticas.total_cartas > 0" 
-          color="primary" 
-          floating 
+        <q-badge
+          v-if="cartasStore.estatisticas.total_cartas > 0"
+          color="primary"
+          floating
           rounded
           :label="cartasStore.estatisticas.total_cartas"
         />
@@ -145,12 +162,18 @@ import { checkAdminAccess } from "../admin";
 const props = defineProps({
   mobileMenuOpen: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 // Emits
-const emit = defineEmits(['toggle-mobile-menu', 'open-code-dialog', 'logout', 'ver-perfil', 'ver-colecao']);
+const emit = defineEmits([
+  "toggle-mobile-menu",
+  "open-code-dialog",
+  "logout",
+  "ver-perfil",
+  "ver-colecao",
+]);
 
 // Stores e router
 const authStore = useAuthStore();
@@ -166,30 +189,35 @@ const isAdmin = computed(() => {
 
 // Methods
 const toggleMobileMenu = () => {
-  emit('toggle-mobile-menu');
+  emit("toggle-mobile-menu");
 };
 
 const openCodeDialog = () => {
-  emit('open-code-dialog');
+  emit("open-code-dialog");
 };
 
 const logout = () => {
-  emit('logout');
+  emit("logout");
 };
 
 const verPerfil = () => {
-  emit('ver-perfil');
+  emit("ver-perfil");
 };
 
 const verColetao = () => {
-  emit('ver-colecao');
+  emit("ver-colecao");
 };
 </script>
 
 <style scoped>
 /* ===== NAVBAR ACAMPJA 2025 ===== */
 .acampja-header {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary), var(--acampja-accent));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary),
+    var(--acampja-accent)
+  );
   border-bottom: 3px solid var(--cr-gold);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
@@ -268,7 +296,7 @@ const verColetao = () => {
 }
 
 .admin-btn {
-  color: #E74C3C;
+  color: #e74c3c;
   background: rgba(231, 76, 60, 0.1);
 }
 
@@ -278,7 +306,11 @@ const verColetao = () => {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
   box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
 }
 
@@ -334,7 +366,9 @@ const verColetao = () => {
 
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
-  .desktop-actions, .header-stats, .desktop-only {
+  .desktop-actions,
+  .header-stats,
+  .desktop-only {
     display: none;
   }
 

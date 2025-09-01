@@ -32,7 +32,11 @@
         </div>
         <div class="mobile-stat">
           <q-icon name="collections" color="blue" />
-          <span>{{ cartasStore.estatisticas.total_cartas }}/{{ cartasStore.estatisticas.total_disponiveis }}</span>
+          <span
+            >{{ cartasStore.estatisticas.total_cartas }}/{{
+              cartasStore.estatisticas.total_disponiveis
+            }}</span
+          >
         </div>
       </div>
 
@@ -113,15 +117,15 @@
 
       <!-- Footer com créditos -->
       <div class="mobile-footer">
-        <q-btn 
-          flat 
-          no-caps 
-          class="developer-credit-mobile" 
+        <q-btn
+          flat
+          no-caps
+          class="developer-credit-mobile"
           @click="openWhatsApp"
           icon="code"
         >
           <div class="dev-info">
-            <div class="dev-text">Desenvolvido com ❤️</div>
+            <div class="dev-text">Desenvolvido por</div>
             <div class="dev-name">@dev_garbson</div>
           </div>
           <q-icon name="open_in_new" size="xs" />
@@ -142,12 +146,12 @@ import { checkAdminAccess } from "../admin";
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 // Emits
-const emit = defineEmits(['update:isOpen', 'open-code-dialog', 'logout']);
+const emit = defineEmits(["update:isOpen", "open-code-dialog", "logout"]);
 
 // Stores e router
 const authStore = useAuthStore();
@@ -162,13 +166,13 @@ const isAdmin = computed(() => {
 
 // Methods
 const openCodeDialog = () => {
-  emit('open-code-dialog');
-  emit('update:isOpen', false);
+  emit("open-code-dialog");
+  emit("update:isOpen", false);
 };
 
 const logout = () => {
-  emit('logout');
-  emit('update:isOpen', false);
+  emit("logout");
+  emit("update:isOpen", false);
 };
 
 const openWhatsApp = () => {
@@ -179,7 +183,11 @@ const openWhatsApp = () => {
 <style scoped>
 /* ===== MENU MOBILE ACAMPJA ===== */
 .mobile-drawer {
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
 }
 
 .mobile-menu {
@@ -187,7 +195,11 @@ const openWhatsApp = () => {
   display: flex;
   flex-direction: column;
   color: rgb(208, 208, 208);
-  background: linear-gradient(135deg, var(--acampja-primary), var(--acampja-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--acampja-primary),
+    var(--acampja-secondary)
+  );
 }
 
 .mobile-menu-header {

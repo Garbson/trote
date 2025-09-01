@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf" class="acampja-layout">
     <!-- Header Component -->
-    <AppHeader 
+    <AppHeader
       :mobile-menu-open="mobileMenuOpen"
       @toggle-mobile-menu="mobileMenuOpen = !mobileMenuOpen"
       @open-code-dialog="openCodeDialog"
@@ -11,7 +11,7 @@
     />
 
     <!-- Mobile Menu Component -->
-    <MobileMenu 
+    <MobileMenu
       v-model:is-open="mobileMenuOpen"
       @open-code-dialog="openCodeDialog"
       @logout="logout"
@@ -24,8 +24,8 @@
           <WelcomeSection />
 
           <!-- Cards Section Component (apenas para usuários autenticados) -->
-          <CardsSection 
-            v-if="authStore.isAuthenticated" 
+          <CardsSection
+            v-if="authStore.isAuthenticated"
             :active-carta="activeCarta"
           />
 
@@ -142,44 +142,44 @@ const logout = async () => {
 const verPerfil = () => {
   mobileMenuOpen.value = false;
   $q.notify({
-    type: 'info',
-    message: 'Funcionalidade em desenvolvimento',
-    caption: 'Em breve você poderá editar seu perfil!'
+    type: "info",
+    message: "Funcionalidade em desenvolvimento",
+    caption: "Em breve você poderá editar seu perfil!",
   });
 };
 
 const verColetao = () => {
   mobileMenuOpen.value = false;
   // Scroll para a seção de cartas
-  const cardsSection = document.querySelector('.cards-section');
+  const cardsSection = document.querySelector(".cards-section");
   if (cardsSection) {
-    cardsSection.scrollIntoView({ behavior: 'smooth' });
+    cardsSection.scrollIntoView({ behavior: "smooth" });
   }
 };
 
 // Lifecycle
 onMounted(async () => {
-  console.log('🏠 Home montado - Estado auth:', authStore.isAuthenticated);
-  console.log('🏠 Auth inicializado:', authStore.initialized);
+  console.log("🏠 Home montado - Estado auth:", authStore.isAuthenticated);
+  console.log("🏠 Auth inicializado:", authStore.initialized);
 
   // Aguardar inicialização da autenticação se necessário
   if (!authStore.initialized) {
-    console.log('⏳ Aguardando inicialização da autenticação...');
-    
+    console.log("⏳ Aguardando inicialização da autenticação...");
+
     // Aguardar até 5 segundos pela inicialização
     const maxWait = 5000;
     const startTime = Date.now();
-    
-    while (!authStore.initialized && (Date.now() - startTime) < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+
+    while (!authStore.initialized && Date.now() - startTime < maxWait) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
-    console.log('✅ Autenticação inicializada:', authStore.initialized);
+
+    console.log("✅ Autenticação inicializada:", authStore.initialized);
   }
 
   // Sempre carregar cartas disponíveis primeiro
   await cartasStore.fetchCartas();
-  console.log('📦 Cartas disponíveis carregadas:', cartasStore.cartas.length);
+  console.log("📦 Cartas disponíveis carregadas:", cartasStore.cartas.length);
 
   // Carregar cartas do usuário com retry
   if (authStore.isAuthenticated) {
@@ -193,19 +193,24 @@ const loadUserCardsWithRetry = async (maxRetries = 3) => {
     try {
       console.log(`🔄 Tentativa ${attempt} de carregar cartas do usuário...`);
       await cartasStore.fetchCartasUsuario();
-      
-      console.log('✅ Cartas do usuário carregadas:', cartasStore.cartasUsuario.length);
-      console.log('📊 Estatísticas:', cartasStore.estatisticas);
-      
+
+      console.log(
+        "✅ Cartas do usuário carregadas:",
+        cartasStore.cartasUsuario.length
+      );
+      console.log("📊 Estatísticas:", cartasStore.estatisticas);
+
       return; // Sucesso - sair da função
     } catch (error) {
       console.error(`❌ Erro na tentativa ${attempt}:`, error);
-      
+
       if (attempt < maxRetries) {
         // Aguardar antes da próxima tentativa
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       } else {
-        console.error('❌ Falha ao carregar cartas do usuário após todas as tentativas');
+        console.error(
+          "❌ Falha ao carregar cartas do usuário após todas as tentativas"
+        );
       }
     }
   }
@@ -277,7 +282,7 @@ const loadUserCardsWithRetry = async (maxRetries = 3) => {
   .page-container {
     padding: 10px;
   }
-  
+
   .code-dialog {
     min-width: 90vw;
   }

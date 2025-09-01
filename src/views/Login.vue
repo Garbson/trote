@@ -5,14 +5,14 @@
         <!-- Logo/Título -->
         <div class="game-logo">
           <q-icon name="auto_awesome" size="60px" color="amber" />
-          <h1 class="game-title">ACAMPJA 2025</h1>
-          <p class="game-subtitle">Coleção de Calouros Lendários</p>
+          <h1 class="game-title">ARCA DE NOÉ</h1>
+          <p class="game-subtitle">Coleção de Animais Lendários</p>
         </div>
 
         <!-- Card de Login -->
         <q-card class="login-card">
           <q-card-section class="card-header">
-            <div class="text-h5 text-center">⚔️ Entrar na Arena</div>
+            <div class="text-h5 text-center">🚢 Entrar na Arca</div>
           </q-card-section>
 
           <q-card-section class="card-content">
@@ -134,7 +134,12 @@ onMounted(async () => {
 
 <style scoped>
 .layout {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4a90e2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--arca-wood) 0%,
+    var(--arca-gold) 50%,
+    var(--arca-green) 100%
+  );
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -212,7 +217,7 @@ onMounted(async () => {
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--arca-wood), var(--arca-gold));
   color: white;
   text-align: center;
   padding: 20px;
@@ -262,7 +267,7 @@ onMounted(async () => {
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--arca-wood), var(--arca-gold));
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 

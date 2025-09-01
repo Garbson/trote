@@ -1,7 +1,7 @@
 <template>
   <q-card
     :class="[
-      'clash-card-container',
+      'acampja-card-container',
       { acquired },
       pokemon.raridade,
       {
@@ -38,7 +38,7 @@
     <!-- Header da carta -->
     <q-card-section class="card-header">
       <!-- Nome só aparece se a carta foi obtida -->
-      <div class="card-title clash-subtitle">
+      <div class="card-title acampja-subtitle">
         {{ acquired ? pokemon.name : "???" }}
       </div>
 
@@ -80,7 +80,7 @@
             name="help_outline"
             size="80px"
             color="white"
-            class="clash-pulse"
+            class="acampja-pulse"
           />
           <div class="mystery-text">Carta Misteriosa</div>
           <div class="mystery-subtitle">Digite o código para revelar</div>
@@ -102,7 +102,7 @@
           <div class="info-item">
             <q-icon name="school" size="sm" color="primary" />
             <span class="info-label">Descrição:</span>
-            <span class="info-value">{{ pokemon.curso || "Arena" }}</span>
+            <span class="info-value">{{ pokemon.curso || "Acampista da Arena" }}</span>
           </div>
         </div>
 
@@ -253,7 +253,7 @@ defineExpose({
 
 <style scoped>
 /* ===== ESTRUTURA PRINCIPAL ===== */
-.clash-card-container {
+.acampja-card-container {
   height: 680px; /* Altura fixa para todos os cards */
   display: flex;
   flex-direction: column;
@@ -268,7 +268,7 @@ defineExpose({
 }
 
 /* ===== BACKGROUNDS POR RARIDADE (CARDS DESBLOQUEADOS) ===== */
-.clash-card-container.acquired.comum {
+.acampja-card-container.acquired.comum {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95),
@@ -276,7 +276,7 @@ defineExpose({
   );
 }
 
-.clash-card-container.acquired.raro {
+.acampja-card-container.acquired.raro {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95),
@@ -284,7 +284,7 @@ defineExpose({
   );
 }
 
-.clash-card-container.acquired.epico {
+.acampja-card-container.acquired.epico {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95),
@@ -292,7 +292,7 @@ defineExpose({
   );
 }
 
-.clash-card-container.acquired.lendario {
+.acampja-card-container.acquired.lendario {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95),
@@ -301,22 +301,27 @@ defineExpose({
 }
 
 /* ===== BORDAS DE RARIDADE ===== */
-.clash-card-container.comum {
+.acampja-card-container.comum {
   border-color: var(--cr-common);
   box-shadow: 0 4px 20px rgba(168, 168, 168, 0.985);
 }
 
-.clash-card-container.raro {
+.acampja-card-container.raro {
   border-color: var(--cr-rare);
   box-shadow: 0 4px 20px rgb(74, 145, 226);
 }
 
-.clash-card-container.epico {
+.acampja-card-container.epico {
   border-color: var(--cr-epic);
   box-shadow: 0 4px 20px rgba(95, 14, 109, 0.787);
 }
 
-.clash-card-container.lendario {
+.acampja-card-container.epico {
+  border-color: var(--cr-epic);
+  box-shadow: 0 4px 20px rgba(95, 14, 109, 0.787);
+}
+
+.acampja-card-container.lendario {
   border-color: var(--cr-legendary);
   box-shadow: 0 4px 25px rgba(255, 149, 0, 0.787);
   animation: legendary-border-glow 3s ease-in-out infinite;
@@ -333,13 +338,13 @@ defineExpose({
 }
 
 /* ===== EFEITO HOVER ===== */
-.clash-card-container:hover {
+.acampja-card-container:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 /* ===== CARDS NÃO OBTIDAS ===== */
-.clash-card-container:not(.acquired) {
+.acampja-card-container:not(.acquired) {
   background: linear-gradient(
     135deg,
     rgba(30, 60, 114, 0.9),
@@ -349,7 +354,7 @@ defineExpose({
   border-color: #6c757d;
 }
 
-.clash-card-container:not(.acquired):hover {
+.acampja-card-container:not(.acquired):hover {
   border-color: var(--cr-gold);
   box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
   transform: translateY(-4px) scale(1.02);
@@ -379,7 +384,7 @@ defineExpose({
   margin: 0;
 }
 
-.clash-card-container:not(.acquired) .card-title {
+.acampja-card-container:not(.acquired) .card-title {
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.3rem;
   text-align: center;
@@ -483,7 +488,7 @@ defineExpose({
   transition: transform 0.4s ease;
 }
 
-.clash-card-container:hover .card-image {
+.acampja-card-container:hover .card-image {
   transform: scale(1.08);
 }
 
@@ -932,7 +937,7 @@ defineExpose({
 }
 
 /* ===== ESTADO PÓS-DESBLOQUEIO ===== */
-.clash-card-container.just-unlocked {
+.acampja-card-container.just-unlocked {
   animation: celebration 2s ease-out;
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
 }
@@ -951,7 +956,7 @@ defineExpose({
 }
 
 /* ===== EFEITO DE DESBLOQUEIO EM PROGRESSO ===== */
-.clash-card-container.unlocking {
+.acampja-card-container.unlocking {
   transform: scale(1.1);
   z-index: 999;
   transition: all 0.3s ease;
@@ -959,7 +964,7 @@ defineExpose({
 
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 600px) {
-  .clash-card-container {
+  .acampja-card-container {
     height: 680px; /* Altura um pouco menor em mobile */
   }
 
@@ -1011,7 +1016,7 @@ defineExpose({
 }
 
 /* ===== ANIMAÇÕES DE ENTRADA ===== */
-.clash-card-container {
+.acampja-card-container {
   animation: card-enter 0.6s ease-out;
 }
 
@@ -1027,16 +1032,16 @@ defineExpose({
 }
 
 /* ===== ESTADOS ESPECIAIS ===== */
-.clash-card-container.rotate {
-  animation: clash-card-flip 4s ease-in-out;
+.acampja-card-container.rotate {
+  animation: acampja-card-flip 4s ease-in-out;
 }
 
-.clash-card-container.active-rotate {
+.acampja-card-container.active-rotate {
   z-index: 1000;
   transform: scale(1.15);
 }
 
-@keyframes clash-card-flip {
+@keyframes acampja-card-flip {
   0% {
     transform: rotateY(0deg) scale(1);
   }
@@ -1055,8 +1060,8 @@ defineExpose({
 }
 
 /* ===== AJUSTES FINAIS PARA CARDS NÃO OBTIDAS ===== */
-.clash-card-container:not(.acquired) .info-item,
-.clash-card-container:not(.acquired) .stat-chip {
+.acampja-card-container:not(.acquired) .info-item,
+.acampja-card-container:not(.acquired) .stat-chip {
   color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.1);
 }

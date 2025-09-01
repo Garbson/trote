@@ -8,7 +8,7 @@
         </q-avatar>
 
         <q-toolbar-title class="admin-title">
-          🛡️ BIXO ROYALE - Admin
+          🛡️ ACAMPJA 2025 - Admin
         </q-toolbar-title>
 
         <!-- Navegação Desktop -->
@@ -194,7 +194,7 @@
         <div v-if="activeTab === 'dashboard'" class="dashboard-content">
           <div class="page-header">
             <h3 class="page-title">📊 Dashboard Administrativo</h3>
-            <p class="page-subtitle">Visão geral do sistema BIXO ROYALE</p>
+            <p class="page-subtitle">Visão geral do sistema ACAMPJA 2025</p>
           </div>
 
           <div class="stats-grid">
@@ -1285,7 +1285,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import "@/assets/clash-royale-theme.css";
+@import "@/assets/acampja-theme.css";
 
 .admin-layout {
   background: var(--cr-bg-primary);

@@ -10,7 +10,7 @@ import "@quasar/extras/material-icons/material-icons.css";
 import "quasar/src/css/index.sass";
 
 // Importar tema CSS global
-import "./assets/clash-royale-theme.css";
+import "./assets/acampja-theme.css";
 
 // Configuração do Quasar
 const quasarConfig = {

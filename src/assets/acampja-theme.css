@@ -1,44 +1,49 @@
-/* src/assets/clash-royale-theme.css */
+/* src/assets/acampja-theme.css */
 
 /* Imports devem vir primeiro */
-@import url("https://fonts.googleapis.com/css2?family=Supercell+Magic:wght@400@600&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
 
-/* Paleta de cores Clash Royale */
+/* Paleta de cores AcampJA 2025 */
 :root {
-  /* Cores principais */
-  --cr-blue-primary: #4a90e2;
-  --cr-blue-dark: #1e3c72;
-  --cr-blue-light: #6bb6ff;
+  /* Cores principais AcampJA */
+  --acampja-primary: #2ECC71;
+  --acampja-secondary: #E67E22;
+  --acampja-accent: #9B59B6;
+  
+  /* Cores de destaque */
+  --acampja-yellow: #F1C40F;
+  --acampja-blue: #3498DB;
+  --acampja-red: #E74C3C;
 
   /* Cores de raridade */
-  --cr-common: #a8a8a8;
-  --cr-rare: #4a90e2;
-  --cr-epic: #9c27b0;
-  --cr-legendary: #ff9500;
+  --cr-common: #95A5A6;
+  --cr-rare: #3498DB;
+  --cr-epic: #9B59B6;
+  --cr-legendary: #F39C12;
 
   /* Cores de UI */
-  --cr-gold: #ffd700;
-  --cr-purple: #7b2cbf;
-  --cr-orange: #ff6b35;
-  --cr-green: #06d6a0;
-  --cr-red: #ef233c;
+  --cr-gold: #F1C40F;
+  --cr-purple: #9B59B6;
+  --cr-orange: #E67E22;
+  --cr-green: #2ECC71;
+  --cr-red: #E74C3C;
 
   /* Backgrounds */
   --cr-bg-primary: linear-gradient(
     135deg,
-    #1e3c72 0%,
-    #2a5298 50%,
-    #4a90e2 100%
+    #2ECC71 0%,
+    #27AE60 50%,
+    #229954 100%
   );
-  --cr-bg-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --cr-bg-secondary: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
   --cr-bg-card: rgba(255, 255, 255, 0.95);
-  --cr-bg-dark: rgba(30, 60, 114, 0.9);
+  --cr-bg-dark: rgba(46, 204, 113, 0.9);
 
   /* Sombras */
   --cr-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --cr-shadow-button: 0 4px 15px rgba(74, 144, 226, 0.4);
-  --cr-shadow-glow: 0 0 20px rgba(255, 215, 0, 0.5);
+  --cr-shadow-button: 0 4px 15px rgba(46, 204, 113, 0.4);
+  --cr-shadow-glow: 0 0 20px rgba(241, 196, 15, 0.5);
 
   /* Bordas */
   --cr-border-radius: 16px;
@@ -50,52 +55,52 @@
   box-sizing: border-box;
 }
 
-.clash-title {
-  font-family: "Supercell Magic", "Press Start 2P", cursive;
-  font-weight: 600;
+.acampja-title {
+  font-family: "Fredoka One", "Poppins", sans-serif;
+  font-weight: 700;
   text-shadow: 2px 2px 0px var(--cr-orange), 4px 4px 0px var(--cr-red),
     6px 6px 10px rgba(0, 0, 0, 0.3);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
-.clash-subtitle {
-  font-family: "Supercell Magic", sans-serif;
-  font-weight: 400;
+.acampja-subtitle {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
 }
 
 /* Cores de raridade para badges */
 .rarity-common {
-  background: linear-gradient(135deg, #a8a8a8, #7f7f7f);
+  background: linear-gradient(135deg, #95A5A6, #7F8C8D);
   color: white;
 }
 
 .rarity-rare {
-  background: linear-gradient(135deg, #4a90e2, #1e3c72);
+  background: linear-gradient(135deg, #3498DB, #2980B9);
   color: white;
 }
 
 .rarity-epic {
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(135deg, #9B59B6, #8E44AD);
   color: white;
 }
 
 .rarity-legendary {
-  background: linear-gradient(135deg, #ff9500, #ff6b00);
+  background: linear-gradient(135deg, #F39C12, #E67E22);
   color: white;
   animation: legendary-glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes legendary-glow {
   from {
-    box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+    box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
   }
   to {
-    box-shadow: 0 0 20px rgba(255, 149, 0, 0.8);
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.8);
   }
 }
 
-/* Botões estilo Clash Royale */
-.clash-btn {
+/* Botões estilo AcampJA 2025 */
+.acampja-btn {
   border-radius: 12px;
   font-weight: bold;
   text-transform: uppercase;
@@ -106,7 +111,7 @@
   overflow: hidden;
 }
 
-.clash-btn::before {
+.acampja-btn::before {
   content: "";
   position: absolute;
   top: 0;
@@ -122,11 +127,11 @@
   transition: left 0.5s;
 }
 
-.clash-btn:hover::before {
+.acampja-btn:hover::before {
   left: 100%;
 }
 
-.clash-btn-primary {
+.acampja-btn-primary {
   background: linear-gradient(
     135deg,
     var(--cr-blue-primary),
@@ -135,7 +140,7 @@
   box-shadow: var(--cr-shadow-button);
 }
 
-.clash-btn-secondary {
+.acampja-btn-secondary {
   background: linear-gradient(135deg, var(--cr-purple), var(--cr-orange));
 }
 
@@ -378,11 +383,11 @@
   }
 }
 
-.clash-pulse {
-  animation: clash-pulse 2s ease-in-out infinite;
+.acampja-pulse {
+  animation: acampja-pulse 2s ease-in-out infinite;
 }
 
-@keyframes clash-pulse {
+@keyframes acampja-pulse {
   0%,
   100% {
     transform: scale(1);

@@ -5,7 +5,7 @@
         <!-- Logo/Título -->
         <div class="game-logo">
           <q-icon name="auto_awesome" size="60px" color="amber" />
-          <h1 class="game-title">BIXO ROYALE</h1>
+          <h1 class="game-title">ACAMPJA 2025</h1>
           <p class="game-subtitle">Coleção de Calouros Lendários</p>
         </div>
 

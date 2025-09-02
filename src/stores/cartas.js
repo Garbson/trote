@@ -299,6 +299,184 @@ export const useCartasStore = defineStore('cartas', () => {
     return obtida
   }
 
+  // ============ FUNÇÕES DE ADMINISTRAÇÃO ============
+
+  const fetchTodasCartas = async () => {
+    loading.value = true
+    try {
+      const { data, error } = await supabase
+        .from('cartas')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      cartas.value = data || []
+      return { success: true, data }
+    } catch (error) {
+      console.error('Erro ao buscar todas as cartas:', error)
+      Notify.create({
+        type: 'negative',
+        message: 'Erro ao carregar cartas'
+      })
+      return { success: false, error: error.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const criarCarta = async (dadosCarta) => {
+    loading.value = true
+    try {
+      // Gerar hash do QR code baseado no código único
+      const qrCodeHash = btoa(dadosCarta.codigo_unico + Date.now()).replace(/[^a-zA-Z0-9]/g, '')
+
+      const { data, error } = await supabase
+        .from('cartas')
+        .insert({
+          ...dadosCarta,
+          qr_code_hash: qrCodeHash
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Atualizar lista local
+      await fetchTodasCartas()
+
+      Notify.create({
+        type: 'positive',
+        message: `Animal "${dadosCarta.nome}" criado com sucesso!`
+      })
+
+      return { success: true, data }
+    } catch (error) {
+      console.error('Erro ao criar carta:', error)
+      let message = 'Erro ao criar animal'
+      
+      if (error.code === '23505') {
+        if (error.detail.includes('codigo_unico')) {
+          message = 'Código único já existe!'
+        } else if (error.detail.includes('qr_code_hash')) {
+          message = 'QR Code já existe!'
+        }
+      }
+
+      Notify.create({
+        type: 'negative',
+        message
+      })
+      
+      return { success: false, error: error.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const atualizarCarta = async (cartaId, dadosAtualizados) => {
+    loading.value = true
+    try {
+      const { data, error } = await supabase
+        .from('cartas')
+        .update({
+          ...dadosAtualizados,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', cartaId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Atualizar lista local
+      await fetchTodasCartas()
+
+      Notify.create({
+        type: 'positive',
+        message: 'Animal atualizado com sucesso!'
+      })
+
+      return { success: true, data }
+    } catch (error) {
+      console.error('Erro ao atualizar carta:', error)
+      Notify.create({
+        type: 'negative',
+        message: 'Erro ao atualizar animal'
+      })
+      return { success: false, error: error.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const excluirCarta = async (cartaId) => {
+    loading.value = true
+    try {
+      const { error } = await supabase
+        .from('cartas')
+        .delete()
+        .eq('id', cartaId)
+
+      if (error) throw error
+
+      // Atualizar lista local
+      await fetchTodasCartas()
+
+      Notify.create({
+        type: 'positive',
+        message: 'Animal excluído com sucesso!'
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Erro ao excluir carta:', error)
+      Notify.create({
+        type: 'negative',
+        message: 'Erro ao excluir animal'
+      })
+      return { success: false, error: error.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const toggleStatusCarta = async (cartaId, novoStatus) => {
+    loading.value = true
+    try {
+      const { data, error } = await supabase
+        .from('cartas')
+        .update({ 
+          ativa: novoStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', cartaId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Atualizar lista local
+      await fetchTodasCartas()
+
+      Notify.create({
+        type: 'positive',
+        message: `Animal ${novoStatus ? 'ativado' : 'desativado'} com sucesso!`
+      })
+
+      return { success: true, data }
+    } catch (error) {
+      console.error('Erro ao alterar status da carta:', error)
+      Notify.create({
+        type: 'negative',
+        message: 'Erro ao alterar status do animal'
+      })
+      return { success: false, error: error.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // Estado
     cartas,
@@ -317,6 +495,13 @@ export const useCartasStore = defineStore('cartas', () => {
     fetchCartasUsuario,
     obterCartaPorCodigo,
     obterCartaPorQR,
-    verificarCartaObtida
+    verificarCartaObtida,
+
+    // Admin Actions
+    fetchTodasCartas,
+    criarCarta,
+    atualizarCarta,
+    excluirCarta,
+    toggleStatusCarta
   }
 })

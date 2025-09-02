@@ -3,9 +3,10 @@
     <!-- Header Componente -->
     <AdminHeader
       :active-tab="activeTab"
-      :cartas-count="cartas.length"
+      :cartas-count="cartasStore.cartas.length"
       @tab-change="activeTab = $event"
       @logout="logout"
+      @go-home="goHome"
       @toggle-drawer="drawerOpen = !drawerOpen"
     />
 
@@ -13,9 +14,10 @@
     <AdminSidebar
       v-model:is-open="drawerOpen"
       :active-tab="activeTab"
-      :cartas-count="cartas.length"
+      :cartas-count="cartasStore.cartas.length"
       @tab-change="activeTab = $event"
       @logout="logout"
+      @go-home="goHome"
     />
 
     <!-- Conteúdo Principal -->
@@ -24,8 +26,13 @@
         <!-- Dashboard -->
         <AdminDashboard
           v-if="activeTab === 'dashboard'"
-          :stats="adminStore.estatisticas"
-          :loading="loadingEstatisticas"
+          :stats="{
+            totalCartas: cartasStore.cartas.length,
+            cartasAtivas: cartasStore.cartas.filter(c => c.ativa).length,
+            totalUsuarios: adminUsersStore.usuarios.length,
+            usuariosAtivos: adminUsersStore.usuariosAtivos.length
+          }"
+          :loading="cartasStore.loading || adminUsersStore.loading"
           @add-animal="activeTab = 'cartas'"
           @refresh-stats="carregarEstatisticas"
           @export-data="exportarDados"
@@ -34,8 +41,8 @@
         <!-- Gerenciar Animais -->
         <AdminAnimals
           v-if="activeTab === 'cartas'"
-          :animals="cartas"
-          :loading="loading"
+          :animals="cartasStore.cartas"
+          :loading="cartasStore.loading"
           @add-animal="adicionarCarta"
           @edit-animal="editarCarta"
           @delete-animal="excluirCarta"
@@ -45,9 +52,9 @@
         <!-- Gerenciar Usuários -->
         <AdminUsers
           v-if="activeTab === 'usuarios'"
-          :users="usuarios"
-          :loading="loadingUsuarios"
-          :total-animals="cartas.length"
+          :users="adminUsersStore.usuarios"
+          :loading="adminUsersStore.loading"
+          :total-animals="cartasStore.cartas.filter(c => c.ativa).length"
           @search="buscarUsuarios"
           @filter-status="filtrarPorStatus"
           @refresh-users="carregarUsuarios"
@@ -62,12 +69,12 @@
 </template>
 
 <script setup>
-import { useAdminStore } from "@/stores/admin";
+import { useAdminUsersStore } from "@/stores/adminUsers";
 import { useAuthStore } from "@/stores/auth";
+import { useCartasStore } from "@/stores/cartas";
 import { useQuasar } from "quasar";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { checkAdminAccess } from "../admin";
 
 // Componentes
 import AdminAnimals from "@/components/admin/AdminAnimals.vue";
@@ -78,22 +85,18 @@ import AdminUsers from "@/components/admin/AdminUsers.vue";
 
 // Stores e router
 const authStore = useAuthStore();
-const adminStore = useAdminStore();
+const cartasStore = useCartasStore();
+const adminUsersStore = useAdminUsersStore();
 const router = useRouter();
 const $q = useQuasar();
 
 // Estado local
 const activeTab = ref('dashboard');
 const drawerOpen = ref(false);
-const loading = ref(false);
-const loadingUsuarios = ref(false);
-const loadingEstatisticas = ref(false);
-const cartas = ref([]);
-const usuarios = ref([]);
 
 // Verificação de acesso admin
 onMounted(async () => {
-  if (!authStore.isAuthenticated || !checkAdminAccess(authStore.user)) {
+  if (!authStore.isAuthenticated || !authStore.user?.is_admin) {
     $q.notify({
       type: 'negative',
       message: 'Acesso negado! Apenas administradores podem acessar esta área.',
@@ -104,78 +107,40 @@ onMounted(async () => {
   }
 
   await Promise.all([
-    carregarCartas(),
-    carregarUsuarios(),
-    carregarEstatisticas()
+    cartasStore.fetchTodasCartas(),
+    adminUsersStore.fetchUsuarios()
   ]);
 });
 
 // Methods
 const carregarCartas = async () => {
-  loading.value = true;
-  try {
-    await adminStore.carregarCartas();
-    cartas.value = adminStore.cartas;
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar animais: ' + error.message
-    });
-  } finally {
-    loading.value = false;
-  }
+  await cartasStore.fetchTodasCartas();
 };
 
 const carregarUsuarios = async () => {
-  loadingUsuarios.value = true;
-  try {
-    await adminStore.carregarUsuarios();
-    usuarios.value = adminStore.usuarios;
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar usuários: ' + error.message
-    });
-  } finally {
-    loadingUsuarios.value = false;
-  }
+  await adminUsersStore.fetchUsuarios();
 };
 
 const carregarEstatisticas = async () => {
-  loadingEstatisticas.value = true;
-  try {
-    await adminStore.carregarEstatisticas();
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar estatísticas: ' + error.message
-    });
-  } finally {
-    loadingEstatisticas.value = false;
-  }
+  // Estatísticas são calculadas automaticamente nos stores
+  await Promise.all([
+    cartasStore.fetchTodasCartas(),
+    adminUsersStore.fetchUsuarios()
+  ]);
 };
 
 const adicionarCarta = async (novaCarta) => {
-  try {
-    await adminStore.adicionarCarta(novaCarta);
-    await carregarCartas();
-    $q.notify({
-      type: 'positive',
-      message: 'Animal adicionado com sucesso!'
-    });
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao adicionar animal: ' + error.message
-    });
+  const resultado = await cartasStore.criarCarta(novaCarta);
+  if (resultado.success) {
+    // Sucesso é tratado no store com notify
   }
 };
 
 const editarCarta = async (carta) => {
-  // Implementar edição
-  $q.notify({
-    type: 'info',
-    message: 'Função de edição em desenvolvimento'
+  $q.dialog({
+    title: 'Editar Animal',
+    message: 'Funcionalidade de edição será implementada em breve.',
+    ok: 'Ok'
   });
 };
 
@@ -186,83 +151,68 @@ const excluirCarta = async (carta) => {
     cancel: true,
     persistent: true
   }).onOk(async () => {
-    try {
-      await adminStore.excluirCarta(carta.id);
-      await carregarCartas();
-      $q.notify({
-        type: 'positive',
-        message: 'Animal excluído com sucesso!'
-      });
-    } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Erro ao excluir animal: ' + error.message
-      });
-    }
+    await cartasStore.excluirCarta(carta.id);
   });
 };
 
-const buscarUsuarios = (termo) => {
-  // Implementar busca
-  console.log('Buscar:', termo);
+const buscarUsuarios = async (termo) => {
+  await adminUsersStore.buscarUsuarios(termo);
 };
 
-const filtrarPorStatus = (status) => {
-  // Implementar filtro
-  console.log('Filtrar por status:', status);
+const filtrarPorStatus = async (status) => {
+  if (status === 'todos') {
+    await adminUsersStore.fetchUsuarios();
+  } else {
+    // Filtrar localmente
+    const usuariosFiltrados = adminUsersStore.usuarios.filter(user => user.ativo === status);
+    adminUsersStore.usuarios = usuariosFiltrados;
+  }
 };
 
-const exportarUsuarios = () => {
-  // Implementar exportação
-  $q.notify({
-    type: 'info',
-    message: 'Função de exportação em desenvolvimento'
-  });
+const exportarUsuarios = async () => {
+  await adminUsersStore.exportarUsuarios();
 };
 
 const exportarDados = () => {
-  // Implementar exportação de dados
   $q.notify({
     type: 'info',
-    message: 'Função de exportação em desenvolvimento'
+    message: 'Função de exportação geral em desenvolvimento'
   });
 };
 
-const visualizarUsuario = (usuario) => {
-  // Implementar visualização
-  $q.notify({
-    type: 'info',
-    message: `Visualizar usuário: ${usuario.nome}`
-  });
-};
-
-const editarUsuario = (usuario) => {
-  // Implementar edição
-  $q.notify({
-    type: 'info',
-    message: `Editar usuário: ${usuario.nome}`
-  });
-};
-
-const alternarStatusUsuario = async (usuario) => {
-  try {
-    await adminStore.alternarStatusUsuario(usuario.id);
-    await carregarUsuarios();
-    $q.notify({
-      type: 'positive',
-      message: `Status do usuário ${usuario.nome} alterado com sucesso!`
-    });
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao alterar status: ' + error.message
+const visualizarUsuario = async (usuario) => {
+  const resultado = await adminUsersStore.obterDetalhesUsuario(usuario.id);
+  if (resultado.success) {
+    $q.dialog({
+      title: `Detalhes - ${usuario.nome}`,
+      message: `
+        Email: ${usuario.email}
+        Pontos: ${usuario.pontos_totais}
+        Nível: ${usuario.nivel}
+        Animais coletados: ${usuario.total_cartas || 0}
+        Admin: ${usuario.is_admin ? 'Sim' : 'Não'}
+        Status: ${usuario.ativo ? 'Ativo' : 'Inativo'}
+      `,
+      ok: 'Fechar'
     });
   }
 };
 
+const editarUsuario = (usuario) => {
+  $q.dialog({
+    title: 'Editar Usuário',
+    message: 'Funcionalidade de edição será implementada em breve.',
+    ok: 'Ok'
+  });
+};
+
+const alternarStatusUsuario = async (usuario) => {
+  await adminUsersStore.alterarStatusUsuario(usuario.id, !usuario.ativo);
+};
+
 const logout = async () => {
   try {
-    await authStore.logout();
+    await authStore.signOut();
     router.push('/login');
   } catch (error) {
     $q.notify({
@@ -270,6 +220,10 @@ const logout = async () => {
       message: 'Erro ao fazer logout: ' + error.message
     });
   }
+};
+
+const goHome = () => {
+  router.push('/');
 };
 </script>
 

@@ -15,11 +15,11 @@
           <div class="stat-info">
             <div class="stat-number">
               <q-skeleton v-if="loading" type="text" width="60px" />
-              <span v-else>{{ stats.total_cartas || 0 }}</span>
+              <span v-else>{{ stats.totalCartas || 0 }}</span>
             </div>
             <div class="stat-label">Total de Animais</div>
             <div class="stat-sublabel">
-              {{ stats.cartas_ativas || 0 }} ativos
+              {{ stats.cartasAtivas || 0 }} ativos
             </div>
           </div>
         </q-card-section>
@@ -33,11 +33,11 @@
           <div class="stat-info">
             <div class="stat-number">
               <q-skeleton v-if="loading" type="text" width="60px" />
-              <span v-else>{{ stats.total_usuarios || 0 }}</span>
+              <span v-else>{{ stats.totalUsuarios || 0 }}</span>
             </div>
             <div class="stat-label">Acampistas</div>
             <div class="stat-sublabel">
-              {{ stats.usuarios_ativos || 0 }} ativos
+              {{ stats.usuariosAtivos || 0 }} ativos
             </div>
           </div>
         </q-card-section>

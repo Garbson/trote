@@ -98,15 +98,23 @@
         </q-item>
       </q-list>
 
-      <!-- Logout na sidebar -->
+      <!-- Botões de ação na sidebar -->
       <div class="sidebar-footer">
+        <q-btn
+          flat
+          @click="$emit('go-home')"
+          color="primary"
+          icon="home"
+          label="Voltar ao Início"
+          class="action-btn"
+        />
         <q-btn
           flat
           @click="$emit('logout')"
           color="negative"
           icon="logout"
           label="Sair"
-          class="logout-btn"
+          class="action-btn logout-btn"
         />
       </div>
     </q-scroll-area>
@@ -131,7 +139,7 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["update:isOpen", "tab-change", "logout"]);
+const emit = defineEmits(["update:isOpen", "tab-change", "logout", "go-home"]);
 </script>
 
 <style scoped>
@@ -195,12 +203,22 @@ const emit = defineEmits(["update:isOpen", "tab-change", "logout"]);
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid #e0e0e0;
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 12px 16px;
 }
 
 .logout-btn {
-  width: 100%;
-  border-radius: 8px;
+  margin-top: 4px;
 }
 </style>

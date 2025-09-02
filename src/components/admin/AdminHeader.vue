@@ -38,18 +38,32 @@
         />
       </div>
 
-      <!-- Botão logout desktop -->
-      <q-btn
-        flat
-        round
-        icon="logout"
-        color="white"
-        @click="$emit('logout')"
-        size="md"
-        class="desktop-logout"
-      >
-        <q-tooltip>Sair do sistema</q-tooltip>
-      </q-btn>
+      <!-- Botões de ação desktop -->
+      <div class="header-actions">
+        <q-btn
+          flat
+          round
+          icon="home"
+          color="white"
+          @click="$emit('go-home')"
+          size="md"
+          class="desktop-action"
+        >
+          <q-tooltip>Voltar ao início</q-tooltip>
+        </q-btn>
+        
+        <q-btn
+          flat
+          round
+          icon="logout"
+          color="white"
+          @click="$emit('logout')"
+          size="md"
+          class="desktop-action"
+        >
+          <q-tooltip>Sair do sistema</q-tooltip>
+        </q-btn>
+      </div>
 
       <!-- Menu mobile -->
       <q-btn
@@ -78,7 +92,7 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["tab-change", "logout", "toggle-drawer"]);
+const emit = defineEmits(["tab-change", "logout", "toggle-drawer", "go-home"]);
 
 // Methods
 const getTabLabel = (tab) => {
@@ -118,8 +132,18 @@ const getTabLabel = (tab) => {
   padding: 8px 16px;
 }
 
-.desktop-logout {
+.header-actions {
+  display: flex;
+  gap: 8px;
   margin-left: 16px;
+}
+
+.desktop-action {
+  transition: all 0.3s ease;
+}
+
+.desktop-action:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .mobile-menu-btn {
@@ -128,7 +152,7 @@ const getTabLabel = (tab) => {
 
 @media (max-width: 768px) {
   .desktop-nav,
-  .desktop-logout {
+  .header-actions {
     display: none;
   }
 

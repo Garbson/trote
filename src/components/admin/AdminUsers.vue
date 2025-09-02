@@ -146,20 +146,16 @@
             </q-td>
           </template>
 
-          <template v-slot:body-cell-cartas="props">
+          <template v-slot:body-cell-admin="props">
             <q-td :props="props">
-              <q-circular-progress
-                :value="(props.value / totalAnimals) * 100"
-                size="40px"
-                :thickness="0.15"
-                color="primary"
-                track-color="grey-3"
-                class="progress-circle"
+              <q-chip
+                :color="props.value ? 'purple' : 'grey'"
+                text-color="white"
+                size="sm"
+                :icon="props.value ? 'admin_panel_settings' : 'person'"
               >
-                <span class="progress-text"
-                  >{{ props.value }}/{{ totalAnimals }}</span
-                >
-              </q-circular-progress>
+                {{ props.value ? "Admin" : "Usuário" }}
+              </q-chip>
             </q-td>
           </template>
 
@@ -272,16 +268,16 @@ const topCollectors = computed(
 const columns = [
   {
     name: "nome",
-    label: "Acampista",
+    label: "Usuário",
     field: "nome",
     align: "left",
     sortable: true,
   },
   {
-    name: "telefone",
-    label: "Telefone",
-    field: "telefone",
-    align: "center",
+    name: "email",
+    label: "Email",
+    field: "email",
+    align: "left",
     sortable: true,
   },
   {
@@ -299,9 +295,9 @@ const columns = [
     sortable: true,
   },
   {
-    name: "cartas",
-    label: "Animais",
-    field: "total_cartas",
+    name: "admin",
+    label: "Admin",
+    field: "is_admin",
     align: "center",
     sortable: true,
   },

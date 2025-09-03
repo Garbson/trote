@@ -28,9 +28,9 @@
           v-if="activeTab === 'dashboard'"
           :stats="{
             totalCartas: cartasStore.cartas.length,
-            cartasAtivas: cartasStore.cartas.filter(c => c.ativa).length,
+            cartasAtivas: cartasStore.cartas.filter((c) => c.ativa).length,
             totalUsuarios: adminUsersStore.usuarios.length,
-            usuariosAtivos: adminUsersStore.usuariosAtivos.length
+            usuariosAtivos: adminUsersStore.usuariosAtivos.length,
           }"
           :loading="cartasStore.loading || adminUsersStore.loading"
           @add-animal="activeTab = 'cartas'"
@@ -54,7 +54,7 @@
           v-if="activeTab === 'usuarios'"
           :users="adminUsersStore.usuarios"
           :loading="adminUsersStore.loading"
-          :total-animals="cartasStore.cartas.filter(c => c.ativa).length"
+          :total-animals="cartasStore.cartas.filter((c) => c.ativa).length"
           @search="buscarUsuarios"
           @filter-status="filtrarPorStatus"
           @refresh-users="carregarUsuarios"
@@ -91,24 +91,24 @@ const router = useRouter();
 const $q = useQuasar();
 
 // Estado local
-const activeTab = ref('dashboard');
+const activeTab = ref("dashboard");
 const drawerOpen = ref(false);
 
 // Verificação de acesso admin
 onMounted(async () => {
   if (!authStore.isAuthenticated || !authStore.user?.is_admin) {
     $q.notify({
-      type: 'negative',
-      message: 'Acesso negado! Apenas administradores podem acessar esta área.',
-      timeout: 3000
+      type: "negative",
+      message: "Acesso negado! Apenas administradores podem acessar esta área.",
+      timeout: 3000,
     });
-    router.push('/');
+    router.push("/");
     return;
   }
 
   await Promise.all([
     cartasStore.fetchTodasCartas(),
-    adminUsersStore.fetchUsuarios()
+    adminUsersStore.fetchUsuarios(),
   ]);
 });
 
@@ -125,7 +125,7 @@ const carregarEstatisticas = async () => {
   // Estatísticas são calculadas automaticamente nos stores
   await Promise.all([
     cartasStore.fetchTodasCartas(),
-    adminUsersStore.fetchUsuarios()
+    adminUsersStore.fetchUsuarios(),
   ]);
 };
 
@@ -138,18 +138,18 @@ const adicionarCarta = async (novaCarta) => {
 
 const editarCarta = async (carta) => {
   $q.dialog({
-    title: 'Editar Animal',
-    message: 'Funcionalidade de edição será implementada em breve.',
-    ok: 'Ok'
+    title: "Editar Animal",
+    message: "Funcionalidade de edição será implementada em breve.",
+    ok: "Ok",
   });
 };
 
 const excluirCarta = async (carta) => {
   $q.dialog({
-    title: 'Confirmar exclusão',
+    title: "Confirmar exclusão",
     message: `Tem certeza que deseja excluir o animal "${carta.nome}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     await cartasStore.excluirCarta(carta.id);
   });
@@ -160,11 +160,13 @@ const buscarUsuarios = async (termo) => {
 };
 
 const filtrarPorStatus = async (status) => {
-  if (status === 'todos') {
+  if (status === "todos") {
     await adminUsersStore.fetchUsuarios();
   } else {
     // Filtrar localmente
-    const usuariosFiltrados = adminUsersStore.usuarios.filter(user => user.ativo === status);
+    const usuariosFiltrados = adminUsersStore.usuarios.filter(
+      (user) => user.ativo === status
+    );
     adminUsersStore.usuarios = usuariosFiltrados;
   }
 };
@@ -175,8 +177,8 @@ const exportarUsuarios = async () => {
 
 const exportarDados = () => {
   $q.notify({
-    type: 'info',
-    message: 'Função de exportação geral em desenvolvimento'
+    type: "info",
+    message: "Função de exportação geral em desenvolvimento",
   });
 };
 
@@ -190,19 +192,19 @@ const visualizarUsuario = async (usuario) => {
         Pontos: ${usuario.pontos_totais}
         Nível: ${usuario.nivel}
         Animais coletados: ${usuario.total_cartas || 0}
-        Admin: ${usuario.is_admin ? 'Sim' : 'Não'}
-        Status: ${usuario.ativo ? 'Ativo' : 'Inativo'}
+        Admin: ${usuario.is_admin ? "Sim" : "Não"}
+        Status: ${usuario.ativo ? "Ativo" : "Inativo"}
       `,
-      ok: 'Fechar'
+      ok: "Fechar",
     });
   }
 };
 
 const editarUsuario = (usuario) => {
   $q.dialog({
-    title: 'Editar Usuário',
-    message: 'Funcionalidade de edição será implementada em breve.',
-    ok: 'Ok'
+    title: "Editar Usuário",
+    message: "Funcionalidade de edição será implementada em breve.",
+    ok: "Ok",
   });
 };
 
@@ -213,17 +215,17 @@ const alternarStatusUsuario = async (usuario) => {
 const logout = async () => {
   try {
     await authStore.signOut();
-    router.push('/login');
+    router.push("/login");
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao fazer logout: ' + error.message
+      type: "negative",
+      message: "Erro ao fazer logout: " + error.message,
     });
   }
 };
 
 const goHome = () => {
-  router.push('/');
+  router.push("/");
 };
 </script>
 

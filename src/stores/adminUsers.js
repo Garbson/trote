@@ -134,7 +134,7 @@ export const useAdminUsersStore = defineStore('adminUsers', () => {
     try {
       const { data, error } = await supabase
         .from('usuarios')
-        .update({ 
+        .update({
           ativo: novoStatus,
           updated_at: new Date().toISOString()
         })
@@ -170,7 +170,7 @@ export const useAdminUsersStore = defineStore('adminUsers', () => {
     try {
       const { data, error } = await supabase
         .from('usuarios')
-        .update({ 
+        .update({
           is_admin: isAdmin,
           updated_at: new Date().toISOString()
         })

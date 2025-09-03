@@ -9,19 +9,27 @@
     <q-card class="add-form-card">
       <q-card-section>
         <h5 class="form-title">➕ Adicionar Novo Animal</h5>
-        
+
         <!-- ETAPA 1: Upload da Imagem (OBRIGATÓRIO PRIMEIRO) -->
         <div class="upload-section">
           <div class="upload-header">
             <h6 class="upload-title">📸 1. Selecione a Foto do Animal</h6>
-            <p class="upload-subtitle">Primeiro faça o upload da imagem para continuar</p>
+            <p class="upload-subtitle">
+              Primeiro faça o upload da imagem para continuar
+            </p>
           </div>
-          
-          <q-card class="upload-card" :class="{ 'upload-success': novaAnimal.foto_url }">
+
+          <q-card
+            class="upload-card"
+            :class="{ 'upload-success': novaAnimal.foto_url }"
+          >
             <q-card-section>
               <div class="photo-upload-container">
                 <!-- Preview da imagem -->
-                <div v-if="imagePreview || novaAnimal.foto_url" class="image-preview-large">
+                <div
+                  v-if="imagePreview || novaAnimal.foto_url"
+                  class="image-preview-large"
+                >
                   <q-img
                     :src="imagePreview || novaAnimal.foto_url"
                     style="height: 200px; width: 200px"
@@ -57,7 +65,7 @@
                     class="upload-btn"
                     rounded
                   />
-                  
+
                   <!-- Input file escondido -->
                   <input
                     ref="fileInput"
@@ -66,7 +74,7 @@
                     style="display: none"
                     @change="handleImageUpload"
                   />
-                  
+
                   <div v-if="uploadingImage" class="upload-progress">
                     <q-linear-progress indeterminate color="primary" />
                     <p class="upload-progress-text">Carregando...</p>
@@ -78,128 +86,131 @@
         </div>
 
         <!-- ETAPA 2: Informações do Animal (HABILITADO APÓS UPLOAD) -->
-        <div class="form-section" :class="{ 'form-disabled': !novaAnimal.foto_url }">
+        <div
+          class="form-section"
+          :class="{ 'form-disabled': !novaAnimal.foto_url }"
+        >
           <div class="form-header">
             <h6 class="form-section-title">📝 2. Informações do Animal</h6>
             <p v-if="!novaAnimal.foto_url" class="form-disabled-text">
               ⚠️ Faça o upload da imagem primeiro para continuar
             </p>
           </div>
-          
-        <div class="form-grid" :class="{ 'disabled': !novaAnimal.foto_url }">
-          <q-input
-            v-model="novaAnimal.nome"
-            label="Nome do Animal"
-            outlined
-            dense
-            placeholder="Ex: Leão Dourado"
-            class="form-input"
-            :rules="[val => !!val || 'Nome é obrigatório']"
-            :disable="!novaAnimal.foto_url"
-            @input="onNomeChange"
-          >
-            <template v-slot:prepend>
-              <q-icon name="pets" />
-            </template>
-          </q-input>
 
-          <q-select
-            v-model="novaAnimal.raridade"
-            :options="raridadeOptions"
-            label="Raridade"
-            outlined
-            dense
-            emit-value
-            map-options
-            class="form-input"
-            :disable="!novaAnimal.foto_url"
-          >
-            <template v-slot:prepend>
-              <q-icon name="star" />
-            </template>
-          </q-select>
+          <div class="form-grid" :class="{ disabled: !novaAnimal.foto_url }">
+            <q-input
+              v-model="novaAnimal.nome"
+              label="Nome do Animal"
+              outlined
+              dense
+              placeholder="Ex: Leão Dourado"
+              class="form-input"
+              :rules="[(val) => !!val || 'Nome é obrigatório']"
+              :disable="!novaAnimal.foto_url"
+              @input="onNomeChange"
+            >
+              <template v-slot:prepend>
+                <q-icon name="pets" />
+              </template>
+            </q-input>
 
-          <q-input
-            v-model.number="novaAnimal.pontos_valor"
-            label="Pontos"
-            type="number"
-            outlined
-            dense
-            min="1"
-            class="form-input"
-            :disable="!novaAnimal.foto_url"
-          >
-            <template v-slot:prepend>
-              <q-icon name="stars" />
-            </template>
-          </q-input>
+            <q-select
+              v-model="novaAnimal.raridade"
+              :options="raridadeOptions"
+              label="Raridade"
+              outlined
+              dense
+              emit-value
+              map-options
+              class="form-input"
+              :disable="!novaAnimal.foto_url"
+            >
+              <template v-slot:prepend>
+                <q-icon name="star" />
+              </template>
+            </q-select>
 
-          <q-input
-            v-model="novaAnimal.codigo_unico"
-            label="Código Único"
-            outlined
-            dense
-            placeholder="Ex: LEO001 (gerado automaticamente)"
-            class="form-input"
-            :rules="[val => !!val || 'Código único é obrigatório']"
-            :disable="!novaAnimal.foto_url"
-            readonly
-          >
-            <template v-slot:prepend>
-              <q-icon name="qr_code" />
-            </template>
-            <template v-slot:append>
-              <q-btn
-                flat
-                round
-                icon="refresh"
-                @click="gerarCodigoUnico"
-                color="primary"
-                size="sm"
-                :disable="!novaAnimal.foto_url"
-              >
-                <q-tooltip>Gerar novo código</q-tooltip>
-              </q-btn>
-            </template>
-          </q-input>
+            <q-input
+              v-model.number="novaAnimal.pontos_valor"
+              label="Pontos"
+              type="number"
+              outlined
+              dense
+              min="1"
+              class="form-input"
+              :disable="!novaAnimal.foto_url"
+            >
+              <template v-slot:prepend>
+                <q-icon name="stars" />
+              </template>
+            </q-input>
 
-          <q-input
-            v-model="novaAnimal.descricao"
-            label="Descrição do Animal"
-            outlined
-            dense
-            type="textarea"
-            rows="2"
-            placeholder="Ex: O leão é conhecido como o rei da selva..."
-            class="form-input full-width"
-            :disable="!novaAnimal.foto_url"
-          >
-            <template v-slot:prepend>
-              <q-icon name="description" />
-            </template>
-          </q-input>
-        </div>
+            <q-input
+              v-model="novaAnimal.codigo_unico"
+              label="Código Único"
+              outlined
+              dense
+              placeholder="Ex: LEO001 (gerado automaticamente)"
+              class="form-input"
+              :rules="[(val) => !!val || 'Código único é obrigatório']"
+              :disable="!novaAnimal.foto_url"
+              readonly
+            >
+              <template v-slot:prepend>
+                <q-icon name="qr_code" />
+              </template>
+              <template v-slot:append>
+                <q-btn
+                  flat
+                  round
+                  icon="refresh"
+                  @click="gerarCodigoUnico"
+                  color="primary"
+                  size="sm"
+                  :disable="!novaAnimal.foto_url"
+                >
+                  <q-tooltip>Gerar novo código</q-tooltip>
+                </q-btn>
+              </template>
+            </q-input>
 
-        <div class="form-actions">
-          <q-btn
-            @click="adicionarAnimal"
-            :loading="loading || uploadingImage"
-            :disable="!isFormValid"
-            color="primary"
-            icon="add"
-            label="Adicionar Animal"
-            size="md"
-            class="add-btn"
-          />
-          <q-btn
-            @click="resetForm"
-            flat
-            color="grey"
-            icon="refresh"
-            label="Limpar"
-            size="md"
-          />
-        </div>
+            <q-input
+              v-model="novaAnimal.descricao"
+              label="Descrição do Animal"
+              outlined
+              dense
+              type="textarea"
+              rows="2"
+              placeholder="Ex: O leão é conhecido como o rei da selva..."
+              class="form-input full-width"
+              :disable="!novaAnimal.foto_url"
+            >
+              <template v-slot:prepend>
+                <q-icon name="description" />
+              </template>
+            </q-input>
+          </div>
+
+          <div class="form-actions">
+            <q-btn
+              @click="adicionarAnimal"
+              :loading="loading || uploadingImage"
+              :disable="!isFormValid"
+              color="primary"
+              icon="add"
+              label="Adicionar Animal"
+              size="md"
+              class="add-btn"
+            />
+            <q-btn
+              @click="resetForm"
+              flat
+              color="grey"
+              icon="refresh"
+              label="Limpar"
+              size="md"
+            />
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -415,7 +426,7 @@ const gerarCodigoUnico = () => {
   const nomeBase = novaAnimal.nome.trim().toUpperCase().slice(0, 3) || "ANI";
   const timestamp = Date.now().toString().slice(-4);
   const random = Math.random().toString(36).substring(2, 4).toUpperCase();
-  
+
   novaAnimal.codigo_unico = `${nomeBase}${timestamp}${random}`;
 };
 
@@ -430,11 +441,11 @@ const handleImageUpload = async (event) => {
   if (!file) return;
 
   // Validar arquivo
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
   if (!allowedTypes.includes(file.type)) {
     $q.notify({
-      type: 'negative',
-      message: 'Formato não suportado. Use JPEG, PNG ou WebP'
+      type: "negative",
+      message: "Formato não suportado. Use JPEG, PNG ou WebP",
     });
     return;
   }
@@ -442,8 +453,8 @@ const handleImageUpload = async (event) => {
   // Validar tamanho (máximo 10MB)
   if (file.size > 10 * 1024 * 1024) {
     $q.notify({
-      type: 'negative',
-      message: 'Arquivo muito grande. Máximo 10MB'
+      type: "negative",
+      message: "Arquivo muito grande. Máximo 10MB",
     });
     return;
   }
@@ -460,51 +471,51 @@ const handleImageUpload = async (event) => {
 
     // Upload para Cloudinary
     $q.notify({
-      type: 'ongoing',
-      message: 'Fazendo upload da imagem...',
+      type: "ongoing",
+      message: "Fazendo upload da imagem...",
       timeout: 0,
-      group: 'upload'
+      group: "upload",
     });
 
     const resultado = await cloudinaryUploader.uploadImage(file, {
-      folder: 'arca-de-noe/animais',
+      folder: "arca-de-noe/animais",
       compress: true,
       maxWidth: 800,
-      maxHeight: 800
+      maxHeight: 800,
     });
 
     if (resultado.success) {
       novaAnimal.foto_url = resultado.url;
-      
+
       $q.notify({
-        type: 'positive',
-        message: 'Imagem carregada com sucesso!',
-        group: 'upload'
+        type: "positive",
+        message: "Imagem carregada com sucesso!",
+        group: "upload",
       });
 
       // Log para debug
-      console.log('✅ Upload concluído:', {
+      console.log("✅ Upload concluído:", {
         url: resultado.url,
         size: `${Math.round(resultado.size / 1024)}KB`,
-        compression: `${resultado.compressionRatio}%`
+        compression: `${resultado.compressionRatio}%`,
       });
     } else {
       throw new Error(resultado.error);
     }
   } catch (error) {
-    console.error('❌ Erro no upload:', error);
+    console.error("❌ Erro no upload:", error);
     $q.notify({
-      type: 'negative',
+      type: "negative",
       message: `Erro ao carregar imagem: ${error.message}`,
-      group: 'upload'
+      group: "upload",
     });
-    
+
     // Limpar preview em caso de erro
     imagePreview.value = "";
   } finally {
     uploadingImage.value = false;
     // Limpar input para permitir selecionar o mesmo arquivo novamente
-    event.target.value = '';
+    event.target.value = "";
   }
 };
 
@@ -516,13 +527,13 @@ const removerImagem = () => {
 const adicionarAnimal = async () => {
   if (!isFormValid.value) {
     $q.notify({
-      type: 'warning',
-      message: 'Preencha todos os campos obrigatórios'
+      type: "warning",
+      message: "Preencha todos os campos obrigatórios",
     });
     return;
   }
 
-  emit('add-animal', { ...novaAnimal });
+  emit("add-animal", { ...novaAnimal });
 };
 
 const resetForm = () => {
@@ -536,7 +547,7 @@ const resetForm = () => {
     ativa: true,
   });
   imagePreview.value = "";
-  
+
   // Gerar novo código automaticamente
   setTimeout(() => {
     if (novaAnimal.nome.trim()) {

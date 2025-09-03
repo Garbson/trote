@@ -72,7 +72,7 @@ export const useCartasStore = defineStore('cartas', () => {
 
   const fetchCartasUsuario = async () => {
     const authStore = useAuthStore()
-    
+
     if (!authStore.isAuthenticated) {
       console.log('❌ Usuario não autenticado, pulando carregamento de cartas')
       return
@@ -108,7 +108,7 @@ export const useCartasStore = defineStore('cartas', () => {
 
       cartasUsuario.value = data || []
       console.log('✅ Cartas do usuário carregadas:', cartasUsuario.value.length)
-      
+
       // Log das cartas obtidas para debug
       if (cartasUsuario.value.length > 0) {
         console.log('📝 Cartas obtidas:', cartasUsuario.value.map(uc => ({
@@ -117,17 +117,17 @@ export const useCartasStore = defineStore('cartas', () => {
           data_obtencao: uc.data_obtencao
         })))
       }
-      
+
     } catch (error) {
       console.error('❌ Erro ao buscar cartas do usuário:', error)
-      
+
       // Não resetar as cartas em caso de erro - manter estado anterior
       Notify.create({
         type: 'warning',
         message: 'Erro ao carregar suas cartas. Tentando novamente...',
         timeout: 2000
       })
-      
+
       throw error // Re-throw para permitir retry
     }
   }
@@ -290,12 +290,12 @@ export const useCartasStore = defineStore('cartas', () => {
 
   const verificarCartaObtida = (cartaId) => {
     const obtida = cartasUsuario.value.some(uc => uc.carta_id === cartaId)
-    
+
     // Log apenas em desenvolvimento para debug
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔍 Verificando carta ${cartaId}: ${obtida ? '✅ obtida' : '❌ não obtida'}`)
     }
-    
+
     return obtida
   }
 
@@ -354,7 +354,7 @@ export const useCartasStore = defineStore('cartas', () => {
     } catch (error) {
       console.error('Erro ao criar carta:', error)
       let message = 'Erro ao criar animal'
-      
+
       if (error.code === '23505') {
         if (error.detail.includes('codigo_unico')) {
           message = 'Código único já existe!'
@@ -367,7 +367,7 @@ export const useCartasStore = defineStore('cartas', () => {
         type: 'negative',
         message
       })
-      
+
       return { success: false, error: error.message }
     } finally {
       loading.value = false
@@ -446,7 +446,7 @@ export const useCartasStore = defineStore('cartas', () => {
     try {
       const { data, error } = await supabase
         .from('cartas')
-        .update({ 
+        .update({
           ativa: novoStatus,
           updated_at: new Date().toISOString()
         })

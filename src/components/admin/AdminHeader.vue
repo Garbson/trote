@@ -51,7 +51,7 @@
         >
           <q-tooltip>Voltar ao início</q-tooltip>
         </q-btn>
-        
+
         <q-btn
           flat
           round

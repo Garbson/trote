@@ -5,7 +5,7 @@ export const ADMIN_CONFIG = {
   // Emails dos administradores
   ADMIN_EMAILS: [
     'garbsonsouza2602@gmail.com',
-    'luisgeovanixl@gmail.com'
+    'ana.vilanova@sou.ufac.br'
   ],
 
   // Função para verificar se um usuário é admin

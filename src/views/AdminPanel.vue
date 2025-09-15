@@ -65,6 +65,152 @@
         />
       </q-page>
     </q-page-container>
+
+    <!-- Modal de Edição de Animal -->
+    <q-dialog v-model="modalEdicao" persistent>
+      <q-card style="min-width: 500px; max-width: 650px" class="modal-edicao">
+        <q-card-section class="row items-center q-pb-sm modal-header">
+          <div class="text-h6 modal-title">📝 Editar Animal</div>
+          <q-space />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            @click="fecharModalEdicao"
+            class="close-btn"
+          />
+        </q-card-section>
+
+        <q-card-section class="modal-content">
+          <div class="row q-gutter-md q-pa-sm">
+            <!-- Imagem atual -->
+            <div class="col-12 image-section" v-if="cartaEditando.foto_url">
+              <div class="text-subtitle2 q-mb-md image-label">🖼️ Imagem Atual:</div>
+              <div class="image-container">
+                <q-img
+                  :src="cartaEditando.foto_url"
+                  style="height: 180px; width: 180px"
+                  class="rounded-borders image-preview"
+                />
+              </div>
+            </div>
+
+            <!-- Nome -->
+            <div class="col-12">
+              <q-input
+                v-model="cartaEditando.nome"
+                label="Nome do Animal"
+                outlined
+                dense
+                :rules="[val => !!val || 'Nome é obrigatório']"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="pets" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- Raridade -->
+            <div class="col-12">
+              <q-select
+                v-model="cartaEditando.raridade"
+                :options="[
+                  { label: 'Comum', value: 'comum' },
+                  { label: 'Raro', value: 'raro' },
+                  { label: 'Épico', value: 'epico' },
+                  { label: 'Lendário', value: 'lendario' }
+                ]"
+                label="Raridade"
+                outlined
+                dense
+                emit-value
+                map-options
+              >
+                <template v-slot:prepend>
+                  <q-icon name="star" />
+                </template>
+              </q-select>
+            </div>
+
+            <!-- Pontos -->
+            <div class="col-12">
+              <q-input
+                v-model.number="cartaEditando.pontos_valor"
+                label="Pontos"
+                type="number"
+                outlined
+                dense
+                min="1"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="stars" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- Código Único -->
+            <div class="col-12">
+              <q-input
+                v-model="cartaEditando.codigo_unico"
+                label="Código Único"
+                outlined
+                dense
+                :rules="[val => !!val || 'Código é obrigatório']"
+                readonly
+              >
+                <template v-slot:prepend>
+                  <q-icon name="qr_code" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- Descrição -->
+            <div class="col-12">
+              <q-input
+                v-model="cartaEditando.descricao"
+                label="Descrição"
+                outlined
+                dense
+                type="textarea"
+                rows="3"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="description" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- Status -->
+            <div class="col-12">
+              <q-toggle
+                v-model="cartaEditando.ativa"
+                label="Animal Ativo"
+                color="positive"
+              />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="modal-actions q-pa-md">
+          <q-btn
+            flat
+            label="Cancelar"
+            color="grey"
+            @click="fecharModalEdicao"
+            class="cancel-btn"
+          />
+          <q-btn
+            label="Salvar Alterações"
+            color="primary"
+            :loading="salvandoEdicao"
+            @click="salvarEdicao"
+            class="save-btn"
+            icon="save"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -93,6 +239,9 @@ const $q = useQuasar();
 // Estado local
 const activeTab = ref("dashboard");
 const drawerOpen = ref(false);
+const modalEdicao = ref(false);
+const cartaEditando = ref({});
+const salvandoEdicao = ref(false);
 
 // Verificação de acesso admin
 onMounted(async () => {
@@ -137,11 +286,34 @@ const adicionarCarta = async (novaCarta) => {
 };
 
 const editarCarta = async (carta) => {
-  $q.dialog({
-    title: "Editar Animal",
-    message: "Funcionalidade de edição será implementada em breve.",
-    ok: "Ok",
-  });
+  modalEdicao.value = true;
+  cartaEditando.value = { ...carta };
+};
+
+const salvarEdicao = async () => {
+  salvandoEdicao.value = true;
+  try {
+    const resultado = await cartasStore.editarCarta(cartaEditando.value.id, cartaEditando.value);
+    if (resultado.success) {
+      modalEdicao.value = false;
+      $q.notify({
+        type: "positive",
+        message: "Animal editado com sucesso!",
+      });
+    }
+  } catch (error) {
+    $q.notify({
+      type: "negative",
+      message: "Erro ao editar animal: " + error.message,
+    });
+  } finally {
+    salvandoEdicao.value = false;
+  }
+};
+
+const fecharModalEdicao = () => {
+  modalEdicao.value = false;
+  cartaEditando.value = {};
 };
 
 const excluirCarta = async (carta) => {
@@ -239,9 +411,135 @@ const goHome = () => {
   min-height: 100vh;
 }
 
+/* Estilos do Modal de Edição */
+.modal-edicao {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #8B4513, #D2691E);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 24px 16px 24px;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.close-btn {
+  color: white !important;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.image-section {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.image-label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.image-preview {
+  border: 3px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.image-preview:hover {
+  border-color: #D2691E;
+  transform: scale(1.02);
+}
+
+.modal-actions {
+  background: #f8f9fa;
+  border-radius: 0 0 16px 16px;
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+.cancel-btn {
+  min-width: 100px;
+  height: 40px;
+  font-weight: 500;
+}
+
+.save-btn {
+  min-width: 140px;
+  height: 40px;
+  background: linear-gradient(135deg, #8B4513, #D2691E);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #A0522D, #F4A460);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+/* Melhorar espaçamento dos campos */
+.q-input,
+.q-select {
+  margin-bottom: 4px;
+}
+
+.q-toggle {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
 @media (max-width: 768px) {
   .admin-page {
     padding: 0;
+  }
+
+  .modal-edicao {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+    min-width: auto;
+  }
+
+  .modal-header {
+    padding: 16px 20px 12px 20px;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+
+  .image-preview {
+    height: 150px !important;
+    width: 150px !important;
+  }
+
+  .save-btn {
+    min-width: 120px;
   }
 }
 </style>

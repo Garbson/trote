@@ -502,6 +502,9 @@ export const useCartasStore = defineStore('cartas', () => {
     criarCarta,
     atualizarCarta,
     excluirCarta,
-    toggleStatusCarta
+    toggleStatusCarta,
+
+    // Aliases para compatibilidade
+    editarCarta: atualizarCarta
   }
 })

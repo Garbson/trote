@@ -1,6 +1,6 @@
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
-import { Notify, Quasar } from "quasar";
+import { Dialog, Notify, Quasar } from "quasar";
 import "quasar/src/css/index.sass";
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -15,7 +15,8 @@ import "./assets/acampja-theme.css";
 // Configuração do Quasar
 const quasarConfig = {
   plugins: {
-    Notify
+    Notify,
+    Dialog
   }
 }
 

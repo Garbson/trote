@@ -570,17 +570,22 @@ export const useAdminStore = defineStore('admin', () => {
     excluirCarta,
     reativarCarta,
     toggleStatusCarta,
-    
+
     // Actions - Usuários
     fetchUsuarios,
     fetchUsuarioCartas,
-    
+
     // Actions - Estatísticas
     fetchEstatisticas,
-    
+
     // Actions - Utilitários
     gerarCodigoUnico,
     uploadImagem,
-    fetchTodosOsDados
+    fetchTodosOsDados,
+
+    // Aliases para compatibilidade com o painel admin
+    carregarCartas: fetchCartas,
+    adicionarCarta: criarCarta,
+    editarCarta: atualizarCarta
   }
 })

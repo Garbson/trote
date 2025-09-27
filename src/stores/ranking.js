@@ -9,9 +9,21 @@ export const useRankingStore = defineStore('ranking', () => {
   const ranking = ref([])
   const loading = ref(false)
   const minhaColecao = ref(null)
+  const currentPage = ref(1)
+  const itemsPerPage = ref(10)
 
   // Getters
   const top10 = computed(() => ranking.value.slice(0, 10))
+
+  const totalPages = computed(() => {
+    return Math.ceil(ranking.value.length / itemsPerPage.value)
+  })
+
+  const paginatedRanking = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    const end = start + itemsPerPage.value
+    return ranking.value.slice(start, end)
+  })
 
   const minhaPosicao = computed(() => {
     const authStore = useAuthStore()
@@ -171,22 +183,57 @@ export const useRankingStore = defineStore('ranking', () => {
     }
   }
 
+  // Actions para paginação
+  const setPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+      currentPage.value = page
+    }
+  }
+
+  const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++
+    }
+  }
+
+  const previousPage = () => {
+    if (currentPage.value > 1) {
+      currentPage.value--
+    }
+  }
+
+  const goToMyPosition = () => {
+    const position = minhaPosicao.value
+    if (position) {
+      const page = Math.ceil(position / itemsPerPage.value)
+      setPage(page)
+    }
+  }
+
   return {
     // Estado
     ranking,
     loading,
     minhaColecao,
+    currentPage,
+    itemsPerPage,
 
     // Getters
     top10,
     minhaPosicao,
     estatisticasGerais,
+    totalPages,
+    paginatedRanking,
 
     // Actions
     fetchRanking,
     fetchMinhaColecao,
     salvarRankingDiario,
     buscarHistoricoRanking,
-    buscarEvolucaoUsuario
+    buscarEvolucaoUsuario,
+    setPage,
+    nextPage,
+    previousPage,
+    goToMyPosition
   }
 })

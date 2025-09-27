@@ -73,11 +73,17 @@
             </q-card-section>
           </q-card>
 
-          <!-- Top 10 -->
+          <!-- Ranking com Paginação -->
           <q-card class="ranking-card">
             <q-card-section>
-              <div class="text-h6 text-center q-mb-md">
-                🏆 Top 10 Colecionadores
+              <div class="ranking-header">
+                <div class="text-h6 text-center">
+                  🏆 Ranking de Colecionadores
+                </div>
+                <div class="ranking-info">
+                  Página {{ rankingStore.currentPage }} de {{ rankingStore.totalPages }}
+                  ({{ rankingStore.ranking.length }} colecionadores)
+                </div>
               </div>
 
               <div v-if="rankingStore.loading" class="loading-container">
@@ -86,35 +92,54 @@
               </div>
 
               <div
-                v-else-if="rankingStore.top10.length === 0"
+                v-else-if="rankingStore.ranking.length === 0"
                 class="empty-state"
               >
                 <q-icon name="emoji_events" size="80px" color="grey-5" />
                 <p>Nenhum colecionador encontrado</p>
               </div>
 
-              <div v-else class="ranking-list">
+              <div v-else>
+                <!-- Botão para ir à minha posição -->
                 <div
-                  v-for="(usuario, index) in rankingStore.top10"
-                  :key="usuario.usuario_id"
-                  :class="[
-                    'ranking-item',
-                    {
-                      'first-place': index === 0,
-                      'second-place': index === 1,
-                      'third-place': index === 2,
-                      'my-rank': authStore.user?.id === usuario.usuario_id,
-                    },
-                  ]"
+                  v-if="authStore.isAuthenticated && rankingStore.minhaPosicao"
+                  class="my-position-controls q-mb-md"
                 >
+                  <q-btn
+                    color="primary"
+                    icon="my_location"
+                    label="Ir para minha posição"
+                    @click="rankingStore.goToMyPosition"
+                    size="sm"
+                    outline
+                  />
+                  <div class="current-position">
+                    Você está na posição #{{ rankingStore.minhaPosicao }}
+                  </div>
+                </div>
+
+                <div class="ranking-list">
+                  <div
+                    v-for="(usuario, index) in rankingStore.paginatedRanking"
+                    :key="usuario.usuario_id"
+                    :class="[
+                      'ranking-item',
+                      {
+                        'first-place': usuario.posicao === 1,
+                        'second-place': usuario.posicao === 2,
+                        'third-place': usuario.posicao === 3,
+                        'my-rank': authStore.user?.id === usuario.usuario_id,
+                      },
+                    ]"
+                  >
                   <div class="rank-position">
                     <div class="position-number">
                       {{ usuario.posicao }}
                     </div>
                     <q-icon
-                      v-if="index < 3"
-                      :name="getMedalIcon(index)"
-                      :color="getMedalColor(index)"
+                      v-if="usuario.posicao <= 3"
+                      :name="getMedalIcon(usuario.posicao - 1)"
+                      :color="getMedalColor(usuario.posicao - 1)"
                       size="md"
                     />
                   </div>
@@ -158,7 +183,42 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Controles de Paginação -->
+                <div v-if="rankingStore.totalPages > 1" class="pagination-controls">
+                  <q-btn
+                    icon="chevron_left"
+                    color="primary"
+                    outline
+                    :disable="rankingStore.currentPage === 1"
+                    @click="rankingStore.previousPage"
+                    label="Anterior"
+                  />
+
+                  <div class="page-indicators">
+                    <q-btn
+                      v-for="page in getVisiblePages()"
+                      :key="page"
+                      :label="page"
+                      :color="page === rankingStore.currentPage ? 'primary' : 'grey'"
+                      :outline="page !== rankingStore.currentPage"
+                      @click="rankingStore.setPage(page)"
+                      size="sm"
+                      class="page-btn"
+                    />
+                  </div>
+
+                  <q-btn
+                    icon-right="chevron_right"
+                    color="primary"
+                    outline
+                    :disable="rankingStore.currentPage === rankingStore.totalPages"
+                    @click="rankingStore.nextPage"
+                    label="Próximo"
+                  />
+                </div>
               </div>
+            </div>
             </q-card-section>
           </q-card>
 
@@ -269,6 +329,50 @@ const atualizarDados = async () => {
       ? rankingStore.fetchMinhaColecao()
       : Promise.resolve(),
   ]);
+};
+
+const getVisiblePages = () => {
+  const current = rankingStore.currentPage;
+  const total = rankingStore.totalPages;
+  const pages = [];
+
+  if (total <= 7) {
+    // Se há 7 páginas ou menos, mostrar todas
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Sempre mostrar primeira página
+    pages.push(1);
+
+    // Calcular range ao redor da página atual
+    let start = Math.max(2, current - 2);
+    let end = Math.min(total - 1, current + 2);
+
+    // Adicionar "..." se necessário
+    if (start > 2) {
+      pages.push('...');
+    }
+
+    // Adicionar páginas ao redor da atual
+    for (let i = start; i <= end; i++) {
+      if (i !== 1 && i !== total) {
+        pages.push(i);
+      }
+    }
+
+    // Adicionar "..." se necessário
+    if (end < total - 1) {
+      pages.push('...');
+    }
+
+    // Sempre mostrar última página
+    if (total > 1) {
+      pages.push(total);
+    }
+  }
+
+  return pages;
 };
 
 // Lifecycle
@@ -513,6 +617,56 @@ onMounted(async () => {
   color: #7f8c8d;
 }
 
+/* ===== HEADER DO RANKING ===== */
+.ranking-header {
+  margin-bottom: 20px;
+}
+
+.ranking-info {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+/* ===== CONTROLES DA MINHA POSIÇÃO ===== */
+.my-position-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.current-position {
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* ===== CONTROLES DE PAGINAÇÃO ===== */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 20px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.page-indicators {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-btn {
+  min-width: 40px;
+  height: 36px;
+}
+
 @media (max-width: 600px) {
   .collection-progress {
     flex-direction: column;
@@ -527,6 +681,22 @@ onMounted(async () => {
   .my-position {
     flex-direction: column;
     text-align: center;
+  }
+
+  .my-position-controls {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-indicators {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>

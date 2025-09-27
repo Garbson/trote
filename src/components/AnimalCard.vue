@@ -255,7 +255,8 @@ defineExpose({
 <style scoped>
 /* ===== ESTRUTURA PRINCIPAL ===== */
 .acampja-card-container {
-  height: 680px; /* Altura fixa para todos os cards */
+  min-height: 680px; /* Altura mínima, permite expansão para descrições longas */
+  height: auto; /* Permite que o card se expanda conforme necessário */
   display: flex;
   flex-direction: column;
   background: var(--cr-bg-card);
@@ -559,7 +560,7 @@ defineExpose({
 
 /* ===== FOOTER DA CARTA ===== */
 .card-footer {
-  flex: 0 0 auto; /* Não cresce */
+  flex: 1 1 auto; /* Permite crescimento para acomodar descrições longas */
   padding: 16px 20px 20px 20px;
   min-height: 80px; /* Altura mínima para o footer */
   display: flex;
@@ -571,7 +572,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
+  flex: 1 1 auto; /* Permite crescimento e encolhimento conforme necessário */
   justify-content: space-between;
 }
 
@@ -966,7 +967,7 @@ defineExpose({
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 600px) {
   .acampja-card-container {
-    height: 680px; /* Altura um pouco menor em mobile */
+    min-height: 600px; /* Altura mínima menor em mobile, mas ainda permite expansão */
   }
 
   .card-header {

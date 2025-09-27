@@ -2,14 +2,30 @@
 import { supabase } from '@/lib/supabase'
 import { defineStore } from 'pinia'
 import { Notify } from 'quasar'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  // Estado
+  // Estado - SEMPRE inicializar loadings como false
   const user = ref(null)
   const session = ref(null)
   const loading = ref(false)
+  const googleLoading = ref(false)
   const initialized = ref(false)
+
+  // Garantir que loadings sempre iniciem como false
+  loading.value = false
+  googleLoading.value = false
+
+  // Watch para garantir que loadings sejam resetados após inicialização
+  watch(initialized, (isInit) => {
+    if (isInit) {
+      // Após inicialização, qualquer loading deve ser resetado
+      setTimeout(() => {
+        loading.value = false
+        googleLoading.value = false
+      }, 50)
+    }
+  })
 
   // Getters
   const isAuthenticated = computed(() => !!session.value && !!user.value)
@@ -55,6 +71,41 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Função auxiliar para criar perfil de usuário
+  const createUserProfile = async (userId, email, nome = null) => {
+    try {
+      // Se não tiver nome, extrair do email
+      const userName = nome || email.split('@')[0]
+
+      // Primeira tentativa: inserção direta
+      let { error: profileError } = await supabase
+        .from('usuarios')
+        .insert({
+          id: userId,
+          nome: userName,
+          email,
+          senha_hash: 'supabase_managed',
+          pontos_totais: 0,
+          nivel: 1
+        })
+
+      // Se falhar por RLS, usar função que bypassa RLS
+      if (profileError) {
+        const { error: functionError } = await supabase.rpc('criar_usuario_completo', {
+          user_id: userId,
+          user_email: email,
+          user_nome: userName
+        })
+
+        if (functionError) {
+          console.error('Erro ao criar perfil via função:', functionError)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao criar perfil do usuário:', error)
+    }
+  }
+
   // Actions
   const signUp = async (email, password, nome) => {
     loading.value = true
@@ -69,32 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 2. Criar perfil na tabela usuarios
       if (authData.user) {
-        // Primeira tentativa: inserção direta
-        let { error: profileError } = await supabase
-          .from('usuarios')
-          .insert({
-            id: authData.user.id,
-            nome,
-            email,
-            senha_hash: 'supabase_managed',
-            pontos_totais: 0,
-            nivel: 1
-          })
-
-        // Se falhar por RLS, usar função que bypassa RLS
-        if (profileError) {
-
-          const { error: functionError } = await supabase.rpc('criar_usuario_completo', {
-            user_id: authData.user.id,
-            user_email: email,
-            user_nome: nome
-          })
-
-          if (functionError) {
-            console.error('Erro ao criar perfil via função:', functionError)
-            // Não falha o cadastro se o perfil não for criado
-          }
-        }
+        await createUserProfile(authData.user.id, email, nome)
       }
 
       Notify.create({
@@ -118,7 +144,6 @@ export const useAuthStore = defineStore('auth', () => {
   const signIn = async (email, password) => {
     loading.value = true
     try {
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -152,10 +177,61 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const signInWithGoogle = async () => {
+    googleLoading.value = true
+    try {
+      // Determinar a URL base correta baseada no ambiente
+      const baseUrl = window.location.origin
+      const redirectUrl = `${baseUrl}/`
+
+      console.log('🔗 URL de redirecionamento:', redirectUrl)
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      })
+
+      if (error) {
+        console.error('❌ Erro no OAuth:', error)
+        throw error
+      }
+
+      console.log('✅ OAuth iniciado com sucesso')
+
+      // Não resetar o loading aqui pois o usuário será redirecionado
+      // O loading será resetado no onAuthStateChange ou no initAuth
+      return { data, error: null }
+    } catch (error) {
+      console.error('❌ Erro no login com Google:', error)
+      googleLoading.value = false
+
+      let errorMessage = 'Erro ao fazer login com Google'
+
+      // Mensagens de erro mais específicas
+      if (error.message?.includes('redirect_uri_mismatch')) {
+        errorMessage = 'URL de redirecionamento não configurada. Verifique as configurações do Google OAuth.'
+      } else if (error.message?.includes('unauthorized_client')) {
+        errorMessage = 'Cliente não autorizado. Verifique as credenciais do Google.'
+      }
+
+      Notify.create({
+        type: 'negative',
+        message: errorMessage
+      })
+      return { data: null, error }
+    }
+  }
+
   const signOut = async () => {
     loading.value = true
     try {
-      
+
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
@@ -192,13 +268,15 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (error) {
           console.error('Erro ao buscar perfil:', error)
-          // Se não encontrar o perfil, tentar criar
+          // Se não encontrar o perfil, tentar criar (especialmente útil para login Google)
           if (error.code === 'PGRST116') { // Not found
-            await supabase.rpc('criar_usuario_completo', {
-              user_id: authUser.id,
-              user_email: authUser.email,
-              user_nome: authUser.email.split('@')[0] // Nome padrão
-            })
+            // Extrair nome do metadata do Google ou usar email
+            const nomeUsuario = authUser.user_metadata?.full_name ||
+                               authUser.user_metadata?.name ||
+                               authUser.email.split('@')[0]
+
+            await createUserProfile(authUser.id, authUser.email, nomeUsuario)
+
             // Tentar buscar novamente
             const { data: newProfile } = await supabase
               .from('usuarios')
@@ -255,7 +333,11 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    
+    // SEMPRE resetar loading states ao inicializar
+    // Importante para casos de OAuth redirect onde a página recarrega
+    loading.value = false
+    googleLoading.value = false
+
     try {
       // 1. Verificar se há dados no localStorage
       const hasStoredData = loadFromStorage()
@@ -270,10 +352,14 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       if (supabaseSession) {
+        // Resetar loading states quando sessão válida for encontrada
+        loading.value = false
+        googleLoading.value = false
+
         session.value = supabaseSession
         await fetchUserProfile()
         saveToStorage()
-        
+
         // Carregar cartas do usuário na restauração da sessão
         try {
           const { useCartasStore } = await import('./cartas')
@@ -283,6 +369,9 @@ export const useAuthStore = defineStore('auth', () => {
           console.error('❌ Erro ao carregar cartas:', error)
         }
       } else {
+        // Resetar loading states quando não há sessão
+        loading.value = false
+        googleLoading.value = false
         clearStorage()
         user.value = null
         session.value = null
@@ -291,8 +380,11 @@ export const useAuthStore = defineStore('auth', () => {
       // 3. Configurar listener para mudanças na autenticação
       supabase.auth.onAuthStateChange(async (event, newSession) => {
 
-        
         if (event === 'SIGNED_IN' && newSession?.user) {
+          // Resetar loading states quando o login for bem-sucedido
+          googleLoading.value = false
+          loading.value = false
+
           session.value = newSession
           await fetchUserProfile()
           saveToStorage()
@@ -307,6 +399,9 @@ export const useAuthStore = defineStore('auth', () => {
           }
 
         } else if (event === 'SIGNED_OUT') {
+          // Resetar loading states quando fazer logout
+          googleLoading.value = false
+          loading.value = false
           user.value = null
           session.value = null
           clearStorage()
@@ -323,6 +418,12 @@ export const useAuthStore = defineStore('auth', () => {
       clearStorage()
       user.value = null
       session.value = null
+      loading.value = false
+      googleLoading.value = false
+    } finally {
+      // Garantir que os loadings sejam sempre resetados ao final da inicialização
+      loading.value = false
+      googleLoading.value = false
     }
   }
 
@@ -331,6 +432,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     session,
     loading,
+    googleLoading,
     initialized,
 
     // Getters
@@ -340,6 +442,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     fetchUserProfile,
     updateProfile,
@@ -349,6 +452,13 @@ export const useAuthStore = defineStore('auth', () => {
   persist: {
     key: 'bixo-auth-store',
     storage: localStorage,
-    paths: ['user', 'session']
+    // Apenas persistir user e session, NUNCA os loadings
+    paths: ['user', 'session'],
+    afterRestore: (ctx) => {
+      // SEMPRE resetar loadings após restaurar do localStorage
+      ctx.store.loading = false
+      ctx.store.googleLoading = false
+      console.log('🔄 Estados de loading resetados após restauração')
+    }
   }
 })

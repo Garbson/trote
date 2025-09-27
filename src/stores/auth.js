@@ -184,11 +184,14 @@ export const useAuthStore = defineStore('auth', () => {
       const baseUrl = window.location.origin
       const redirectUrl = `${baseUrl}/home`
 
-      console.log('🔗 URL de redirecionamento:', redirectUrl)
+      console.log('🔗 window.location.origin:', window.location.origin)
+      console.log('🔗 URL de redirecionamento completa:', redirectUrl)
+      console.log('🔗 Ambiente detectado:', baseUrl.includes('localhost') ? 'desenvolvimento' : 'produção')
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          // FORÇAR redirectTo para localhost durante desenvolvimento
           redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
@@ -401,6 +404,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 3. Configurar listener para mudanças na autenticação
       supabase.auth.onAuthStateChange(async (event, newSession) => {
+        console.log('🔔 AUTH STATE CHANGE:', event, newSession?.user?.email || 'sem usuário')
 
         if (event === 'SIGNED_IN' && newSession?.user) {
           // Resetar loading states quando o login for bem-sucedido
@@ -420,24 +424,22 @@ export const useAuthStore = defineStore('auth', () => {
             console.error('❌ Erro ao carregar cartas após login:', error)
           }
 
-          // Redirecionar para home se estiver em páginas de auth
-          try {
-            const { useRouter } = await import('vue-router')
-            const router = useRouter()
-            const currentPath = window.location.pathname
+          // SEMPRE redirecionar para home após login bem-sucedido
+          const currentPath = window.location.pathname
+          console.log('🏠 Login detectado! Página atual:', currentPath)
 
-            if (currentPath === '/login' || currentPath === '/cadastro') {
-              console.log('🏠 Redirecionando para home após login Google')
-              setTimeout(() => {
-                router.push('/home')
-              }, 500)
-            }
-          } catch (error) {
-            // Se houver erro com router, usar redirecionamento nativo
-            if (window.location.pathname === '/login' || window.location.pathname === '/cadastro') {
-              setTimeout(() => {
-                window.location.href = '/home'
-              }, 500)
+          // Se estiver em qualquer página que não seja /home, redirecionar IMEDIATAMENTE
+          if (currentPath !== '/home') {
+            console.log('🔄 Redirecionamento IMEDIATO para /home...')
+            // Redirecionamento duplo para garantir
+            window.location.href = '/home'
+            // Backup com router se disponível
+            try {
+              if (window.$router) {
+                window.$router.push('/home')
+              }
+            } catch (e) {
+              // Silenciar erro de router
             }
           }
 

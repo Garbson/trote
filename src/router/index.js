@@ -72,21 +72,19 @@ router.beforeEach(async (to, from, next) => {
 
 
 
+  // Detectar callback OAuth ANTES de verificar autenticação
+  const hasOAuthParams = to.query.code || to.query.access_token || to.query.error;
+
+  if (hasOAuthParams && (to.path === '/login' || to.path === '/cadastro')) {
+    console.log('🔄 OAuth callback detectado, aguardando processamento...');
+    // Permitir que a página carregue para processar OAuth
+    // O redirecionamento será feito pelo onAuthStateChange
+    next();
+    return;
+  }
+
   // Redirecionar usuários logados para longe de login/cadastro
-  // Exceto se estiver vindo de um callback OAuth (tem parâmetros na URL)
   if (to.meta.requiresGuest && isAuthenticated) {
-    // Se a URL tem parâmetros OAuth, permitir o processamento antes de redirecionar
-    const hasOAuthParams = to.query.code || to.query.access_token || to.query.error;
-
-    if (hasOAuthParams) {
-      // Aguardar um pouco para o Supabase processar e depois redirecionar
-      setTimeout(() => {
-        router.push('/home');
-      }, 1000);
-      next();
-      return;
-    }
-
     next('/home');
     return;
   }

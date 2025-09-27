@@ -110,23 +110,41 @@ export const useAuthStore = defineStore('auth', () => {
   const signUp = async (email, password, nome) => {
     loading.value = true
     try {
-      // 1. Criar usuário no Supabase Auth
+      // 1. Criar usuário no Supabase Auth (sem confirmação de email)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: undefined // Não redirecionar para confirmação
+        }
       })
 
       if (authError) throw authError
 
-      // 2. Criar perfil na tabela usuarios
-      if (authData.user) {
-        await createUserProfile(authData.user.id, email, nome)
-      }
+      // 2. Se o usuário foi criado, definir sessão imediatamente
+      if (authData.user && authData.session) {
+        session.value = authData.session
 
-      Notify.create({
-        type: 'positive',
-        message: 'Cadastro realizado! Verifique seu email.'
-      })
+        // 3. Criar perfil na tabela usuarios
+        await createUserProfile(authData.user.id, email, nome)
+
+        // 4. Buscar perfil criado
+        await fetchUserProfile()
+
+        // 5. Salvar no localStorage
+        saveToStorage()
+
+        Notify.create({
+          type: 'positive',
+          message: 'Conta criada com sucesso! Bem-vindo!'
+        })
+      } else {
+        // Se não houver sessão, significa que precisa confirmação
+        Notify.create({
+          type: 'positive',
+          message: 'Cadastro realizado! Você já pode fazer login.'
+        })
+      }
 
       return { data: authData, error: null }
     } catch (error) {

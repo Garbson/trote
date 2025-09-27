@@ -197,8 +197,15 @@ const handleCadastro = async () => {
   );
 
   if (resultado.data && !resultado.error) {
-    // Redirecionar para login ou home dependendo da confirmação de email
-    router.push("/login");
+    // Se o usuário foi logado automaticamente, ir para home
+    // Senão, ir para login
+    setTimeout(() => {
+      if (authStore.isAuthenticated) {
+        router.push("/home");
+      } else {
+        router.push("/login");
+      }
+    }, 500);
   }
 };
 

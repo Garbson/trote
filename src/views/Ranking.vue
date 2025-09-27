@@ -418,8 +418,9 @@ onMounted(async () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
+  /* Mobile first: 1 coluna */
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .stat-item {
@@ -429,17 +430,60 @@ onMounted(async () => {
   padding: 16px;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.05);
+  min-width: 0; /* Permite que o item seja menor que seu conteúdo */
+  width: 100%; /* Garante largura total */
+}
+
+/* Tablet: 2 colunas quando há espaço */
+@media (min-width: 600px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Desktop: 3 colunas */
+@media (min-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
   color: #2c3e50;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 0.9rem;
   color: #7f8c8d;
+  white-space: nowrap; /* Evita quebra de linha nos labels */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Melhorar o layout interno do stat-item em mobile */
+.stat-item > div {
+  flex: 1;
+  min-width: 0; /* Permite encolhimento */
+}
+
+/* Ajustes específicos para mobile */
+@media (max-width: 599px) {
+  .stat-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
 }
 
 .my-position {

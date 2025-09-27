@@ -23,9 +23,8 @@
           <!-- Welcome Section Component -->
           <WelcomeSection />
 
-          <!-- Cards Section Component (apenas para usuários autenticados) -->
+          <!-- Cards Section Component -->
           <CardsSection
-            v-if="authStore.isAuthenticated"
             :active-carta="activeCarta"
           />
 

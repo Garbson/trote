@@ -180,9 +180,9 @@ export const useAuthStore = defineStore('auth', () => {
   const signInWithGoogle = async () => {
     googleLoading.value = true
     try {
-      // Determinar a URL base correta baseada no ambiente
+      // SEMPRE redirecionar para home após login Google
       const baseUrl = window.location.origin
-      const redirectUrl = `${baseUrl}/`
+      const redirectUrl = `${baseUrl}/home`
 
       console.log('🔗 URL de redirecionamento:', redirectUrl)
 
@@ -231,24 +231,46 @@ export const useAuthStore = defineStore('auth', () => {
   const signOut = async () => {
     loading.value = true
     try {
+      // Primeiro limpar estado local independentemente da resposta do Supabase
+      const currentUser = user.value
+      const currentSession = session.value
 
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      // Tentar fazer logout no Supabase
+      try {
+        const { error } = await supabase.auth.signOut()
+        if (error && error.message !== 'Auth session missing!') {
+          console.warn('⚠️ Aviso no logout:', error)
+          // Não falhar se for apenas sessão ausente
+        }
+      } catch (supabaseError) {
+        console.warn('⚠️ Erro do Supabase no logout (continuando):', supabaseError)
+        // Continuar com limpeza local mesmo se Supabase falhar
+      }
 
-      // Limpar estado
+      // SEMPRE limpar estado local
+      user.value = null
+      session.value = null
+      clearStorage()
+
+      // Notificar sucesso se havia usuário logado
+      if (currentUser || currentSession) {
+        Notify.create({
+          type: 'positive',
+          message: 'Logout realizado com sucesso!'
+        })
+      }
+
+    } catch (error) {
+      console.error('❌ Erro crítico no logout:', error)
+
+      // Forçar limpeza mesmo em erro crítico
       user.value = null
       session.value = null
       clearStorage()
 
       Notify.create({
         type: 'positive',
-        message: 'Logout realizado com sucesso!'
-      })
-    } catch (error) {
-      console.error('❌ Erro no logout:', error)
-      Notify.create({
-        type: 'negative',
-        message: 'Erro ao fazer logout'
+        message: 'Logout realizado!'
       })
     } finally {
       loading.value = false
@@ -396,6 +418,27 @@ export const useAuthStore = defineStore('auth', () => {
             await cartasStore.fetchCartasUsuario()
           } catch (error) {
             console.error('❌ Erro ao carregar cartas após login:', error)
+          }
+
+          // Redirecionar para home se estiver em páginas de auth
+          try {
+            const { useRouter } = await import('vue-router')
+            const router = useRouter()
+            const currentPath = window.location.pathname
+
+            if (currentPath === '/login' || currentPath === '/cadastro') {
+              console.log('🏠 Redirecionando para home após login Google')
+              setTimeout(() => {
+                router.push('/home')
+              }, 500)
+            }
+          } catch (error) {
+            // Se houver erro com router, usar redirecionamento nativo
+            if (window.location.pathname === '/login' || window.location.pathname === '/cadastro') {
+              setTimeout(() => {
+                window.location.href = '/home'
+              }, 500)
+            }
           }
 
         } else if (event === 'SIGNED_OUT') {

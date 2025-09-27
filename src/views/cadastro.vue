@@ -231,7 +231,7 @@ const handleGoogleSignup = async () => {
     // Aguardar um momento para garantir que o auth state foi atualizado
     setTimeout(() => {
       if (authStore.isAuthenticated) {
-        router.push('/');
+        router.push('/home');
       }
     }, 500);
   }

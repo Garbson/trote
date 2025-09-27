@@ -4,14 +4,21 @@ import { checkAdminAccess } from '../admin';
 import AdminPanel from '../views/AdminPanel.vue';
 import Cadastro from '../views/cadastro.vue';
 import Home from '../views/Home.vue';
+import Landing from '../views/Landing.vue';
 import Login from '../views/Login.vue';
 import Ranking from '../views/Ranking.vue';
 
 const routes = [
   {
     path: '/',
+    name: 'Landing',
+    component: Landing,
+  },
+  {
+    path: '/home',
     name: 'Home',
     component: Home,
+    meta: { requiresAuth: true } // Requer autenticação
   },
   {
     path: '/login',
@@ -66,8 +73,21 @@ router.beforeEach(async (to, from, next) => {
 
 
   // Redirecionar usuários logados para longe de login/cadastro
+  // Exceto se estiver vindo de um callback OAuth (tem parâmetros na URL)
   if (to.meta.requiresGuest && isAuthenticated) {
-    next('/');
+    // Se a URL tem parâmetros OAuth, permitir o processamento antes de redirecionar
+    const hasOAuthParams = to.query.code || to.query.access_token || to.query.error;
+
+    if (hasOAuthParams) {
+      // Aguardar um pouco para o Supabase processar e depois redirecionar
+      setTimeout(() => {
+        router.push('/home');
+      }, 1000);
+      next();
+      return;
+    }
+
+    next('/home');
     return;
   }
 

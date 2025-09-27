@@ -133,7 +133,7 @@ const handleLogin = async () => {
   const resultado = await authStore.signIn(email.value, password.value);
 
   if (resultado.data && !resultado.error) {
-    const redirectTo = router.currentRoute.value.query.redirect || "/";
+    const redirectTo = router.currentRoute.value.query.redirect || "/home";
     router.push(redirectTo);
   }
 };
